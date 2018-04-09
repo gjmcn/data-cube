@@ -1,6 +1,6 @@
 # DataCube
 
-DataCube manipulates JavaScript's native arrays so that an array behaves both as a normal array and as a *cube*: a 3-dimensional array whose entries and *subcubes* can be accessed using indices or keys. Cubes make it easy to handle data that naturally fits into a multidimensional array or a 'data-table'. Since DataCube manipulates the native array class, the syntax for using cubes is simple and clean, e.g.
+DataCube manipulates JavaScript's native arrays so that an array behaves both as a normal array and as a *cube*: a 3-dimensional array whose entries and *subcubes* can be accessed using indices or keys. Cubes make it easy to handle data that naturally fit into a multidimensional array or a 'data-table'. Since DataCube manipulates the native array class, the syntax for using cubes is simple and clean, e.g.
 
 ```js
 [3,4].cube(1);         //3-by-4 matrix, each entry is 1
@@ -28,7 +28,7 @@ Some notes:
 
 * There are libraries that add additional cube methods:
 	* advanced linear algebra: `det`, `inv`, `svd` ...
-	* html: `attr`, `.on`, `append`, ...
+	* html: `attr`, `on`, `append`, ...
 
 * Cube methods behave sensibly when passed arrays/cubes or non-arrays. E.g. `lt` is the less-than method:
 	```js
@@ -45,15 +45,15 @@ Some notes:
 ## Arrays versus cubes
 By default, an array is a standard array: any standard array method can be used (including `push`, `pop` and `splice`) and the number of entries is not fixed.
 
-When a cube setter method is used, it converts an existing array to a cube if it is not one already. Setters return the modified cube which allows chaining, e.g. `x.$shape(y).$key(z)`. Only setters and the special method `toCube` convert an existing array to a cube.
+When a cube setter method is used, it converts an existing array to a cube if it is not one already. Setters return the modified cube which allows chaining, e.g. `x.$shape(y).$key(z)`. Only setters and the `toCube` method convert an existing array to a cube.
 
 Cube methods that are not setters never change an existing array/cube; many of them do return a new cube &mdash; e.g. `[3,4].cube(1)` returns a 3-by-4 matrix with all entries set to `1`.
 
-Cube methods never return a standard (i.e. non-cube) array.
+The `fromCube` method is the only cube method that returns a standard (i.e. non-cube) array.
 
 ## Implementation
 
-To enable writing code such as `[5,6,7,8].$shape(2)`, we add methods to the array prototype rather than creating a subclass (which is problematic with arrays in JavaScript anyway).  Existing array methods are left unchanged.
+To enable writing code such as `[5,6,7,8].$shape(2)`, we add methods to the array prototype rather than creating a subclass (which is problematic with arrays in JavaScript anyway).
 
 A cube instance is an array with additional properties. The following diagram shows all possible additional properties:
 
