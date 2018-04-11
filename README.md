@@ -47,7 +47,7 @@ By default, an array is a standard array: any standard array method can be used 
 
 When a cube setter method is used, it converts an existing array to a cube if it is not one already. Setters return the modified cube which allows chaining, e.g. `x.$shape(y).$key(z)`. Only setters and the `toCube` method convert an existing array to a cube.
 
-Cube methods that are not setters never change an existing array/cube; many of them do return a new cube &mdash; e.g. `[3,4].cube(1)` returns a 3-by-4 matrix with all entries set to `1`.
+Only setters and `delete` (used to remove keys and dimension labels) change an existing array/cube. Many other cube methods do return a new cube &mdash; e.g. `[3,4].cube(1)` returns a 3-by-4 matrix with all entries set to `1`.
 
 The `fromCube` method is the only cube method that returns a standard (i.e. non-cube) array.
 
