@@ -2,7 +2,7 @@
   "name": "data-cube",
   "version": "0.1.0",
   "description": "",
-  "main": "core.js",
+  "main": "src/core.js",
   "directories": {
     "test": "test"
   },

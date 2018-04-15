@@ -39,22 +39,12 @@ Some notes:
 	* many native array methods can be used as normal; native methods that would invalidate the cube (e.g. `push`, `pop` and `splice`, see below) will produce an error
 	* other syntax such as `+=`, `++`, `...` and `[]` for getting/setting entries can be used as normal
 
+* Setters return the modified cube which allows chaining, e.g. `x.$shape(y).$key(z)`. 
+
 * The number of entries of a cube **cannot** be changed.
 
-## Arrays versus cubes
-By default, an array is a standard array: any standard array method can be used (including `push`, `pop` and `splice`) and the number of entries is not fixed.
-
-When a cube setter method is used, it converts an existing array to a cube if it is not one already. Setters return the modified cube which allows chaining, e.g. `x.$shape(y).$key(z)`. Only setters and the `toCube` method convert an existing array to a cube.
-
-Only setters and `delete` (used to remove keys and dimension labels) change an existing array/cube. Many other cube methods return a new cube &mdash; e.g. `[3,4].cube(1)` returns a 3-by-4 matrix with all entries set to `1`.
-
-The `fromCube` method (converts a cube back to a standard array) is the only cube method that returns a standard array.
-
 ## Implementation
-
-To enable writing code such as `[5,6,7,8].$shape(2)`, we add methods to the array prototype rather than creating a subclass (which is problematic with arrays in JavaScript anyway).
-
-A cube instance is an array with additional properties. The following diagram shows all possible additional properties:
+To enable writing code such as `[5,6,7,8].$shape(2)`, we add methods to the array prototype rather than creating a subclass (which is problematic with arrays in JavaScript anyway). Standard arrays bahave as normal: any native array method can be used (including `push`, `pop` and `splice`) and the number of entries is not fixed. When a cube method is called, the array is converted to a cube; this involves adding properties to the array instance. The following diagram shows all possible additional properties:
 
 ```
 array instance
@@ -88,4 +78,4 @@ If a cube has e.g. row keys, both `rk` and `ra` are used:
 
 * `ra`: entry *i* is the key of row *i*.
 
-Once an array has been converted to a cube, it is sealed with `Object.seal()` and the `length` property is made non-writable. Native array methods that are not compatible with cubes (such as `push`, `pop` and `splice`) are modified: they behave as normal when called from a standard array, but throw an error when called from a cube.
+Once an array has been converted to a cube, the `length` property is made non-writable. Native array methods that are not compatible with cubes (such as `push`, `pop` and `splice`) are modified: they behave as normal when called from a standard array, but throw an error when called from a cube.
