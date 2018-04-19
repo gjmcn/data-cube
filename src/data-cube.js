@@ -1,46 +1,108 @@
-/*
-Comments notation:
-  str, num, bool, regex, date, func:
-      -args assumed to be of this type 
-      -if prefixed with '>' (eg >str), arg is implicitly or explicitly converted
-  obj: object
-  ar: array
-  cu: cube
-  ac: array or cube 
-  *: anything
+ /*
+  comments:
+    obj: object
+    ar: array
+    cu: cube
+    ac: array or cube 
+    *: anything
+  Arguments are assumed to be of the correct type unless
+  prefixed with '>' (e.g. >str), in which case they are
+  implicitly or explicitly converted.
 */
 
 {
-  
-	"use strict";
+  'use strict';
 
-  const assert = require('./assert.js');
-	const helper = require('./helper.js');
-  const {fill, fillEW, kind, lengthNonWritable} = helper; 
+	const helper = require('data-cube-helper');
   
-  const AP = Array.prototype;
+  const {assert, fill, fillEW, kind, expand, addArrayMethod} = helper;
   const isAr = Array.isArray;
-  
-	//commonly used error messages
   const errorMsg = {
-		shapeMismatch:  'shape mismatch',
-		dupKey:         'will result in duplicate key',
-	};
-  
-  //convert array to cube
-  AP.toCube = function() {
-    if (!this._d_c_) {
-      this._d_c_ = {r: this.length, c: 1, p: 1};
-      lengthNonWritable(this);
-    }
-    return this;
+    shapeMismatch: 'shape mismatch',
+    dupKey: 'will result in duplicate key',
+    acExpected: 'array/cube expected'
   };
   
   
-  //---------- create cube ----------//
+  //--------------- convert array to cube ---------------//
+
+  addArrayMethod('toCube', function() {
+    if (!this._d_c_) {
+      this._d_c_ = {r: this.length, c: 1, p: 1};
+      helper.lengthNonWritable(this);
+    }
+    return this;
+  });
+  
+    
+  //--------------- compare ---------------//
+  
+  //ac[,str]->cu/false
+  addArrayMethod('compare', function(b, behav = 'assert') {
+    this.toCube();
+    const dc = this._d_c_;
+    const anExtra = (dcProp) => { //name of an extra or false if none 
+      if (dcProp.e) {
+        for (let k of dcProp.e) {
+          if (dcProp.e[k]) return k;
+        } 
+      }
+      return false;
+    }
+    let done;
+    if (behav === 'assert') done = msg => { throw new Error(msg) };
+    else if (behav === 'test') done = () => false;
+    else throw new Error('\'assert\' or \'test\' expected');
+    if (!isAr(b)) return done('cube compared to non-array');
+    const bdc = b._d_c_;
+    const n = this.length;
+    if (n !== b.length) return done('number of entries not equal')
+    for (let i=0; i<n; i++) {
+      if (this[i] !== b[i]) return done(`entries at vector index ${i} not equal`);
+    }
+    if (bdc) {  //b is a cube
+      if (dc.r !== bdc.r || dc.c !== bdc.c || dc.p !== bdc.p) return done(`shape not equal`);
+      const thisEx = anExtra(dc);
+      const bEx = anExtra(bdc);
+      if (!thisEx) {
+        if (bEx) return done(`no ${expand[bEx]}, ${expand[bEx]}`);
+        else return this;
+      }
+      else if (!BEx) return done(`${expand[thisEx]}, no ${expand[thisEx]}`);
+      else { //both this and b have at least one extra
+        ['ra','ca','pa','rl','cl','pl'].forEach(a => {
+          if (dc.e[a]) {
+            if (!bdc.e[a]) return done(`${expand[a]}, no ${expand[a]}`);
+            else if (a[1] === 'a') {
+              if (!helper.shallowEqualAr(dc.e[a], bdc.e[a])) return done(`${expand[a]} not equal`);
+            }
+            else {
+              if (dc.e[a] !== bdc.e[a]) return done(`${expand[a]} not equal`);
+            }
+          }
+          else if (bdc.e[a]) return done(`no ${expand[a]}, ${expand[a]}`);
+        });
+      }
+    }
+    else {  //b is a standard array  
+      if (dc.c !== 1 || dc.p !== 1) return done('shape not equal');
+      const thisEx = anExtra(dc);
+      if (thisEx) return done(`${expand[thisEx]}, no ${expand[thisEx]}`);
+    }
+    return this;
+  });
+
+
+  // NEXT: overwrite native array methods where reqd - put at top of file
+
+  //what if error thrown by cube method after converted to cube?? -transactional like L2 
+  //EXCEPT FOR THE ARRAY -> CUBE CONVERSION
+  
+  
+  //--------------- create cube ---------------//
 
   //[*]->cb, new cube from shape array
-  AP.cube = function(val) {
+  addArrayMethod('cube', function(val) {
     assert.shapeArray(this);
     let n, dc;
     switch (this.length) {
@@ -50,7 +112,7 @@ Comments notation:
     }
     const r = new Array(n);
     r._d_c_ = dc;
-    lengthNonWritable(r);
+    helper.lengthNonWritable(r);
     if (val !== undefined) {
       switch (kind(val)) {
         case 0:  fill(r, val);     break;
@@ -59,10 +121,10 @@ Comments notation:
       }
     }
     return r;
-  };
+  });
     
   //[>num]->cb, random cube
-  AP.rand = function(mx) {
+  addArrayMethod('rand', function(mx) {
     const r = this.cube();
     const n = r.length;
     if (mx !== undefined) {
@@ -73,10 +135,10 @@ Comments notation:
       for (let i=0; i<n; i++) r[i] = Math.random();
     }
     return r;
-  };
+  });
 
   //[>num,>num]->cb, sample from normal distribution
-  AP.normal = function(mu = 0, sig = 1) {
+  addArrayMethod('normal', function(mu = 0, sig = 1) {
     const sampleNormal = () => {
       let u, v, s;
       while (1) {
@@ -93,7 +155,7 @@ Comments notation:
     if (sig <= 0) throw new Error('positive number expected (standard deviation)');
     for (let i=0; i<n; i++) r[i] = sampleNormal() * sig + mu;
     return r;
-  };
+  });
     
 
 }
@@ -103,7 +165,7 @@ Comments notation:
 
   /*
   
-  NEXT: overwrite native array methods where reqd - put at top of file
+
   
   
   
