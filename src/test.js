@@ -20,22 +20,26 @@
 		if (ran) assert.fail(name, `expected error but none thrown`);
 	};
   
-
+ 
+  //--------------- tests ---------------//
+  
   console.log('Testing compare');
   {
-    //some tests using arrays/cubes from scratch since
-    //compare is used to test all other cube methods
+    //these tests use cubes made 'from scratch' (i.e. no cube
+    //methods) since compare is used to test all other cube methods
     const baseArray = [5, 'abc', false, {}, [6]];
-    const s = 5
     const a0 = [];
     const a1 = [5];
     const a = [...baseArray];  //shallow copy baseArray
+    const aCopy = [...baseArray];
     const v0 = [];
     v0._d_c_ = {r:0, c:1, p:1};
     const v1 = [5];
     v1._d_c_ = {r:1, c:1, p:1};
     const v = [...baseArray];
     v._d_c_ = {r:5, c:1, p:1};
+    const vCopy = [...baseArray];
+    vCopy._d_c_ = {r:5, c:1, p:1};
     const ve = [...baseArray];
     ve._d_c_ = {r:5, c:1, p:1}
     ve._d_c_.e = {
@@ -64,37 +68,65 @@
       rl: 'rows'
     };
     
-    
-    test.throw('throw-compare-array-scaler', a, s);
-    test.throw('throw-compare-cube-scaler', v, s);
-    
-    
-    //equal themselves - NO POINT DOING THESE NOW SINCE 
+    test.throw('throw-compare-array-scaler', a, 5);
+    test.throw('throw-compare-vector-scaler', v, 5);
+    test.throw('throw-compare-vector-dict', v, ve);
+    test.throw('throw-compare-matrix-extras', m, me);
+    test.throw('throw-compare-book-extras', b, be);
+    test.throw('throw-compare-shape', m, b);
+        
     test('compare-empty-arrays', a0, []);
-    test('compare-1-entrys', a1, [5]);
-    test('compare-same-arrays', a, a);
+    test('compare-1-entry-arrays', a1, [5]);
+    test('compare-same-arrays', a, aCopy);
     test('compare-same-books', be, be);
- 
-    HERE!!!!!!!!!!!!!!!!
+    test('compare-empty-array-vector', a0, v0);
+    test('compare-empty-vector-array', v0, a0);
+    test('compare-1-entry-vector-array', v1, a1);
+    test('compare-1-entry-array-vector', a1, v1);
+    test('compare-array-vector', a, v);
+    test('compare-vector-array', v, a);
     
+    aCopy[3] = {}; //same as before, but now not referencing same object as a[3]
+    vCopy[3] = {};
+    test.throw('throw-compare-array-array', a, aCopy);
+    test.throw('throw-compare-vector-vector', v, vCopy);
     
+    v._d_c_.e = { rl: 'rows' };  //still missing row keys
+    test.throw('throw-compare-dict-dict-1', v, ve);
+    test.throw('throw-compare-dict-dict-2', ve, v);
+    v._d_c_.e.rk = {a:0, b:1, c:2, dd:3, e:4};  //key dd is wrong
+    v._d_c_.e.ra = ['a','b','c','dd','e'];
+    test.throw('throw-compare-dict-dict-3', v, ve);
+    test.throw('throw-compare-dict-dict-4', ve, v);
+    delete v._d_c_.e.rk.dd;
+    v._d_c_.e.rk.d = 3;
+    v._d_c_.e.ra[3] = 'd';
+    test('compare-dict-dict-1', v, ve);
+    test('compare-dict-dict-2', ve, v);
     
-    test('compare-array-vector', a , v);
+    m._d_c_.e = {  
+      ck: {a:0, b:1,c:2},
+      ca: ['a','b','c'],
+      rl: 'rows',
+    };  //still missing column label
+    test.throw('throw-compare-matrix-matrix-1', m, me);
+    test.throw('throw-compare-matrix-matrix-2', me, m);
+    m._d_c_.e.cl = 'columns';
+    test('compare-matrix-matrix-1', m, me);
+    test('compare-matrix-matrix-2', me, m);
     
-    
-
-    //change entry that is an obj so not refericing same object - get throw
-
-
- 
-          
-    
-    
-  
-  
-  
+    b._d_c_.e = {
+      pk: {a:0, b:1, c:2},
+      pa: ['a','b','c'],
+      pl: 'paGes',  //G should not be uppercase
+      rl: 'rows'
+    };
+    test.throw('throw-compare-book-book-1', b, be);
+    test.throw('throw-compare-book-book-2', be, b);
+    b._d_c_.e.pl = 'pages'
+    test('compare-book-book-1', b, be);
+    test('compare-book-book-2', be, b);   
   }
-  
   
   
   console.log('Tests finished');
