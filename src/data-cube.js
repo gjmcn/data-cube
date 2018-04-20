@@ -40,10 +40,9 @@
   //ac[,str]->cu/false
   addArrayMethod('compare', function(b, behav = 'assert') {
     this.toCube();
-    const dc = this._d_c_;
-    const anExtra = (dcProp) => { //name of an extra or false if none 
+    const anExtra = (dcProp) => { //name of an extra, false if none 
       if (dcProp.e) {
-        for (let k of dcProp.e) {
+        for (let k in dcProp.e) {
           if (dcProp.e[k]) return k;
         } 
       }
@@ -53,7 +52,9 @@
     if (behav === 'assert') done = msg => { throw new Error(msg) };
     else if (behav === 'test') done = () => false;
     else throw new Error('\'assert\' or \'test\' expected');
+    if (this === b) return this;  //reference same object
     if (!isAr(b)) return done('cube compared to non-array');
+    const dc = this._d_c_;
     const bdc = b._d_c_;
     const n = this.length;
     if (n !== b.length) return done('number of entries not equal')
@@ -68,7 +69,7 @@
         if (bEx) return done(`no ${expand[bEx]}, ${expand[bEx]}`);
         else return this;
       }
-      else if (!BEx) return done(`${expand[thisEx]}, no ${expand[thisEx]}`);
+      else if (!bEx) return done(`${expand[thisEx]}, no ${expand[thisEx]}`);
       else { //both this and b have at least one extra
         ['ra','ca','pa','rl','cl','pl'].forEach(a => {
           if (dc.e[a]) {
@@ -95,8 +96,7 @@
 
   // NEXT: overwrite native array methods where reqd - put at top of file
 
-  //what if error thrown by cube method after converted to cube?? -transactional like L2 
-  //EXCEPT FOR THE ARRAY -> CUBE CONVERSION
+
   
   
   //--------------- create cube ---------------//
