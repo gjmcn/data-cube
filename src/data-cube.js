@@ -1,21 +1,10 @@
- /*
-  comments:
-    obj: object
-    ar: array
-    cu: cube
-    ac: array or cube 
-    *: anything
-  Arguments are assumed to be of the correct type unless
-  prefixed with '>' (e.g. >str), in which case they are
-  implicitly or explicitly converted.
-*/
-
 {
   'use strict';
 
 	const helper = require('data-cube-helper');
   
-  const {assert, fill, fillEW, kind, expand, addArrayMethod} = helper;
+  const {assert, fill, fillEW, kind, expand, addArrayMethod, 
+         anyExtra, squeezeExtra} = helper;
   const isAr = Array.isArray;
   const errorMsg = {
     shapeMismatch: 'shape mismatch',
@@ -28,7 +17,7 @@
 
   addArrayMethod('toCube', function() {
     if (!this._d_c_) {
-      this._d_c_ = {r: this.length, c: 1, p: 1};
+      this._d_c_ = {r: this.length, c: 1, p: 1, e:undefined};
       helper.lengthNonWritable(this);
     }
     return this;
@@ -37,21 +26,13 @@
     
   //--------------- compare ---------------//
   
-  //ac[,str]->cu/false
+  //array/cube[, str] -> cu/false
   addArrayMethod('compare', function(b, behav = 'assert') {
     this.toCube();
-    const anExtra = (dcProp) => { //name of an extra, false if none 
-      if (dcProp.e) {
-        for (let k in dcProp.e) {
-          if (dcProp.e[k]) return k;
-        } 
-      }
-      return false;
-    }
     let done;
-    if (behav === 'assert') done = msg => { throw new Error(msg) };
+    if (behav === 'assert') done = msg => { throw Error(msg) };
     else if (behav === 'test') done = () => false;
-    else throw new Error('\'assert\' or \'test\' expected');
+    else throw Error('\'assert\' or \'test\' expected');
     if (this === b) return this;  //reference same object
     if (!isAr(b)) return done('cube compared to non-array');
     const dc = this._d_c_;
@@ -63,8 +44,8 @@
     }
     if (bdc) {  //b is a cube
       if (dc.r !== bdc.r || dc.c !== bdc.c || dc.p !== bdc.p) return done(`shape not equal`);
-      const thisEx = anExtra(dc);
-      const bEx = anExtra(bdc);
+      const thisEx = anyExtra(dc);
+      const bEx = anyExtra(bdc);
       if (!thisEx) {
         if (bEx) return done(`no ${expand[bEx]}, ${expand[bEx]}`);
         else return this;
@@ -87,21 +68,16 @@
     }
     else {  //b is a standard array  
       if (dc.c !== 1 || dc.p !== 1) return done('shape not equal');
-      const thisEx = anExtra(dc);
+      const thisEx = anyExtra(dc);
       if (thisEx) return done(`${expand[thisEx]}, no ${expand[thisEx]}`);
     }
     return this;
   });
 
-
-  // NEXT: overwrite native array methods where reqd - put at top of file
-
-
-  
   
   //--------------- create cube ---------------//
 
-  //[*]->cb, new cube from shape array
+  //[*] -> cube, new cube from shape array
   addArrayMethod('cube', function(val) {
     assert.shapeArray(this);
     let n, dc;
@@ -110,6 +86,7 @@
       case 2:  dc = {r: +this[0], c: +this[1], p: 1};         n = dc.r * dc.c;         break;
       case 3:  dc = {r: +this[0], c: +this[1], p: +this[2]};  n = dc.r * dc.c * dc.p;  break;
     }
+    dc.e = undefined;
     const r = new Array(n);
     r._d_c_ = dc;
     helper.lengthNonWritable(r);
@@ -123,7 +100,7 @@
     return r;
   });
     
-  //[>num]->cb, random cube
+  //[num] -> cube, random cube
   addArrayMethod('rand', function(mx) {
     const r = this.cube();
     const n = r.length;
@@ -137,7 +114,7 @@
     return r;
   });
 
-  //[>num,>num]->cb, sample from normal distribution
+  //[num, num] -> cube, sample from normal distribution
   addArrayMethod('normal', function(mu = 0, sig = 1) {
     const sampleNormal = () => {
       let u, v, s;
@@ -152,7 +129,7 @@
     const n = r.length;
     mu = +mu;
     sig = +sig;
-    if (sig <= 0) throw new Error('positive number expected (standard deviation)');
+    if (sig <= 0) throw Error('positive number expected (standard deviation)');
     for (let i=0; i<n; i++) r[i] = sampleNormal() * sig + mu;
     return r;
   });
@@ -354,6 +331,10 @@
 	//s,s[,s,s,s]->a, unit and utc only used by by date range
   //NEED TO INCLUDE ADDDATE dunc here (approp modified)
   //(LOCALLY OR ADD TO TO HELPERS) since removed from earlier? 
+  
+  
+  //DO WE USE DAYNAMES AND MONTHNAMES IN HELPER ANYMORE?
+  
 	L2.sc.range = function(s,f,j,unit,utc) {
 		var tmp = typeof s;
 		var i,n,R,v,s_ms,f_ms;
