@@ -2,9 +2,9 @@
   'use strict';
 
 	const helper = require('data-cube-helper');
+  const {assert, expand, fill, fillEW, kind, addArrayMethod, 
+         squeezeExtra} = helper;
   
-  const {assert, fill, fillEW, kind, expand, addArrayMethod, 
-         anyExtra, squeezeExtra} = helper;
   const isAr = Array.isArray;
   const errorMsg = {
     shapeMismatch: 'shape mismatch',
@@ -17,8 +17,8 @@
 
   addArrayMethod('toCube', function() {
     if (!this._d_c_) {
-      this._d_c_ = {r: this.length, c: 1, p: 1, e:undefined};
-      helper.lengthNonWritable(this);
+      this._d_c_ = new Map([ ['r',this.length], ['c',1], ['p',1] ]);
+      Object.defineProperty(this, 'length', { writable: false });
     }
     return this;
   });
@@ -26,13 +26,12 @@
     
   //--------------- compare ---------------//
   
-  //array/cube[, str] -> cu/false
-  addArrayMethod('compare', function(b, behav = 'assert') {
+  //array/cube[, bool] -> cu/false
+  addArrayMethod('compare', function(b, asrt = true) {
     this.toCube();
-    let done;
-    if (behav === 'assert') done = msg => { throw Error(msg) };
-    else if (behav === 'test') done = () => false;
-    else throw Error('\'assert\' or \'test\' expected');
+    let done, mismatch;
+    if (asrt) done = msg => { throw Error(msg) };
+    else done = () => false;
     if (this === b) return this;  //reference same object
     if (!isAr(b)) return done('cube compared to non-array');
     const dc = this._d_c_;
@@ -42,34 +41,45 @@
     for (let i=0; i<n; i++) {
       if (this[i] !== b[i]) return done(`entries at vector index ${i} not equal`);
     }
+    const e = dc.get('e');
     if (bdc) {  //b is a cube
-      if (dc.r !== bdc.r || dc.c !== bdc.c || dc.p !== bdc.p) return done(`shape not equal`);
-      const thisEx = anyExtra(dc);
-      const bEx = anyExtra(bdc);
-      if (!thisEx) {
-        if (bEx) return done(`no ${expand[bEx]}, ${expand[bEx]}`);
+      if (dc.get('r') !== bdc.get('r') || 
+          dc.get('c') !== bdc.get('c') ||
+          dc.get('p') !== bdc.get('p')) return done(`shape not equal`);
+      const be = bdc.get('e');
+      if (!e) {
+        if (be) {
+          mismatch = expand.get(be.keys().next().value);
+          return done(`no ${mismatch}, ${mismatch}`);
+        }
         else return this;
       }
-      else if (!bEx) return done(`${expand[thisEx]}, no ${expand[thisEx]}`);
+      else if (!be) {
+        mismatch = expand.get(e.keys().next().value);
+        return done(`${mismatch}, no ${mismatch}`);
+      }
       else { //both this and b have at least one extra
-        ['ra','ca','pa','rl','cl','pl'].forEach(a => {
-          if (dc.e[a]) {
-            if (!bdc.e[a]) return done(`${expand[a]}, no ${expand[a]}`);
-            else if (a[1] === 'a') {
-              if (!helper.shallowEqualAr(dc.e[a], bdc.e[a])) return done(`${expand[a]} not equal`);
+        ['rk','ck','pk','rl','cl','pl'].forEach(a => {
+          mismatch = expand.get(a);
+          if (e.get(a)) {
+            if (!be.get(a)) return done(`${mismatch}, no ${mismatch}`);
+            else if (a[1] === 'k') {
+              if (!helper.shallowEqualMap(e.get(a), be.get(a))) return done(`${mismatch} not equal`);
             }
             else {
-              if (dc.e[a] !== bdc.e[a]) return done(`${expand[a]} not equal`);
+              if (e.get(a) !== be.get(a)) return done(`${mismatch} not equal`);
             }
           }
-          else if (bdc.e[a]) return done(`no ${expand[a]}, ${expand[a]}`);
+          else if (be.get(a)) return done(`no ${mismatch}, ${mismatch}`);
         });
       }
     }
     else {  //b is a standard array  
-      if (dc.c !== 1 || dc.p !== 1) return done('shape not equal');
-      const thisEx = anyExtra(dc);
-      if (thisEx) return done(`${expand[thisEx]}, no ${expand[thisEx]}`);
+      if (dc.get('c') !== 1 || dc.get('p') !== 1) return done('shape not equal');
+      if (e) {
+        mismatch = expand.get(e.keys().next().value);
+        return done(`${mismatch}, no ${mismatch}`);
+      }
     }
     return this;
   });
@@ -79,26 +89,27 @@
 
   //[*] -> cube, new cube from shape array
   addArrayMethod('cube', function(val) {
-    assert.shapeArray(this);
-    let n, dc;
-    switch (this.length) {
-      case 1:  dc = {r: +this[0], c: 1,        p: 1};         n = dc.r;                break;
-      case 2:  dc = {r: +this[0], c: +this[1], p: 1};         n = dc.r * dc.c;         break;
-      case 3:  dc = {r: +this[0], c: +this[1], p: +this[2]};  n = dc.r * dc.c * dc.p;  break;
-    }
-    dc.e = undefined;
-    const r = new Array(n);
-    r._d_c_ = dc;
-    helper.lengthNonWritable(r);
+    if (this.length > 3) throw Error('shape cannot have more than 3 entries');
+    const r = this[0] === undefined ? 1 : assert.nonNegInt(+this[0]);  
+    const c = this[1] === undefined ? 1 : assert.nonNegInt(+this[1]);  
+    const p = this[2] === undefined ? 1 : assert.nonNegInt(+this[2]);  
+    const z = new Array(r*c*p);
+    z._d_c_ = new Map([ ['r',r], ['c',c], ['p',p] ]);
+    Object.defineProperty(z, 'length', { writable: false });
     if (val !== undefined) {
       switch (kind(val)) {
-        case 0:  fill(r, val);     break;
-        case 1:  fill(r, val[0]);  break;
-        case 2:  fillEW(r,val);    break;
+        case 0:  fill(z, val);     break;
+        case 1:  fill(z, val[0]);  break;
+        case 2:  fillEW(z, val);   break;
       }
     }
-    return r;
+    return z;
   });
+  
+  
+  !!!!!!!!!!!!HERE!!!!!!!!!!!!!
+  - update below
+  - run tests for compare and tests for other methods
     
   //[num] -> cube, random cube
   addArrayMethod('rand', function(mx) {
@@ -134,11 +145,62 @@
     return r;
   });
     
-
-}
-
-
-
+  
+  //--------------- shape ---------------//
+  
+  //-> 3-entry array 
+  addArrayMethod('shape', function() {
+    const dc = this._d_c_;
+    return [dc.get('r'), dc.get('c'), dc.get('p')];
+  });
+  
+  //[number/array] -> cube, set shape
+  addArrayMethod('$shape', function(shp) {
+    this.toCube();
+    const dc = this._d_c_;
+    let r = 1;
+    let c = 1;
+    let p = 1;
+    const singleton = () => {
+      r = assert.nonNegInt(+shp);
+      if (r === 0) {
+        if (this.length !== 0) throw Error('number of entries cannot change');
+      }
+      else c = assert.nonNegInt(this.length / r);
+    };
+    if (shp === undefined) r = this.length;
+    else if (isAr(shp)) {
+      let ns = shp.length
+      if (ns === 0 || ns > 3) throw Error('new shape array must have 1-3 entries');
+      switch (ns) {
+        case 1:
+          shp = shp[0];
+          singleton();
+          break;    
+        case 2:     
+          r = assert.nonNegInt(+shp[0]);
+          c = assert.nonNegInt(+shp[1]);
+          if (r*c === 0) {
+            if (this.length !== 0) throw Error('number of entries cannot change');
+          }
+          else p = assert.nonNegInt(this.length / (r*c));
+          break; 
+        case 3:
+          r = assert.nonNegInt(+shp[0]);
+          c = assert.nonNegInt(+shp[1]);
+          p = assert.nonNegInt(+shp[2]);
+          if (r*c*p !== this.length) throw Error('number of entries cannot change');
+          break; 
+      }
+    }
+    else singleton();
+    dc.set('r',r);
+    dc.set('c',c);
+    dc.set('p',p);
+    if (dc.get('e')) dc.delete('e');
+    return this;
+  });
+                 
 
   /*
   
