@@ -1,23 +1,30 @@
 {
   'use strict';
+  
+  //--------------- prep ---------------//
 
 	const helper = require('data-cube-helper');
-  const {assert, expand, fill, fillEW, kind, addArrayMethod, 
-         squeezeExtra} = helper;
+  const {dimName, keyName, labelName, assert, fill, fillEW, kind, 
+         addArrayMethod, squeezeKey, squeezeLabel} = helper;
   
   const isAr = Array.isArray;
-  const errorMsg = {
-    shapeMismatch: 'shape mismatch',
-    dupKey: 'will result in duplicate key',
-    acExpected: 'array/cube expected'
-  };
   
+  //methods use standard accessors for these properties; if an 
+  //absent property is on the prototype chain, methods will
+  //incorrectly treat it as instance-level 
+  ['_data_cube', '_s', '_k', '_l'].forEach(prop => {
+    if (prop in Array.prototype) {
+      throw Error(prop + ' is a property of Array.protoype'); 
+    }
+  });
+    
   
   //--------------- convert array to cube ---------------//
 
   addArrayMethod('toCube', function() {
-    if (!this._d_c_) {
-      this._d_c_ = new Map([ ['r',this.length], ['c',1], ['p',1] ]);
+    if (!this._data_cube) {
+      this._data_cube = true;
+      this._s = [this.length, 1, 1];
       Object.defineProperty(this, 'length', { writable: false });
     }
     return this;
@@ -29,64 +36,52 @@
   //array/cube[, bool] -> cu/false
   addArrayMethod('compare', function(b, asrt = true) {
     this.toCube();
-    let done, mismatch;
+    if (this === b) return this;
+    let done;
     if (asrt) done = msg => { throw Error(msg) };
     else done = () => false;
-    if (this === b) return this;  //reference same object
     if (!isAr(b)) return done('cube compared to non-array');
-    const dc = this._d_c_;
-    const bdc = b._d_c_;
     const n = this.length;
     if (n !== b.length) return done('number of entries not equal')
     for (let i=0; i<n; i++) {
       if (this[i] !== b[i]) return done(`entries at vector index ${i} not equal`);
     }
-    const e = dc.get('e');
-    if (bdc) {  //b is a cube
-      if (dc.get('r') !== bdc.get('r') || 
-          dc.get('c') !== bdc.get('c') ||
-          dc.get('p') !== bdc.get('p')) return done(`shape not equal`);
-      const be = bdc.get('e');
-      if (!e) {
-        if (be) {
-          mismatch = expand.get(be.keys().next().value);
-          return done(`no ${mismatch}, ${mismatch}`);
-        }
-        else return this;
-      }
-      else if (!be) {
-        mismatch = expand.get(e.keys().next().value);
-        return done(`${mismatch}, no ${mismatch}`);
-      }
-      else { //both this and b have at least one extra
-        ['rk','ck','pk','rl','cl','pl'].forEach(a => {
-          mismatch = expand.get(a);
-          if (e.get(a)) {
-            if (!be.get(a)) return done(`${mismatch}, no ${mismatch}`);
-            else if (a[1] === 'k') {
-              if (!helper.shallowEqualMap(e.get(a), be.get(a))) return done(`${mismatch} not equal`);
-            }
-            else {
-              if (e.get(a) !== be.get(a)) return done(`${mismatch} not equal`);
-            }
+    if (b._data_cube) {
+      if (!helper.shallowEqualArray(this._s, b._s)) return done(`shape not equal`);
+      const tk = this._k;
+      const bk = b._k;
+      if (tk) {
+        if (!bk) return done('keys-indices');
+        for (let i=0; i<3; i++) { //both this and b have keys on at least one dim
+          if (tk[i]) {
+            if (!bk[i]) return done(`keys-indices, ${dimName[i]}s`);
+            if (!helper.shallowEqualMap(tk[i],bk[i])) return done(`${keyName[i]} not equal`);    
           }
-          else if (be.get(a)) return done(`no ${mismatch}, ${mismatch}`);
-        });
+          else if (bk[i]) return done('indices-keys');
+        }
       }
+      else if (bk) return done('indices-keys');
+      const tl = this._l;
+      const bl = b._l;
+      if (tl) {
+        if (!bl) return done('labels not equal or not used on same dimensions');
+        if (!helper.shallowEqualArray(tl,bl)) {
+          return done('labels not equal or not used on same dimensions');
+        }
+      }
+      else if (bl) return done('labels not equal or not used on same dimensions');
     }
     else {  //b is a standard array  
-      if (dc.get('c') !== 1 || dc.get('p') !== 1) return done('shape not equal');
-      if (e) {
-        mismatch = expand.get(e.keys().next().value);
-        return done(`${mismatch}, no ${mismatch}`);
-      }
+      if (this._s[1] !== 1 || this._s[2] !== 1) return done('shape not equal');
+      if (this._k) return done('keys-indices');
+      if (this._l) return done('labels not equal or not used on same dimensions');
     }
     return this;
   });
 
   
   //--------------- create cube ---------------//
-
+  
   //[*] -> cube, new cube from shape array
   addArrayMethod('cube', function(val) {
     if (this.length > 3) throw Error('shape cannot have more than 3 entries');
@@ -94,7 +89,8 @@
     const c = this[1] === undefined ? 1 : assert.nonNegInt(+this[1]);  
     const p = this[2] === undefined ? 1 : assert.nonNegInt(+this[2]);  
     const z = new Array(r*c*p);
-    z._d_c_ = new Map([ ['r',r], ['c',c], ['p',p] ]);
+    z._data_cube = true;
+    z._s = [r,c,p];
     Object.defineProperty(z, 'length', { writable: false });
     if (val !== undefined) {
       switch (kind(val)) {
@@ -105,24 +101,19 @@
     }
     return z;
   });
-  
-  
-  !!!!!!!!!!!!HERE!!!!!!!!!!!!!
-  - update below
-  - run tests for compare and tests for other methods
-    
+      
   //[num] -> cube, random cube
   addArrayMethod('rand', function(mx) {
-    const r = this.cube();
-    const n = r.length;
+    const z = this.cube();
+    const n = z.length;
     if (mx !== undefined) {
       const lim = +assert.posInt(mx) + 1;
-      for (let i=0; i<n; i++) r[i] = Math.floor(Math.random()*lim);
+      for (let i=0; i<n; i++) z[i] = Math.floor(Math.random()*lim);
     }
     else {
-      for (let i=0; i<n; i++) r[i] = Math.random();
+      for (let i=0; i<n; i++) z[i] = Math.random();
     }
-    return r;
+    return z;
   });
 
   //[num, num] -> cube, sample from normal distribution
@@ -136,13 +127,13 @@
         if (s > 0 && s < 1) return u * Math.sqrt((-2 * Math.log(s)) / s);
       }
     };
-    const r = this.cube();
-    const n = r.length;
+    const z = this.cube();
+    const n = z.length;
     mu = +mu;
     sig = +sig;
     if (sig <= 0) throw Error('positive number expected (standard deviation)');
-    for (let i=0; i<n; i++) r[i] = sampleNormal() * sig + mu;
-    return r;
+    for (let i=0; i<n; i++) z[i] = sampleNormal() * sig + mu;
+    return z;
   });
     
   
@@ -150,29 +141,28 @@
   
   //-> 3-entry array 
   addArrayMethod('shape', function() {
-    const dc = this._d_c_;
-    return [dc.get('r'), dc.get('c'), dc.get('p')];
+    this.toCube();
+    return this._s.slice();
   });
-  
+    
   //[number/array] -> cube, set shape
   addArrayMethod('$shape', function(shp) {
     this.toCube();
-    const dc = this._d_c_;
     let r = 1;
     let c = 1;
     let p = 1;
+    const empty = this.length === 0;
     const singleton = () => {
       r = assert.nonNegInt(+shp);
       if (r === 0) {
-        if (this.length !== 0) throw Error('number of entries cannot change');
+        if (!empty) throw Error('number of entries cannot change');
       }
+      else if (empty) c = 0;
       else c = assert.nonNegInt(this.length / r);
     };
     if (shp === undefined) r = this.length;
     else if (isAr(shp)) {
-      let ns = shp.length
-      if (ns === 0 || ns > 3) throw Error('new shape array must have 1-3 entries');
-      switch (ns) {
+      switch (shp.length) {
         case 1:
           shp = shp[0];
           singleton();
@@ -181,8 +171,9 @@
           r = assert.nonNegInt(+shp[0]);
           c = assert.nonNegInt(+shp[1]);
           if (r*c === 0) {
-            if (this.length !== 0) throw Error('number of entries cannot change');
+            if (!empty) throw Error('number of entries cannot change');
           }
+          else if (empty) p = 0;
           else p = assert.nonNegInt(this.length / (r*c));
           break; 
         case 3:
@@ -190,24 +181,21 @@
           c = assert.nonNegInt(+shp[1]);
           p = assert.nonNegInt(+shp[2]);
           if (r*c*p !== this.length) throw Error('number of entries cannot change');
-          break; 
+          break;
+        default: throw Error('array argument, must have 1-3 entries');
       }
     }
     else singleton();
-    dc.set('r',r);
-    dc.set('c',c);
-    dc.set('p',p);
-    if (dc.get('e')) dc.delete('e');
+    this._s = [r,c,p];
+    if (this._k) delete this._k;
+    if (this._l) delete this._l;
     return this;
   });
                  
-
+}
   /*
   
 
-  
-  
-  
   
   
   //entrywise functions, all scalar->scalar
