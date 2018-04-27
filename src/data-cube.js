@@ -5,10 +5,10 @@
 
 	const helper = require('data-cube-helper');
   const {dimName, keyName, labelName, assert, fill, fillEW, kind, 
-         addArrayMethod, squeezeKey, squeezeLabel} = helper;
+         addArrayMethod, squeezeKey, squeezeLabel, keyMap} = helper;
   
   const isAr = Array.isArray;
-  
+    
   //methods use standard accessors for these properties; if an 
   //absent property is on the prototype chain, methods will
   //incorrectly treat it as instance-level 
@@ -139,13 +139,13 @@
   
   //--------------- shape ---------------//
   
-  //-> 3-entry array 
+  //-> 3-entry array
   addArrayMethod('shape', function() {
     this.toCube();
     return this._s.slice();
   });
     
-  //[number/array] -> cube, set shape
+  //[number/array] -> cube
   addArrayMethod('$shape', function(shp) {
     this.toCube();
     let r = 1;
@@ -191,7 +191,68 @@
     if (this._l) delete this._l;
     return this;
   });
-                 
+       
+  
+  //--------------- labels ---------------//
+  
+  //[num] -> string/undefined
+  addArrayMethod('label', function(dim = 0) {
+    this.toCube();
+    dim = assert.dim(dim);
+    if (this._l) return this._l[dim];
+  });
+    
+  //[num], str -> cube
+  addArrayMethod('$label', function(dim = 0, val) {
+    this.toCube();
+    dim = assert.dim(dim);
+    val = '' + val;
+    if (val === '') throw Error('label cannot be empty string');
+    if (!this._l) this._l = new Array(3);
+    this._l[dim] = val;
+    return this;
+  });
+    
+  
+  //--------------- keys ---------------//
+  
+  //[num] -> string/undefined
+  addArrayMethod('key', function(dim = 0) {
+    this.toCube();
+    dim = assert.dim(dim);
+    if (this._k) return Array.from(this._k[dim].keys());
+  });
+  
+  //[num], */ar -> cube
+  addArrayMethod('$key', function(dim = 0, val) {
+    this.toCube();
+    dim = assert.dim(dim);
+    if (!isAr(val)) val = [val];
+    if (this.length !== val.length) throw Error('shape mismatch');
+    const mp = keyMap(val);
+    if (!this._k) this._k = new Array(3);    
+    this._k[dim] = mp;
+    return this;
+  });
+  
+  //[num, *] -> bool
+  addArrayMethod('hasKey', function(dim = 0, k) {
+    this.toCube();
+    dim = assert.dim(dim);
+    const _k = this._k;
+    const keysOnDim = !!(_k && _k[dim]);
+    return k === undefined ? keysOnDim : keysOnDim && _k[dim].has(k);
+  });
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 }
   /*
   

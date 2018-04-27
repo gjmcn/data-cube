@@ -27,7 +27,7 @@
 		catch (err) {
       return;
     }
-		assert.fail(name, `expected error but none thrown`);
+		assert.fail(name, 'expected error but none thrown');
 	};
   
   
@@ -144,119 +144,186 @@
     test('compare-book-book-2', be, b);   
   }
   
-//HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  
-//  console.log('--- cube');
-//  {
-//    assert.throw('throw-cube-too-many-entries', () => [6,7,8,9].cube());
-//    assert.throw('throw-cube-neg', () => (-1).cube().cube());
-//    assert.throw('throw-cube-non-int-1', () => [0,2.3].cube());
-//    assert.throw('throw-cube-non-int-1', () => ['a',4].cube());
-//    assert.throw('throw-cube-non-int-3', () => [1,{}].cube());
-//    assert.throw('throw-cube-non-int-4', () => [4,NaN,2].cube());
-//    assert.throw('throw-cube-non-int-5', () => [4,Infinity,2].cube());
-//    
-//    const a = [5,6];
-//    const s = [].cube();
-//    const s_1 =[1].cube(5);    
-//    const e =[0].cube();
-//    const v = [2].cube();
-//    const v_1 = [2].cube(5);
-//    const v_2 = [2].cube(a);
-//    const v_3 = [2].cube([a]);
-//    const m = [0,3].cube();
-//    const m_1 = [2,3].cube([4,5,6,7,8,9]);
-//    const b = [2,3,2].cube(true);
+  console.log('--- cube');
+  {
+    assert.throw('throw-cube-too-many-entries', () => [6,7,8,9].cube());
+    assert.throw('throw-cube-neg', () => (-1).cube());
+    assert.throw('throw-cube-non-int-1', () => [0,2.3].cube());
+    assert.throw('throw-cube-non-int-2', () => ['a',4].cube());
+    assert.throw('throw-cube-non-int-3', () => [1,{}].cube());
+    assert.throw('throw-cube-non-int-4', () => [4,NaN,2].cube());
+    assert.throw('throw-cube-non-int-5', () => [4,Infinity,2].cube());
+    assert.throw('throw-cube-shape-mismatch', () => [4].cube([5,6,7]));
     
-    //HERE!!!!!!!!!!!!  WHY ERRORS WITH ASSERT.CUBE?????????????????????????
-    
-//    assert.cube('cube-check-1', s);
-//    assert.cube('cube-check-2', s_1);
-//    assert.cube('cube-check-3', e);
-//    assert.cube('cube-check-4', v);
-//    assert.cube('cube-check-5', v_1);
-//    assert.cube('cube-check-6', v_2);
-//    assert.cube('cube-check-7', v_3);
-//    assert.cube('cube-check-8', m);
-//    assert.cube('cube-check-9', m_1);
-//    assert.cube('cube-check-10', b);
-    
-//    TESTS WITH HOLES?
-    
-    //console.log(assert.cube(s))
+    const a = [5,6];
+    const s = [].cube(); 
+    const s_1 = [1].cube(5);    
+    const e = [0].cube();
+    const v = [2].cube();
+    const v_1 = [2].cube(5);
+    const v_2 = [2].cube(a);
+    const v_3 = [2].cube([a]);
+    const m = [0,3].cube();
+    const m_1 = [2,3].cube([4,5,6,7,8,9]);
+    const b = [,undefined,3].cube([4,5,6]);
+    const b_1 = [2,3,2].cube(true);
 
-//    assert.each('cube-empty-shape-0', [
-//      [() => assert.cube(s), ],
-//      [() => arrayEq(s, [undefined]), true],
-//      [() => mapEq(s._d_c_, toMap('r',1,'c',1,'p',1)), true]
-//    ]);
-//    assert.each('cube-empty-shape-1', [
-//      [() => assert.cube(s_1), ],
-//      [() => arrayEq(s_1, [5]), true],
-//      [() => mapEq(s_1._d_c_, toMap('r',1,'c',1,'p',1)), true]
-//    ]);
-//    assert.each('cube-vector-empty', [
-//      [() => assert.cube(e), ],
-//      [() => arrayEq(e, []), true],
-//      [() => mapEq(e._d_c_, toMap('r',0,'c',1,'p',1)), true]
-//    ]);
-//    assert.each('cube-vector-0', [
-//      [() => assert.cube(v), ],
-//      [() => arrayEq(v, [undefined,undefined]), true],
-//      [() => mapEq(v._d_c_, toMap('r',2,'c',1,'p',1)), true]
-//    ]);
-//    assert.each('cube-vector-1', [
-//      [() => assert.cube(v_1), ],
-//      [() => arrayEq(v_1, [5,5]), true],
-//      [() => mapEq(v_1._d_c_, toMap('r',2,'c',1,'p',1)), true]
-//    ]);
-//    assert.each('cube-vector-2', [
-//      [() => assert.cube(v_2), ],
-//      [() => arrayEq(v_2, [5,5]), true],
-//      [() => mapEq(v_2._d_c_, toMap('r',2,'c',1,'p',1)), true]
-//    ]);
-//    assert.each('cube-vector-3', [
-//      [() => assert.cube(v_3), ],
-//      [() => arrayEq(v_3, [5,6]), true],
-//      [() => mapEq(v_3._d_c_, toMap('r',2,'c',1,'p',1)), true]
-//    ]);
-//    assert.each('cube-matrix-0', [
-//      [() => assert.cube(m), ],
-//      [() => arrayEq(m, []), true],
-//      [() => mapEq(m._d_c_, toMap('r',0,'c',3,'p',1)), true]
-//    ]);
-//    assert.each('cube-matrix-1', [
-//      [() => assert.cube(m_1), ],
-//      [() => arrayEq(m_1, [4,5,6,7,8,9]), true],
-//      [() => mapEq(m_1._d_c_, toMap('r',2,'c',3,'p',1)), true]
-//    ]);
-//    assert.each('cube-book', [
-//      [() => assert.cube(b), ],
-//      [() => arrayEq(b, [true,true,true,true,true,true]), true],
-//      [() => mapEq(b._d_c_, toMap('r',2,'c',3,'p',2)), true]
-//    ]);
+    assert.each('cube-1-entry-0', [
+      [() => assert.cube(s), ],
+      [() => arrayEq(s, [undefined]), true],
+      [() => arrayEq(s._s, [1,1,1]), true]
+    ]);
+    assert.each('cube-1-entry-1', [
+      [() => assert.cube(s_1), ],
+      [() => arrayEq(s_1, [5]), true],
+      [() => arrayEq(s_1._s, [1,1,1]), true]
+    ]);
+    assert.each('cube-empty-vector', [
+      [() => assert.cube(e), ],
+      [() => arrayEq(e, []), true],
+      [() => arrayEq(e._s, [0,1,1]), true]
+    ]);
+    assert.each('cube-vector-0', [
+      [() => assert.cube(v), ],
+      [() => arrayEq(v, [undefined,undefined]), true],
+      [() => arrayEq(v._s, [2,1,1]), true]
+    ]);
+    assert.each('cube-vector-1', [
+      [() => assert.cube(v_1), ],
+      [() => arrayEq(v_1, [5,5]), true],
+      [() => arrayEq(v_1._s, [2,1,1]), true]
+    ]);
+    assert.each('cube-vector-2', [
+      [() => assert.cube(v_2), ],
+      [() => arrayEq(v_2, [5,6]), true],
+      [() => arrayEq(v_2._s, [2,1,1]), true]
+    ]);
+    assert.each('cube-vector-3', [
+      [() => assert.cube(v_3), ],
+      [() => arrayEq(v_3, [a,a]), true],
+      [() => arrayEq(v_3._s, [2,1,1]), true]
+    ]);
+    assert.each('cube-matrix-0', [
+      [() => assert.cube(m), ],
+      [() => arrayEq(m, []), true],
+      [() => arrayEq(m._s, [0,3,1]), true]
+    ]);
+    assert.each('cube-matrix-1', [
+      [() => assert.cube(m_1), ],
+      [() => arrayEq(m_1, [4,5,6,7,8,9]), true],
+      [() => arrayEq(m_1._s, [2,3,1]), true]
+    ]);
+    assert.each('cube-book-0', [
+      [() => assert.cube(b), ],
+      [() => arrayEq(b, [4,5,6]), true],
+      [() => arrayEq(b._s, [1,1,3]), true]
+    ]);
+    assert.each('cube-book-1', [
+      [() => assert.cube(b_1), ],
+      [() => arrayEq(b_1, (new Array(12)).fill(true)), true],
+      [() => arrayEq(b_1._s, [2,3,2]), true]
+    ]);
     
+  }
+  
+  console.log('--- shape');
+  {
+    assert('shape-array-1', () => arrayEq([].shape(), [0,1,1]), true);
+    assert('shape-array-2', () => arrayEq([5].shape(), [1,1,1]), true);
+    assert('shape-array-3', () => arrayEq([5,6].shape(), [2,1,1]), true);
+    assert('shape-empty-1', () => arrayEq([0].cube().shape(), [0,1,1]), true);
+    assert('shape-empty-2', () => arrayEq([1,0,5].cube().shape(), [1,0,5]), true);
+    assert('shape-empty-3', () => arrayEq([,,0].cube().shape(), [1,1,0]), true);
+    assert('shape-vector', () => arrayEq([3].cube().shape(), [3,1,1]), true);
+    assert('shape-matrix', () => arrayEq([2,4].cube().shape(), [2,4,1]), true);
+    assert('shape-book', () => arrayEq([4,3,2].cube().shape(), [4,3,2]), true);
+  }
+  
+  console.log('--- $shape');
+  {
+    const x = [12].cube();
+    const y = [0].cube();
+
+    assert.throw('throw-$shape-invalid-new-shape-1', () => x.$shape([6,2,1,1]));
+    assert.throw('throw-$shape-invalid-new-shape-2', () => x.$shape(-12));
+    assert.throw('throw-$shape-invalid-new-shape-3', () => x.$shape([6,3.4,2])); 
+    assert.throw('throw-$shape-diff-number-entries-1', () => x.$shape(0));
+    assert.throw('throw-$shape-diff-number-entries-2', () => x.$shape([1,5]));
+    assert.throw('throw-$shape-diff-number-entries-3', () => x.$shape(5));
+    assert.throw('throw-$shape-diff-number-entries-4', () => x.$shape([2,6,3]));
+    assert.throw('throw-$shape-diff-number-entries-5', () => y.$shape([1,1,1]));
+    assert.throw('throw-$shape-diff-number-entries-6', () => y.$shape([2,3,1]));
+
+    test('$shape-1', x.$shape([2,3,2]), [2,3,2].cube());
+    test('$shape-2', x.$shape(), [12].cube());
+    test('$shape-3', x.$shape([1,1]), [1,1,12].cube());
+    test('$shape-4', x.$shape([1]), [1,12].cube());
+    test('$shape-5', x.$shape([2,3,2]), [2,3,2].cube());
+    test('$shape-6', x.$shape(['3','2']), [3,2,2].cube());
+    test('$shape-7', x.$shape(6), [6,2,1].cube());
+    test('$shape-8', y.$shape(50), [50,0,1].cube());
+    test('$shape-9', y.$shape([2]), [2,0,1].cube());
+    test('$shape-10', y.$shape([4,5]), [4,5,0].cube());
+    test('$shape-11', y.$shape(undefined), [0,1,1].cube());
+    test('$shape-12', y.$shape(0), [0,1,1].cube());
+    test('$shape-13', y.$shape([2,0,3]), [2,0,3].cube());
+    assert('$shape-same-length-1', () => x.length, 12);
+    assert('$shape-same-length-2', () => y.length, 0);
+  }
+  
+  console.log('--- rand');
+  {
+    //basic tests; most work handled by cube()
+    const a = [10].rand();
+    assert('rand-1', () => Math.min(...a) >= 0, true);
+    assert('rand-2', () => Math.max(...a) < 1, true);
+    assert('rand-3', () => [10].rand(1).every(v => v === 0 || v === 1), true);
+    assert('rand-4', () => [20].rand('3')
+      .every(v => v === 0 || v === 1 || v === 2 || v === 3), true);
+    assert.throw('throw-rand-invalid-max-1', () => [2].rand(0));
+    assert.throw('throw-rand-invalid-max-2', () => [2].rand(-1));
+    assert.throw('throw-rand-invalid-max-3', () => [2].rand('a'));
+  }
+  
+  console.log('--- normal');
+  {
+    //basic tests; most work handled by cube()
+    const a = [20].normal();
+    const b = [20].normal(500,10);
+    assert('normal-1', () => Math.min(...a) > -10, true);
+    assert('normal-2', () => Math.max(...a) < 10, true);
+    assert('normal-3', () => Math.min(...b) > 400, true);
+    assert('normal-4', () => Math.max(...b) < 600, true);
+    assert.throw('throw-normal-invalid-std-dev', () => [20].normal(5,-1));
+  }
+  
+  
+
+  //TO DO!!!!!!!!!!!!!
+  
+  console.log('--- key')
+  {
+
     
-//  }
+  }
   
+    console.log('--- $key')
+  {
   
-//  console.log('--- rand');
-//  
-//  console.log('--- normal');
-//  
-//  console.log('--- shape');
-//
-//  console.log('--- $shape');
+    
+  }
   
+    console.log('--- label')
+  {
   
+    
+  }
   
+    console.log('--- $label')
+  {
   
-  
-  
-  
-  
-  
-  
+    
+  }
   
   
   console.log('Tests finished');
