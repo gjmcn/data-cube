@@ -4,11 +4,10 @@
   //--------------- prep ---------------//
 
 	const helper = require('data-cube-helper');
-  const {dimName, keyName, labelName, assert, fill, fillEW, kind, 
-         addArrayMethod, squeezeKey, squeezeLabel, keyMap} = helper;
+  const {assert, fill, fillEW, addArrayMethod, squeezeKey,
+         squeezeLabel, keyMap, isSingle, polarize, def,
+         toArray} = helper;
   
-  const isAr = Array.isArray;
-    
   //methods use standard accessors for these properties; if an 
   //absent property is on the prototype chain, methods will
   //incorrectly treat it as instance-level 
@@ -18,7 +17,7 @@
     }
   });
     
-  
+    
   //--------------- convert array to cube ---------------//
 
   addArrayMethod('toCube', function() {
@@ -34,13 +33,14 @@
   //--------------- compare ---------------//
   
   //array/cube[, bool] -> cu/false
-  addArrayMethod('compare', function(b, asrt = true) {
+  addArrayMethod('compare', function(b, asrt) {
     this.toCube();
+    asrt = def(assert.single(asrt), true);
     if (this === b) return this;
     let done;
     if (asrt) done = msg => { throw Error(msg) };
     else done = () => false;
-    if (!isAr(b)) return done('cube compared to non-array');
+    if (!Array.isArray(b)) return done('cube compared to non-array');
     const n = this.length;
     if (n !== b.length) return done('number of entries not equal')
     for (let i=0; i<n; i++) {
@@ -54,8 +54,8 @@
         if (!bk) return done('keys-indices');
         for (let i=0; i<3; i++) { //both this and b have keys on at least one dim
           if (tk[i]) {
-            if (!bk[i]) return done(`keys-indices, ${dimName[i]}s`);
-            if (!helper.shallowEqualMap(tk[i],bk[i])) return done(`${keyName[i]} not equal`);    
+            if (!bk[i]) return done(`keys-indices, ${helper.dimName[i]}s`);
+            if (!helper.shallowEqualMap(tk[i],bk[i])) return done(`${helper.keyName[i]} not equal`);    
           }
           else if (bk[i]) return done('indices-keys');
         }
@@ -85,29 +85,25 @@
   //[*] -> cube, new cube from shape array
   addArrayMethod('cube', function(val) {
     if (this.length > 3) throw Error('shape cannot have more than 3 entries');
-    const r = this[0] === undefined ? 1 : assert.nonNegInt(+this[0]);  
-    const c = this[1] === undefined ? 1 : assert.nonNegInt(+this[1]);  
-    const p = this[2] === undefined ? 1 : assert.nonNegInt(+this[2]);  
+    const r = this[0] === undefined ? 1 : assert.nonNegInt(this[0]);  
+    const c = this[1] === undefined ? 1 : assert.nonNegInt(this[1]);  
+    const p = this[2] === undefined ? 1 : assert.nonNegInt(this[2]);  
     const z = new Array(r*c*p);
     z._data_cube = true;
     z._s = [r,c,p];
     Object.defineProperty(z, 'length', { writable: false });
-    if (val !== undefined) {
-      switch (kind(val)) {
-        case 0:  fill(z, val);     break;
-        case 1:  fill(z, val[0]);  break;
-        case 2:  fillEW(z, val);   break;
-      }
-    }
+    var [val,valSingle] = polarize(val);
+    if (val !== undefined) (valSingle ? fill : fillEW)(z, val);
     return z;
   });
       
   //[num] -> cube, random cube
   addArrayMethod('rand', function(mx) {
+    mx = assert.single(mx);
     const z = this.cube();
     const n = z.length;
     if (mx !== undefined) {
-      const lim = +assert.posInt(mx) + 1;
+      const lim = assert.posInt(mx) + 1;
       for (let i=0; i<n; i++) z[i] = Math.floor(Math.random()*lim);
     }
     else {
@@ -117,7 +113,7 @@
   });
 
   //[num, num] -> cube, sample from normal distribution
-  addArrayMethod('normal', function(mu = 0, sig = 1) {
+  addArrayMethod('normal', function(mu, sig) {
     const sampleNormal = () => {
       let u, v, s;
       while (1) {
@@ -126,17 +122,17 @@
         s = u*u + v*v;
         if (s > 0 && s < 1) return u * Math.sqrt((-2 * Math.log(s)) / s);
       }
-    };
+    };    
+    mu = assert.number(def(assert.single(mu),0));
+    sig = assert.number(def(assert.single(sig),1));
+    if (sig <= 0) throw Error('positive number expected (standard deviation)');
     const z = this.cube();
     const n = z.length;
-    mu = +mu;
-    sig = +sig;
-    if (sig <= 0) throw Error('positive number expected (standard deviation)');
     for (let i=0; i<n; i++) z[i] = sampleNormal() * sig + mu;
     return z;
   });
     
-  
+ 
   //--------------- shape ---------------//
   
   //-> 3-entry array
@@ -148,44 +144,37 @@
   //[number/array] -> cube
   addArrayMethod('$shape', function(shp) {
     this.toCube();
+    assert.argRange(arguments,0,1);
+    var [shp,shpSingle] = polarize(shp);
     let r = 1;
     let c = 1;
     let p = 1;
     const empty = this.length === 0;
-    const singleton = () => {
-      r = assert.nonNegInt(+shp);
+    if (shp === undefined) r = this.length;
+    else if (shpSingle) {
+      r = assert.nonNegInt(shp);
       if (r === 0) {
         if (!empty) throw Error('number of entries cannot change');
       }
       else if (empty) c = 0;
       else c = assert.nonNegInt(this.length / r);
-    };
-    if (shp === undefined) r = this.length;
-    else if (isAr(shp)) {
-      switch (shp.length) {
-        case 1:
-          shp = shp[0];
-          singleton();
-          break;    
-        case 2:     
-          r = assert.nonNegInt(+shp[0]);
-          c = assert.nonNegInt(+shp[1]);
-          if (r*c === 0) {
-            if (!empty) throw Error('number of entries cannot change');
-          }
-          else if (empty) p = 0;
-          else p = assert.nonNegInt(this.length / (r*c));
-          break; 
-        case 3:
-          r = assert.nonNegInt(+shp[0]);
-          c = assert.nonNegInt(+shp[1]);
-          p = assert.nonNegInt(+shp[2]);
-          if (r*c*p !== this.length) throw Error('number of entries cannot change');
-          break;
-        default: throw Error('array argument, must have 1-3 entries');
-      }
     }
-    else singleton();
+    else if (shp.length === 2) {
+      r = assert.nonNegInt(shp[0]);
+      c = assert.nonNegInt(shp[1]);
+      if (r*c === 0) {
+        if (!empty) throw Error('number of entries cannot change');
+      }
+      else if (empty) p = 0;
+      else p = assert.nonNegInt(this.length / (r*c));
+    }
+    else if (shp.length === 3) {
+      r = assert.nonNegInt(shp[0]);
+      c = assert.nonNegInt(shp[1]);
+      p = assert.nonNegInt(shp[2]);
+      if (r*c*p !== this.length) throw Error('number of entries cannot change');
+    }
+    else throw Error('shape must have 1-3 entries');
     this._s = [r,c,p];
     if (this._k) delete this._k;
     if (this._l) delete this._l;
@@ -194,19 +183,21 @@
        
   
   //--------------- labels ---------------//
-  
+    
   //[num] -> string/undefined
-  addArrayMethod('label', function(dim = 0) {
+  addArrayMethod('label', function(dim) {
     this.toCube();
     dim = assert.dim(dim);
     if (this._l) return this._l[dim];
   });
     
   //[num], str -> cube
-  addArrayMethod('$label', function(dim = 0, val) {
+  addArrayMethod('$label', function(dim,val) {
     this.toCube();
+    const nArg = assert.argRange(arguments,1,2);    
+    if (nArg === 1) [dim,val] = [undefined,dim];
     dim = assert.dim(dim);
-    val = '' + val;
+    val = '' + assert.single(val);
     if (val === '') throw Error('label cannot be empty string');
     if (!this._l) this._l = new Array(3);
     this._l[dim] = val;
@@ -217,46 +208,43 @@
   //--------------- keys ---------------//
   
   //[num] -> string/undefined
-  addArrayMethod('key', function(dim = 0) {
+  addArrayMethod('key', function(dim) {
     this.toCube();
     dim = assert.dim(dim);
-    if (this._k) return Array.from(this._k[dim].keys());
+    if (this._k) {
+      const mp = this._k[dim];
+      if (mp) return Array.from(mp.keys());
+    }
   });
-  
-  //[num], */ar -> cube
-  addArrayMethod('$key', function(dim = 0, val) {
+    
+  //[num], * -> cube
+  addArrayMethod('$key', function(dim, val) {
     this.toCube();
+    const nArg = assert.argRange(arguments,1,2);    
+    if (nArg === 1) [dim,val] = [undefined,dim];
     dim = assert.dim(dim);
-    if (!isAr(val)) val = [val];
-    if (this.length !== val.length) throw Error('shape mismatch');
-    const mp = keyMap(val);
+    const mp = keyMap(toArray(val));
+    if (this._s[dim] !== mp.size) throw Error('shape mismatch');
     if (!this._k) this._k = new Array(3);    
     this._k[dim] = mp;
     return this;
   });
   
-  //[num, *] -> bool
-  addArrayMethod('hasKey', function(dim = 0, k) {
-    this.toCube();
-    dim = assert.dim(dim);
-    const _k = this._k;
-    const keysOnDim = !!(_k && _k[dim]);
-    return k === undefined ? keysOnDim : keysOnDim && _k[dim].has(k);
-  });
+//  //[num, *] -> bool
+//  addArrayMethod('hasKey', function(dim, k) {
+//    this.toCube();
+//    dim = assert.dim(dim);
+//    const _k = this._k;
+//    const keysOnDim = !!(_k && _k[dim]);
+//    return k === undefined ? keysOnDim : keysOnDim && _k[dim].has(k);
+//  });
   
-  
-  
-  
-  
-  
-  
-  
-  
+
   
 }
   /*
   
-
+  do remove
   
   
   //entrywise functions, all scalar->scalar

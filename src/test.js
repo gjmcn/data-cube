@@ -112,6 +112,11 @@
     test('compare-array-vector', a, v);
     test('compare-vector-array', v, a);
     
+    assert('compare-test-1', () => v.compare(a,false), v);
+    assert('compare-test-2', () => v.compare(a,[false]), v);
+    assert('compare-test-3', () => v.compare(ve,[false]), false);
+    assert.throw('throw-compare-test', () => v.compare(a,[false,false]));
+    
     aCopy[3] = {}; //same as before, but now not referencing same object as a[3]
     vCopy[3] = {};
     test.throw('throw-compare-array-array', a, aCopy);
@@ -153,77 +158,121 @@
     assert.throw('throw-cube-non-int-3', () => [1,{}].cube());
     assert.throw('throw-cube-non-int-4', () => [4,NaN,2].cube());
     assert.throw('throw-cube-non-int-5', () => [4,Infinity,2].cube());
-    assert.throw('throw-cube-shape-mismatch', () => [4].cube([5,6,7]));
+    assert.throw('throw-cube-non-int-6', () => [4,'3',2].cube());
+    assert.throw('throw-cube-non-int-7', () => [4,[3],2].cube());
+    assert.throw('throw-cube-shape-mismatch-1', () => [4].cube([5,6,7]));
+    assert.throw('throw-cube-shape-mismatch-2', () => [4,2].cube([5,6,7]));
     
-    const a = [5,6];
-    const s = [].cube(); 
-    const s_1 = [1].cube(5);    
-    const e = [0].cube();
-    const v = [2].cube();
-    const v_1 = [2].cube(5);
-    const v_2 = [2].cube(a);
-    const v_3 = [2].cube([a]);
-    const m = [0,3].cube();
-    const m_1 = [2,3].cube([4,5,6,7,8,9]);
-    const b = [,undefined,3].cube([4,5,6]);
-    const b_1 = [2,3,2].cube(true);
+    const obj = {a:5};
+    const a = [5,obj];
+    const a_1 = [undefined];
 
+    const s = [].cube(); 
     assert.each('cube-1-entry-0', [
-      [() => assert.cube(s), ],
+      [() => assert.cube(s), undefined],
       [() => arrayEq(s, [undefined]), true],
       [() => arrayEq(s._s, [1,1,1]), true]
     ]);
+    const s_1 = [1].cube(5);  
     assert.each('cube-1-entry-1', [
-      [() => assert.cube(s_1), ],
+      [() => assert.cube(s_1), undefined],
       [() => arrayEq(s_1, [5]), true],
       [() => arrayEq(s_1._s, [1,1,1]), true]
     ]);
+    const e = [0].cube();
     assert.each('cube-empty-vector', [
-      [() => assert.cube(e), ],
+      [() => assert.cube(e), undefined],
       [() => arrayEq(e, []), true],
       [() => arrayEq(e._s, [0,1,1]), true]
     ]);
+    const v = [2].cube();
     assert.each('cube-vector-0', [
-      [() => assert.cube(v), ],
+      [() => assert.cube(v), undefined],
       [() => arrayEq(v, [undefined,undefined]), true],
       [() => arrayEq(v._s, [2,1,1]), true]
     ]);
+    const v_1 = [2].cube(5);
     assert.each('cube-vector-1', [
-      [() => assert.cube(v_1), ],
+      [() => assert.cube(v_1), undefined],
       [() => arrayEq(v_1, [5,5]), true],
       [() => arrayEq(v_1._s, [2,1,1]), true]
     ]);
+    const v_2 = [2].cube(a);
     assert.each('cube-vector-2', [
-      [() => assert.cube(v_2), ],
-      [() => arrayEq(v_2, [5,6]), true],
+      [() => assert.cube(v_2), undefined],
+      [() => arrayEq(v_2, [5,obj]), true],
       [() => arrayEq(v_2._s, [2,1,1]), true]
     ]);
+    const v_3 = [2].cube([a]);
     assert.each('cube-vector-3', [
-      [() => assert.cube(v_3), ],
+      [() => assert.cube(v_3), undefined],
       [() => arrayEq(v_3, [a,a]), true],
       [() => arrayEq(v_3._s, [2,1,1]), true]
     ]);
+    const v_4 = [2].cube([a_1]);
+    assert.each('cube-vector-4', [
+      [() => assert.cube(v_4), undefined],
+      [() => arrayEq(v_4, [a_1,a_1]), true],
+      [() => arrayEq(v_4._s, [2,1,1]), true]
+    ]);
+    const v_5 = [2].cube(a_1);
+    assert.each('cube-vector-5', [
+      [() => assert.cube(v_5), undefined],
+      [() => arrayEq(v_5, [undefined,undefined]), true],
+      [() => arrayEq(v_5._s, [2,1,1]), true]
+    ]);
+    const m = [0,3].cube();
     assert.each('cube-matrix-0', [
-      [() => assert.cube(m), ],
+      [() => assert.cube(m), undefined],
       [() => arrayEq(m, []), true],
       [() => arrayEq(m._s, [0,3,1]), true]
     ]);
+    const m_1 = [2,3].cube([4,5,6,7,8,9]);
     assert.each('cube-matrix-1', [
-      [() => assert.cube(m_1), ],
+      [() => assert.cube(m_1), undefined],
       [() => arrayEq(m_1, [4,5,6,7,8,9]), true],
       [() => arrayEq(m_1._s, [2,3,1]), true]
     ]);
+    const b = [,undefined,3].cube([4,5,6]);
     assert.each('cube-book-0', [
-      [() => assert.cube(b), ],
+      [() => assert.cube(b), undefined],
       [() => arrayEq(b, [4,5,6]), true],
       [() => arrayEq(b._s, [1,1,3]), true]
     ]);
+    const b_1 = [2,3,2].cube(true);
     assert.each('cube-book-1', [
-      [() => assert.cube(b_1), ],
+      [() => assert.cube(b_1), undefined],
       [() => arrayEq(b_1, (new Array(12)).fill(true)), true],
       [() => arrayEq(b_1._s, [2,3,2]), true]
     ]);
     
+  }
+  
+  console.log('--- rand');
+  {
+    //basic tests; most work handled by cube()
+    const a = [10].rand();
+    assert('rand-1', () => Math.min(...a) >= 0, true);
+    assert('rand-2', () => Math.max(...a) < 1, true);
+    assert('rand-3', () => [10].rand(1).every(v => v === 0 || v === 1), true);
+    assert('rand-4', () => [20].rand([3])
+      .every(v => v === 0 || v === 1 || v === 2 || v === 3), true);
+    assert.throw('throw-rand-invalid-max-1', () => [2].rand(0));
+    assert.throw('throw-rand-invalid-max-2', () => [2].rand(-1));
+    assert.throw('throw-rand-invalid-max-3', () => [2].rand('2'));
+  }
+  
+  console.log('--- normal');
+  {
+    //basic tests; most work handled by cube()
+    const a = [20].normal();
+    const b = [20].normal(500,10);
+    assert('normal-1', () => Math.min(...a) > -10, true);
+    assert('normal-2', () => Math.max(...a) < 10, true);
+    assert('normal-3', () => Math.min(...b) > 400, true);
+    assert('normal-4', () => Math.max(...b) < 600, true);
+    assert.throw('throw-normal-invalid-mean', () => [20].normal('5',2));
+    assert.throw('throw-normal-invalid-std-dev', () => [20].normal(5,-2));
   }
   
   console.log('--- shape');
@@ -247,86 +296,135 @@
     assert.throw('throw-$shape-invalid-new-shape-1', () => x.$shape([6,2,1,1]));
     assert.throw('throw-$shape-invalid-new-shape-2', () => x.$shape(-12));
     assert.throw('throw-$shape-invalid-new-shape-3', () => x.$shape([6,3.4,2])); 
+    assert.throw('throw-$shape-invalid-new-shape-4', () => x.$shape([6,'1',2]));
+    assert.throw('throw-$shape-invalid-new-shape-5', () => x.$shape([[12]]));
+    assert.throw('throw-$shape-invalid-new-shape-6', () => y.$shape([false])); 
+    assert.throw('throw-$shape-invalid-new-shape-7', () => y.$shape(false));
     assert.throw('throw-$shape-diff-number-entries-1', () => x.$shape(0));
     assert.throw('throw-$shape-diff-number-entries-2', () => x.$shape([1,5]));
     assert.throw('throw-$shape-diff-number-entries-3', () => x.$shape(5));
     assert.throw('throw-$shape-diff-number-entries-4', () => x.$shape([2,6,3]));
     assert.throw('throw-$shape-diff-number-entries-5', () => y.$shape([1,1,1]));
     assert.throw('throw-$shape-diff-number-entries-6', () => y.$shape([2,3,1]));
-
+    assert.throw('throw-$shape-too-many-args', () => y.$shape(0,1));
+    
     test('$shape-1', x.$shape([2,3,2]), [2,3,2].cube());
     test('$shape-2', x.$shape(), [12].cube());
     test('$shape-3', x.$shape([1,1]), [1,1,12].cube());
     test('$shape-4', x.$shape([1]), [1,12].cube());
-    test('$shape-5', x.$shape([2,3,2]), [2,3,2].cube());
-    test('$shape-6', x.$shape(['3','2']), [3,2,2].cube());
-    test('$shape-7', x.$shape(6), [6,2,1].cube());
+    test('$shape-5', x.$shape([3,2]), [3,2,2].cube());
+    test('$shape-6', x.$shape(6), [6,2,1].cube());
+    test('$shape-7', x.$shape([6]), [6,2,1].cube());
     test('$shape-8', y.$shape(50), [50,0,1].cube());
     test('$shape-9', y.$shape([2]), [2,0,1].cube());
     test('$shape-10', y.$shape([4,5]), [4,5,0].cube());
-    test('$shape-11', y.$shape(undefined), [0,1,1].cube());
-    test('$shape-12', y.$shape(0), [0,1,1].cube());
-    test('$shape-13', y.$shape([2,0,3]), [2,0,3].cube());
+    test('$shape-11', y.$shape([undefined]), [0,1,1].cube());
+    test('$shape-12', y.$shape(undefined), [0,1,1].cube());
+    test('$shape-13', y.$shape(0), [0,1,1].cube());
+    test('$shape-14', y.$shape(), [0,1,1].cube());
+    test('$shape-15', y.$shape([2,0,3]), [2,0,3].cube());
     assert('$shape-same-length-1', () => x.length, 12);
     assert('$shape-same-length-2', () => y.length, 0);
   }
   
-  console.log('--- rand');
+  console.log('--- label, $label')
   {
-    //basic tests; most work handled by cube()
-    const a = [10].rand();
-    assert('rand-1', () => Math.min(...a) >= 0, true);
-    assert('rand-2', () => Math.max(...a) < 1, true);
-    assert('rand-3', () => [10].rand(1).every(v => v === 0 || v === 1), true);
-    assert('rand-4', () => [20].rand('3')
-      .every(v => v === 0 || v === 1 || v === 2 || v === 3), true);
-    assert.throw('throw-rand-invalid-max-1', () => [2].rand(0));
-    assert.throw('throw-rand-invalid-max-2', () => [2].rand(-1));
-    assert.throw('throw-rand-invalid-max-3', () => [2].rand('a'));
-  }
+    const obj = {a:5};
+    const e = [].$label(1,'columns');
+    const m = [5,6].cube()
+      .$label(1)  //label on dim 0 will be '1'
+      .$label(1,'columns')
+      .$label([2],obj);
+    
+    assert.throwEach('throw-label', [
+      () => e.label(3),
+      () => e.label([1,2]),
+      () => e.$label(0,'a','b'),
+      () => e.$label(),
+      () => e.$label('1','a'),
+      () => e.$label(1,['a','b']),
+      () => e.$label(''),
+      () => e.$label(1,''),
+    ]);
   
-  console.log('--- normal');
+    assert.each('label-1', [
+      [() => assert.cube(e), undefined],
+      [() => arrayEq(e._l, [,'columns',,]), true],
+      [() => e.label(), undefined],
+      [() => e.label(1), 'columns'],
+      [() => e.label(1,10,20), 'columns'],
+      [() => e.label(2), undefined]      
+    ]);
+  
+    assert.each('label-2', [
+      [() => assert.cube(m), undefined],
+      [() => arrayEq(m._l, ['1','columns','' + obj]), true],
+      [() => m.label(), '1'],
+      [() => m.label(1), 'columns'],
+      [() => m.label(2), '' + obj]
+    ]);
+  }
+    
+  console.log('--- key, $key')
   {
-    //basic tests; most work handled by cube()
-    const a = [20].normal();
-    const b = [20].normal(500,10);
-    assert('normal-1', () => Math.min(...a) > -10, true);
-    assert('normal-2', () => Math.max(...a) < 10, true);
-    assert('normal-3', () => Math.min(...b) > 400, true);
-    assert('normal-4', () => Math.max(...b) < 600, true);
-    assert.throw('throw-normal-invalid-std-dev', () => [20].normal(5,-1));
-  }
-  
-  
+    const obj = {a:5};
+    const e = []
+      .$key([])
+      .$key(1,'a')
+      .$key(2,'b')
+    const v = [5,6]
+      .$key(0,['a',obj]);
+    const b = [2,3,4].cube()
+      .$key([obj,'' + obj])
+      .$key(1,[10,20,30])
+      .$key(2,['a','b','c','d']);
 
-  //TO DO!!!!!!!!!!!!!
-  
-  console.log('--- key')
-  {
+    
+        HERE!!!!!!!!!!!!!!!!!!!
+      
+    
+    assert.throwEach('throw-key', [
+      () => e.key(3),
+      () => e.key([1,2]),
+      () => b.$key(1,[5,6,7],8),
+      () => b.$key(),
+      () => e.$key('1','a'),
+      () => e.$key('a'),
+      () => e.$key(0,'a'),
+      () => b.$key(1,['a']),
+      () => b.$key(1,[5,6,7,8]),
+      () => b.$key(1,[false,6,7]),
+      () => b.$key(1,[5,true,7]),
+      () => b.$key(1,[5,6,null]),
+      () => b.$key(1,[undefined,6,7]),
+      () => b.$key(1,[6,6,7]),
+    ]);
 
+    assert.each('key-1', [
+      [() => assert.cube(e), undefined],
+      [() => mapEq(e.key(), new Map()), true],
+      [() => mapEq(e.key(1), new Map([ ['a',0] ])), true],
+      [() => mapEq(e.key(2), new Map([ ['b',0] ])), true],
+    ]);
     
-  }
-  
-    console.log('--- $key')
-  {
-  
+    assert.each('key-2', [
+      [() => assert.cube(v), undefined],
+      [() => mapEq(v.key([undefined]), new Map([ ['a',0], [obj,1] ])), true],
+      [() => v.key(1), undefined],
+      [() => v.key(2), undefined],
+    ]);
     
+    assert.each('key-3', [
+      [() => assert.cube(b), undefined],
+      [() => mapEq(b.key(0), new Map([ [obj,0], ['' + obj,1] ])), true],
+      [() => mapEq(b.key(1), new Map([ [10,0], [20,1], [30,2] ])), true],
+      [() => mapEq(b.key(2), new Map([ ['a',0], ['b',1], ['c',2], [d,3] ])), true],
+    ]);
+
   }
-  
-    console.log('--- label')
-  {
-  
-    
-  }
-  
-    console.log('--- $label')
-  {
-  
-    
-  }
-  
-  
+
   console.log('Tests finished');
+
 }
 
 
