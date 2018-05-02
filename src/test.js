@@ -376,12 +376,8 @@
       .$key(0,['a',obj]);
     const b = [2,3,4].cube()
       .$key([obj,'' + obj])
-      .$key(1,[10,20,30])
-      .$key(2,['a','b','c','d']);
-
-    
-        HERE!!!!!!!!!!!!!!!!!!!
-      
+      .$key(2,['a','b','c','d'])
+      .$key(1,[10,20,30]);
     
     assert.throwEach('throw-key', [
       () => e.key(3),
@@ -398,29 +394,35 @@
       () => b.$key(1,[5,6,null]),
       () => b.$key(1,[undefined,6,7]),
       () => b.$key(1,[6,6,7]),
+      () => b.$key(1,[5,6,7,6]),
     ]);
 
     assert.each('key-1', [
       [() => assert.cube(e), undefined],
-      [() => mapEq(e.key(), new Map()), true],
-      [() => mapEq(e.key(1), new Map([ ['a',0] ])), true],
-      [() => mapEq(e.key(2), new Map([ ['b',0] ])), true],
+      [() => arrayEq(e.key(), []), true],
+      [() => arrayEq(e.key(1), ['a']), true],
+      [() => arrayEq(e.key(2), ['b']), true]
     ]);
     
     assert.each('key-2', [
       [() => assert.cube(v), undefined],
-      [() => mapEq(v.key([undefined]), new Map([ ['a',0], [obj,1] ])), true],
+      [() => arrayEq(v.key([undefined]), ['a',obj]), true],
       [() => v.key(1), undefined],
-      [() => v.key(2), undefined],
+      [() => v.key(2), undefined]
     ]);
     
     assert.each('key-3', [
       [() => assert.cube(b), undefined],
-      [() => mapEq(b.key(0), new Map([ [obj,0], ['' + obj,1] ])), true],
-      [() => mapEq(b.key(1), new Map([ [10,0], [20,1], [30,2] ])), true],
-      [() => mapEq(b.key(2), new Map([ ['a',0], ['b',1], ['c',2], [d,3] ])), true],
+      [() => arrayEq(b.key(0), [obj,'' + obj]), true],
+      [() => arrayEq(b.key(1), [10,20,30]), true],
+      [() => arrayEq(b.key(2), ['a','b','c','d']), true]
     ]);
-
+    
+    assert.each('key-4', [
+      [() => [].key(), undefined],
+      [() => [].key(1), undefined],
+      [() => [].key(2), undefined]
+    ]);
   }
 
   console.log('Tests finished');
