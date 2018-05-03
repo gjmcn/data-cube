@@ -6,7 +6,7 @@
 	const helper = require('data-cube-helper');
   const {assert, fill, fillEW, addArrayMethod, squeezeKey,
          squeezeLabel, keyMap, isSingle, polarize, def,
-         toArray, copyArray, copyMap} = helper;
+         toArray, copyArray, copyMap, ensureKey, ensureLabel} = helper;
   
   //methods use standard accessors for these properties; if an 
   //absent property is on the prototype chain, methods will
@@ -22,9 +22,12 @@
 
   addArrayMethod('toCube', function() {
     if (!this._data_cube) {
-      this._data_cube = true;
-      this._s = [this.length, 1, 1];
-      Object.defineProperty(this, 'length', { writable: false });
+      Object.defineProperty(this, 'length', { writable: false });  
+      Object.defineProperty(this, '_data_cube', { value: true });
+      Object.defineProperty(this, '_s', { 
+        value: [this.length, 1, 1],
+        writable: true
+      });
     }
     return this;
   });
@@ -88,10 +91,13 @@
     const r = this[0] === undefined ? 1 : assert.nonNegInt(this[0]);  
     const c = this[1] === undefined ? 1 : assert.nonNegInt(this[1]);  
     const p = this[2] === undefined ? 1 : assert.nonNegInt(this[2]);  
-    const z = new Array(r*c*p);
-    z._data_cube = true;
-    z._s = [r,c,p];
-    Object.defineProperty(z, 'length', { writable: false });
+    const z = new Array(r*c*p);    
+    Object.defineProperty(z, 'length', { writable: false });  
+    Object.defineProperty(z, '_data_cube', { value: true });
+    Object.defineProperty(z, '_s', { 
+      value: [r,c,p],
+      writable: true
+    });
     var [val,valSingle] = polarize(val);
     if (val !== undefined) (valSingle ? fill : fillEW)(z, val);
     return z;
@@ -198,8 +204,8 @@
     if (nArg === 1) [dim,val] = [undefined,dim];
     dim = assert.dim(dim);
     val = '' + assert.single(val);
-    if (val === '') throw Error('label cannot be empty string');
-    if (!this._l) this._l = new Array(3);
+    if (val === '') throw Error('label cannot be empty string');    
+    ensureLabel(this);
     this._l[dim] = val;
     return this;
   });
@@ -225,7 +231,7 @@
     dim = assert.dim(dim);
     const mp = keyMap(toArray(val));
     if (this._s[dim] !== mp.size) throw Error('shape mismatch');
-    if (!this._k) this._k = new Array(3);
+    ensureKey(this);
     this._k[dim] = mp;
     return this;
   });
@@ -246,9 +252,14 @@
       z._s[1] = this._s[1];
       z._s[2] = this._s[2];
       if (ret !== 'core') {  //copy extras
-        if (this._l) z._l = copyArray(this._l);
+        if (this._l) {
+          ensureLabel(z);
+          z._l[0] = this._l[0];
+          z._l[1] = this._l[1];
+          z._l[2] = this._l[2];
+        }
         if (this._k) {
-          z._k = new Array(3);
+          ensureKey(z);
           for (let i=0; i<3; i++) {
             if (this._k[i]) z._k[i] = copyMap(this._k[i]);
           }
