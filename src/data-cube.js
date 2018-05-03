@@ -20,12 +20,13 @@
     
   //--------------- convert array to cube ---------------//
 
+  //array/cube -> cube
   addArrayMethod('toCube', function() {
     if (!this._data_cube) {
       Object.defineProperty(this, 'length', { writable: false });  
       Object.defineProperty(this, '_data_cube', { value: true });
-      Object.defineProperty(this, '_s', { 
-        value: [this.length, 1, 1],
+      Object.defineProperty(this, '_s', {
+        value: [this.length,1,1],
         writable: true
       });
     }
@@ -91,13 +92,10 @@
     const r = this[0] === undefined ? 1 : assert.nonNegInt(this[0]);  
     const c = this[1] === undefined ? 1 : assert.nonNegInt(this[1]);  
     const p = this[2] === undefined ? 1 : assert.nonNegInt(this[2]);  
-    const z = new Array(r*c*p);    
-    Object.defineProperty(z, 'length', { writable: false });  
-    Object.defineProperty(z, '_data_cube', { value: true });
-    Object.defineProperty(z, '_s', { 
-      value: [r,c,p],
-      writable: true
-    });
+    const z = new Array(r*c*p).toCube();
+    z._s[0] = r;
+    z._s[1] = c;
+    z._s[2] = p;
     var [val,valSingle] = polarize(val);
     if (val !== undefined) (valSingle ? fill : fillEW)(z, val);
     return z;
@@ -138,7 +136,7 @@
     return z;
   });
     
- 
+  
   //--------------- shape ---------------//
   
   //-> 3-entry array
@@ -180,8 +178,10 @@
       p = assert.nonNegInt(shp[2]);
       if (r*c*p !== this.length) throw Error('number of entries cannot change');
     }
-    else throw Error('shape must have 1-3 entries');
-    this._s = [r,c,p];
+    else throw Error('shape must have 1-3 entries');    
+    this._s[0] = r;
+    this._s[1] = c;
+    this._s[2] = p;
     if (this._k) delete this._k;
     if (this._l) delete this._l;
     return this;
