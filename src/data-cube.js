@@ -6,7 +6,7 @@
 	const helper = require('data-cube-helper');
   const {assert, fill, fillEW, addArrayMethod, squeezeKey,
          squeezeLabel, keyMap, isSingle, polarize, def,
-         toArray} = helper;
+         toArray, copyArray, copyMap} = helper;
   
   //methods use standard accessors for these properties; if an 
   //absent property is on the prototype chain, methods will
@@ -47,7 +47,7 @@
       if (this[i] !== b[i]) return done(`entries at vector index ${i} not equal`);
     }
     if (b._data_cube) {
-      if (!helper.shallowEqualArray(this._s, b._s)) return done(`shape not equal`);
+      if (!helper.equalArray(this._s, b._s)) return done(`shape not equal`);
       const tk = this._k;
       const bk = b._k;
       if (tk) {
@@ -55,7 +55,7 @@
         for (let i=0; i<3; i++) { //both this and b have keys on at least one dim
           if (tk[i]) {
             if (!bk[i]) return done(`keys-indices, ${helper.dimName[i]}s`);
-            if (!helper.shallowEqualMap(tk[i],bk[i])) return done(`${helper.keyName[i]} not equal`);    
+            if (!helper.equalMap(tk[i],bk[i])) return done(`${helper.keyName[i]} not equal`);    
           }
           else if (bk[i]) return done('indices-keys');
         }
@@ -65,7 +65,7 @@
       const bl = b._l;
       if (tl) {
         if (!bl) return done('labels not equal or not used on same dimensions');
-        if (!helper.shallowEqualArray(tl,bl)) {
+        if (!helper.equalArray(tl,bl)) {
           return done('labels not equal or not used on same dimensions');
         }
       }
@@ -138,7 +138,7 @@
   //-> 3-entry array
   addArrayMethod('shape', function() {
     this.toCube();
-    return this._s.slice();
+    return copyArray(this._s);
   });
     
   //[number/array] -> cube
@@ -218,26 +218,71 @@
   });
     
   //[num], * -> cube
-  addArrayMethod('$key', function(dim, val) {
+  addArrayMethod('$key', function(dim,val) {
     this.toCube();
     const nArg = assert.argRange(arguments,1,2);    
     if (nArg === 1) [dim,val] = [undefined,dim];
     dim = assert.dim(dim);
     const mp = keyMap(toArray(val));
     if (this._s[dim] !== mp.size) throw Error('shape mismatch');
-    if (!this._k) this._k = new Array(3);    
+    if (!this._k) this._k = new Array(3);
     this._k[dim] = mp;
     return this;
   });
   
-//  //[num, *] -> bool
-//  addArrayMethod('hasKey', function(dim, k) {
-//    this.toCube();
-//    dim = assert.dim(dim);
-//    const _k = this._k;
-//    const keysOnDim = !!(_k && _k[dim]);
-//    return k === undefined ? keysOnDim : keysOnDim && _k[dim].has(k);
-//  });
+  
+  //--------------- copy ---------------//
+      
+  //[str] -> array/cube
+  addArrayMethod('copy', function(ret) {
+    ret = def(assert.single(ret), 'cube');
+    if (ret !== 'cube' && ret !== 'core' && ret !== 'shell' && ret !== 'array') {
+      throw Error(`'cube', 'core', 'shell' or 'array' expected`);
+    }
+    if (ret === 'array') return copyArray(this);
+    const z = (ret === 'shell' ? new Array(this.length) : copyArray(this)).toCube();
+    if (this._data_cube) {
+      z._s[0] = this._s[0];
+      z._s[1] = this._s[1];
+      z._s[2] = this._s[2];
+      if (ret !== 'core') {  //copy extras
+        if (this._l) z._l = copyArray(this._l);
+        if (this._k) {
+          z._k = new Array(3);
+          for (let i=0; i<3; i++) {
+            if (this._k[i]) z._k[i] = copyMap(this._k[i]);
+          }
+        }
+      }
+    }
+    return z;
+  });
+  
+  
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+  
+  //--------------- basic ---------------//
+      
+  //[num, *] -> bool
+  addArrayMethod('hasKey', function(dim, k) {
+    this.toCube();
+    dim = assert.dim(dim);
+    k = assert.single(k);
+    const _k = this._k;
+    const keysOnDim = !!(_k && _k[dim]);
+    return k === undefined ? keysOnDim : keysOnDim && _k[dim].has(k);
+  });
+  
+  //[num] -> bool
+  addArrayMethod('n', function(dim) {
+    this.toCube();
+    dim = assert.dim(dim);
+    return this._s[dim];
+  });
+  
+
+  
   
 
   

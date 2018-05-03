@@ -5,8 +5,8 @@
   const helper = require('data-cube-helper');
   require('data-cube');
   
-  const arrayEq = helper.shallowEqualArray;
-  const mapEq = helper.shallowEqualMap;
+  const arrayEq = helper.equalArray;
+  const mapEq = helper.equalMap;
   const toMap = helper.toMap;
   
   //test a.compare(b)
@@ -275,6 +275,57 @@
     assert.throw('throw-normal-invalid-std-dev', () => [20].normal(5,-2));
   }
   
+  console.log('--- copy')
+  {
+    const e = [];
+    assert('copy-empty-0', () => e.copy('array')._data_cube, undefined);
+    test('copy-empty-1', e.copy('array'), []);
+    assert.cube('copy-empty-2', e.copy());
+    test('copy-empty-3', e.copy(), []);
+    assert.cube('copy-empty-4', e.copy('core'));
+    test('copy-empty-5', e.copy('core'), []);
+    assert.cube('copy-empty-6', e.copy('shell'));
+    test('copy-empty-7', e.copy('shell'), []);
+    
+    const dt = new Date();
+    const a = [5,6]
+      .$key(['a',dt])
+      .$label(0,'row')
+      .$label(2,'page');
+    assert('copy-array-0', () => a.copy('array')._data_cube, undefined);
+    test('copy-array-1', a.copy('array'), [5,6]);
+    assert.cube('copy-array-2', a.copy('cube'));
+    test('copy-array-3', a.copy('cube'),
+      [5,6].$key(['a',dt]).$label(0,'row').$label(2,'page'));
+    assert.cube('copy-array-4', a.copy('core'));
+    test('copy-array-5', a.copy('core'),
+      [5,6]);
+    assert.cube('copy-array-6', a.copy('shell'));
+    test('copy-array-7', a.copy('shell'),
+      [,,].$key(['a',dt]).$label(0,'row').$label(2,'page'));
+    test.throw('copy-array-8', a.copy('shell'),
+      [,,].$key(['a', new Date(+dt)]).$label(0,'row').$label(2,'page'));
+    
+    const obj = {};
+    const b = [4,5,6,obj,7,8]
+      .$shape([1,2,3])
+      .$key(1,['a','b'])
+      .$key(2,['A','B','C']);
+    assert('copy-book-0', () => b.copy('array')._data_cube, undefined);
+    test('copy-book-1', b.copy('array'), [4,5,6,obj,7,8]);
+    assert.cube('copy-book-2', b.copy('cube'));
+    test('copy-book-3', b.copy('cube'),
+      [4,5,6,obj,7,8].$shape([1,2,3]).$key(1,['a','b']).$key(2,['A','B','C']));
+    assert.cube('copy-book-4', b.copy('core'));
+    test('copy-book-5', b.copy('core'),
+      [4,5,6,obj,7,8].$shape([1,2,3]));
+    test.throw('copy-book-6', b.copy('core'),
+      [4,5,6,{},7,8].$shape([1,2,3]));
+    assert.cube('copy-book-7', b.copy('shell'));
+    test('copy-book-8', b.copy('shell'),
+      (new Array(6)).$shape([1,2,3]).$key(1,['a','b']).$key(2,['A','B','C']));
+  }
+  
   console.log('--- shape');
   {
     assert('shape-array-1', () => arrayEq([].shape(), [0,1,1]), true);
@@ -425,9 +476,29 @@
     ]);
   }
 
-  console.log('Tests finished');
 
+  console.log('Tests finished');
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
