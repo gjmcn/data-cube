@@ -241,9 +241,9 @@
       
   //[str] -> array/cube
   addArrayMethod('copy', function(ret) {
-    ret = def(assert.single(ret), 'cube');
-    if (ret !== 'cube' && ret !== 'core' && ret !== 'shell' && ret !== 'array') {
-      throw Error(`'cube', 'core', 'shell' or 'array' expected`);
+    ret = def(assert.single(ret), 'full');
+    if (ret !== 'full' && ret !== 'core' && ret !== 'shell' && ret !== 'array') {
+      throw Error(`'full', 'core', 'shell' or 'array' expected`);
     }
     if (ret === 'array') return copyArray(this);
     const z = (ret === 'shell' ? new Array(this.length) : copyArray(this)).toCube();
@@ -293,8 +293,34 @@
   });
   
 
+  //--------------- dim ---------------//
   
-  
+//  //!! CHECK AND TEST ONCE HAVE ROW, COL, PAGE METHODS !!
+//  //[num, str] -> iterator
+//  addArrayMethod('dim', function(dim,ret) {
+//    this.toCube();
+//    dim = assert.dim(dim);
+//    ret = def(assert.single(ret), 'full');
+//    const ky = this._k && this._k[dim];
+//    const n = this._s[dim];
+//    if (ret === 'full' || ret === 'core') {
+//      var sub = this[dim === 0 ? 'row' : (dim === 1 ? 'col' : 'page')];
+//    } 
+//    const that = this;
+//    if (ret === 'full') {
+//      if (ky) { return (function* () { for (let j of that._k[dim].keys()) yield [j, sub(j)] })() }
+//      else {    return (function* () { for (let j=0; j<n; j++) yield [j, sub(j)] })() }
+//    }
+//    else if (ret === 'core') {
+//      if (ky) { return (function* () { for (let j of that._k[dim].keys()) yield [j, sub(j,true)] })() }
+//      else {    return (function* () { for (let j=0; j<n; j++) yield [j, sub(j,true)] })() }
+//    }
+//    else if (ret === 'none') {
+//      if (ky) { return (function* () { for (let j of that._k[dim].keys()) yield j })() }
+//      return (function* () { for (let j=0; j<n; j++) yield j })();
+//    }
+//    else throw Error(`'full', 'core' or 'none' expected`);
+//  });
 
   
 }
