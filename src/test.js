@@ -38,7 +38,10 @@
   console.log('--- compare');
   {
     //these tests use cubes made 'from scratch' (i.e. no cube
-    //methods) since compare is used to test all other cube methods    
+    //methods) since compare is used to test all other cube methods
+    // -_data_cube, _s, _k and _l properties are added by assignment
+    //  here so will not have same writable, enumerable and configurable
+    //  settings as actual cubes
     const baseArray = [5, 'abc', false, {}, [6]];
     const a0 = [];
     const a1 = [5];
@@ -476,24 +479,64 @@
     ]);
   }
 
+  console.log('--- n');
+  {
+    const b = [4,3,5].cube();
+  
+    assert('n-1', () => [].n(),  0);
+    assert('n-2', () => [].n(0), 0);
+    assert('n-3', () => [].n(1), 1);
+    assert('n-4', () => [].n(2), 1);
+    assert('n-5', () => b.n(),  4);
+    assert('n-6', () => b.n(0), 4);
+    assert('n-7', () => b.n(1), 3);
+    assert('n-8', () => b.n(2), 5);
+  }
+  
+  console.log('--- hasKey');
+  { 
+    assert.each('has-key-1', [
+      [() => [].hasKey(), false],
+      [() => [].hasKey(1), false],
+      [() => [].hasKey(2), false],
+      [() => [].hasKey(0,'a'), false],
+      [() => [].hasKey(1,'a'), false],
+      [() => [].hasKey(2,'a'), false],
+    ]);
+    assert.throw('throw-has-key-1', () => [].hasKey('a'));
+    
+    const obj = {a:5};
+    const b = [2,3,4].cube()
+      .$key([obj,'' + obj])
+      .$key(2,['a','b','c','d']);
+    assert.each('has-key-2', [
+      [() => b.hasKey(), true],
+      [() => b.hasKey(0,obj), true],
+      [() => b.hasKey(undefined,obj), true],
+      [() => b.hasKey(0,''+obj), true],
+      [() => b.hasKey(0,{a:5}), false],
+      [() => b.hasKey(0,'a'), false],
+      [() => b.hasKey(1), false],
+      [() => b.hasKey(1,'a'), false],
+      [() => b.hasKey(2), true],
+      [() => b.hasKey(2,'a'), true],
+      [() => b.hasKey(2,'c'), true],
+      [() => b.hasKey(2,'A'), false]
+    ]);
+    assert.throw('throw-has-key-2', () => b.hasKey(2,['a','b']));
 
+    const e = [].$key([]);
+    assert.each('has-key-3', [
+      [() => e.hasKey(), true],
+      [() => e.hasKey(0,undefined), true],
+      [() => e.hasKey(0,'a'), false],
+    ]);
+  }
+  
+  
+  
   console.log('Tests finished');
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

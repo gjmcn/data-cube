@@ -269,12 +269,16 @@
     return z;
   });
   
-  
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  
-  
+
   //--------------- basic ---------------//
-      
+  
+  //[num] -> bool
+  addArrayMethod('n', function(dim) {
+    this.toCube();
+    dim = assert.dim(dim);
+    return this._s[dim];
+  });
+  
   //[num, *] -> bool
   addArrayMethod('hasKey', function(dim, k) {
     this.toCube();
@@ -285,12 +289,6 @@
     return k === undefined ? keysOnDim : keysOnDim && _k[dim].has(k);
   });
   
-  //[num] -> bool
-  addArrayMethod('n', function(dim) {
-    this.toCube();
-    dim = assert.dim(dim);
-    return this._s[dim];
-  });
   
 
   //--------------- dim ---------------//
@@ -305,21 +303,16 @@
 //    const n = this._s[dim];
 //    if (ret === 'full' || ret === 'core') {
 //      var sub = this[dim === 0 ? 'row' : (dim === 1 ? 'col' : 'page')];
-//    } 
+//    }
 //    const that = this;
-//    if (ret === 'full') {
-//      if (ky) { return (function* () { for (let j of that._k[dim].keys()) yield [j, sub(j)] })() }
-//      else {    return (function* () { for (let j=0; j<n; j++) yield [j, sub(j)] })() }
-//    }
-//    else if (ret === 'core') {
-//      if (ky) { return (function* () { for (let j of that._k[dim].keys()) yield [j, sub(j,true)] })() }
-//      else {    return (function* () { for (let j=0; j<n; j++) yield [j, sub(j,true)] })() }
-//    }
-//    else if (ret === 'none') {
+//    if (ret === 'none') {
 //      if (ky) { return (function* () { for (let j of that._k[dim].keys()) yield j })() }
 //      return (function* () { for (let j=0; j<n; j++) yield j })();
 //    }
-//    else throw Error(`'full', 'core' or 'none' expected`);
+//    else {
+//      if (ky) { return (function* () { for (let j of that._k[dim].keys()) yield [j, sub(j,ret)] })() }
+//      else {    return (function* () { for (let j=0; j<n; j++) yield [j, sub(j,ret)] })() }
+//    }
 //  });
 
   
