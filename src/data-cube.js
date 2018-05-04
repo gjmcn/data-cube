@@ -290,6 +290,28 @@
   });
   
   
+  //--------------- row, col, page ---------------//
+//  
+//  //*[, *] -> cube/array
+//  addArrayMethod('row', function(q, ret) {
+//    this.toCube();
+//    var [q,qSingle] = helper.polarize(q);
+//    const dim = 0;
+//    if (qSingle) {
+//      if (typeof q === 'boolean') {
+//        if (this._s[dim] !== 1) throw Error('Boolean indices, number of indices must equal dimension length');
+//        return [q ? 0 : [], hk];
+//      }
+//        
+//        
+//      }      
+//      
+//    }
+//    
+//  });
+  
+  
+  
 
   //--------------- dim ---------------//
   

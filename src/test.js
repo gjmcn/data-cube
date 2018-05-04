@@ -430,7 +430,7 @@
       .$key(0,['a',obj]);
     const b = [2,3,4].cube()
       .$key([obj,'' + obj])
-      .$key(2,['a','b','c','d'])
+      .$key(2,['a','b',true,false])
       .$key(1,[10,20,30]);
     
     assert.throwEach('throw-key', [
@@ -443,8 +443,6 @@
       () => e.$key(0,'a'),
       () => b.$key(1,['a']),
       () => b.$key(1,[5,6,7,8]),
-      () => b.$key(1,[false,6,7]),
-      () => b.$key(1,[5,true,7]),
       () => b.$key(1,[5,6,null]),
       () => b.$key(1,[undefined,6,7]),
       () => b.$key(1,[6,6,7]),
@@ -469,7 +467,7 @@
       [() => assert.cube(b), undefined],
       [() => arrayEq(b.key(0), [obj,'' + obj]), true],
       [() => arrayEq(b.key(1), [10,20,30]), true],
-      [() => arrayEq(b.key(2), ['a','b','c','d']), true]
+      [() => arrayEq(b.key(2), ['a','b',true,false]), true]
     ]);
     
     assert.each('key-4', [
@@ -508,7 +506,7 @@
     const obj = {a:5};
     const b = [2,3,4].cube()
       .$key([obj,'' + obj])
-      .$key(2,['a','b','c','d']);
+      .$key(2,['a','b',true,false]);
     assert.each('has-key-2', [
       [() => b.hasKey(), true],
       [() => b.hasKey(0,obj), true],
@@ -520,7 +518,8 @@
       [() => b.hasKey(1,'a'), false],
       [() => b.hasKey(2), true],
       [() => b.hasKey(2,'a'), true],
-      [() => b.hasKey(2,'c'), true],
+      [() => b.hasKey(2,false), true],
+      [() => b.hasKey(2,true), true],      
       [() => b.hasKey(2,'A'), false]
     ]);
     assert.throw('throw-has-key-2', () => b.hasKey(2,['a','b']));
