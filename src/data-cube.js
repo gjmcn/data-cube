@@ -4,9 +4,11 @@
   //--------------- prep ---------------//
 
 	const helper = require('data-cube-helper');
-  const {assert, fill, fillEW, addArrayMethod, squeezeKey,
-         squeezeLabel, keyMap, isSingle, polarize, def,
-         toArray, copyArray, copyMap, ensureKey, ensureLabel} = helper;
+  const { 
+    assert, fill, fillEW, addArrayMethod, squeezeKey, squeezeLabel,
+    keyMap, isSingle, polarize, def, toArray, copyArray, copyMap,
+    ensureKey, ensureLabel, nni, copyKey, copyLabel
+  } = helper;
   
   //methods use standard accessors for these properties; if an 
   //absent property is on the prototype chain, methods will
@@ -16,8 +18,8 @@
       throw Error(prop + ' is a property of Array.protoype'); 
     }
   });
-    
-    
+  
+  
   //--------------- convert array to cube ---------------//
 
   //array/cube -> cube
@@ -290,32 +292,183 @@
   });
   
   
-  //--------------- row, col, page ---------------//
-//  
-//  //*[, *] -> cube/array
-//  addArrayMethod('row', function(q, ret) {
-//    this.toCube();
-//    var [q,qSingle] = helper.polarize(q);
-//    const dim = 0;
-//    if (qSingle) {
-//      if (typeof q === 'boolean') {
-//        if (this._s[dim] !== 1) throw Error('Boolean indices, number of indices must equal dimension length');
-//        return [q ? 0 : [], hk];
-//      }
-//        
-//        
-//      }      
-//      
-//    }
-//    
-//  });
+  //--------------- subcubes ---------------//
+        
+  {
+    //num, num -> array, step from s to f (f not included)
+    const rangeInd = (s, f) => {
+      const a = new Array(f - s);
+      let j = 0;
+      for (let i=s; i<f; i++) a[j++] = i;
+      return a;
+    }
+    
+    //array, num -> array: indices of a, but non-neg inds
+    //converted and all inds bounds checked
+    const indInd = (a, nd) => { 
+      const n = a.length;
+      const b = new Array(n);
+      for (let i=0; i<n; i++) b[i] = nni(a[i], nd);
+      return b;
+    }
+    
+    //array, map -> array, values corresponding to keys k
+    //of the map mp; checks values not undefined    
+    const keyInd = (k, mp) => {
+      const n = k.length;
+      const b = new Array(n);
+      for (let i=0; i<n; i++) {
+        let val = mp.get(k[i]);
+        if (val === undefined) throw Error('key does not exist');
+        b[i] = val;
+      }
+      return b;
+    }
+    
+    //num, num -> num: like helper.nni, but adapted for indices
+    //that are start or end of slice.
+    //  -inds bounded at limits rather than error thrown if out of bounds
+    //  -upper limit is dim length nd (not 1 less)
+    //  -nd assumed non-neg-int
+    const nniSlice = (i,nd) => {
+      if (!Number.isInteger(i)) throw Error('integer expecter');
+      if (i >=   0) return Math.min(i,nd);
+      if (i >= -nd) return i + nd;
+      return 0;
+    }
+
+    //cube, num, * -> array: inds corresponding to q on
+    //dimension dim of x
+    const getInd = (x, dim, q) => {
+      var [q, qSingle] = polarize(q);
+      const nd = x._s[dim];
+      if (qSingle) {
+        if (q === undefined || q === null) return [rangeInd(0,nd), true];
+        else if (x.hasKey(dim)) return [keyInd([q], x._k[dim]), false];
+        else {
+          if (typeof q === 'object') {
+            let s = q.s === undefined ?  0 : nniSlice(q.s, nd);
+            let f = q.f === undefined ? nd : nniSlice(q.f, nd);
+//            if (s > f) throw Error('start index greater than finish index');
+            return [rangeInd(s,f), false];
+          }
+          else return [indInd([q], nd), false];
+        }
+      }
+      else {
+        if (x.hasKey(dim)) return [keyInd(q, x._k[dim]), false];
+        else return [indInd(q, nd), false];
+      }
+    };
+
+    //*, *, *[, str] -> cube
+    addArrayMethod('sc', function(row, col, page, ret) {
+      this.toCube();
+      ret = def(assert.single(ret), 'full');
+      const [nr, nc, np] = this._s;
+      //entries
+      const ind = [getInd(this,0,row), getInd(this,1,col), getInd(this,2,page)];
+      const rInd = ind[0][0],    cInd = ind[1][0],   pInd = ind[2][0];
+      const nrz  = rInd.length,  ncz = cInd.length,  npz = pInd.length;
+      const z = new Array(nrz * ncz * npz);
+      let j = 0;
+      for (let p=0; p<npz; p++) {
+        for (let c=0; c<ncz; c++) {
+          for (let r=0; r<nrz; r++) {
+            z[j++] = this[rInd[r] + nr*cInd[c] + nr*nc*pInd[p]];
+          }
+        }
+      }
+      if (ret === 'array') return z;
+      z.toCube();
+      if (!this._data_cube) return z;
+      //shape
+      z._s[0] = nrz,  z._s[1] = ncz,  z._s[2] = npz;
+      if (ret === 'core') return z;
+      //extras
+      if (this._k) {
+        ensureKey(z); 
+        for (let d=0; d<3; d++) {
+          if (this._k[d]) {
+            z._k[d] = ind[d][1] ? copyMap(this._k[d]) : keyMap(toArray(arguments[d]));
+          }
+        }
+      }
+      copyLabel(this,z);
+      return z;      
+    });
+    
+    //*, *, *, *, * -> cube
+    addArrayMethod('$sc', function(row, col, page, ret, val) {
+      this.toCube();
+      const nArg = assert.argRange(arguments,1,5);
+      switch (nArg) {
+        case 1:  [row, col, page, ret, val] = [   ,    ,     , , row ];  break;
+        case 2:  [row, col, page, ret, val] = [row,    ,     , , col ];  break;
+        case 3:  [row, col, page, ret, val] = [row, col,     , , page];  break;
+        case 4:  [row, col, page, ret, val] = [row, col, page, , ret ];  break;
+        case 5:  break;
+      }
+      const [nr, nc, np] = this._s;
+      const rInd = getInd(this,0,row)[0],
+            cInd = getInd(this,1,col)[0],
+            pInd = getInd(this,2,page)[0];
+      const nrz = rInd.length,  ncz = cInd.length,  npz = pInd.length;
+      var [val,valSingle] = polarize(val);
+      if (val.length !== nrz * ncz * npz) throw Error('shape mismatch');
+      let j = 0;
+      for (let p=0; p<npz; p++) {
+        for (let c=0; c<ncz; c++) {
+          for (let r=0; r<nrz; r++) {
+            this[rInd[r] + nr*cInd[c] + nr*nc*pInd[p]] = valSingle ? val : val[j++];
+          }
+        }
+      }
+      return this;
+    });
+    
+    //row, col, page convenience getters and setters
+    addArrayMethod('row',  function(j, ret) { return this.sc(   j, null, null, ret) });
+    addArrayMethod('col',  function(j, ret) { return this.sc(null,    j, null, ret) });
+    addArrayMethod('page', function(j, ret) { return this.sc(null, null,    j, ret) });
+    
+    const headTail = (x, dim, n, ret, hd) => {
+      x.toCube();
+      dim = assert.dim(dim);
+      n = assert.nonNegInt(def(assert.single(n), 5));
+      n = Math.min(x._s[dim], n);
+      return x[['row', 'col', 'page'][dim]](hd ? {f:n} : {s: (n === 0 ? n : -n)}, ret);
+    };
+    
+    addArrayMethod('head', function(dim, n, ret) { return headTail(this, dim, n, ret, true)  });
+    addArrayMethod('tail', function(dim, n, ret) { return headTail(this, dim, n, ret, false) });
+    
+    const rowColPageSet = (x, dim, j, ret, val) => {
+      const nArg = assert.argRange(arguments,4,5);
+      if (nArg === 4) val = ret;
+      switch (dim) {
+        case 0: return x.$sc(   j, null, null, undefined, val); 
+        case 1: return x.$sc(null,    j, null, undefined, val); 
+        case 2: return x.$sc(null, null,    j, undefined, val); 
+      }
+    };
   
+    ['$row', '$col', '$page'].forEach( (name, i) => {
+      addArrayMethod(name, function(j, ret, val) { return rowColPageSet(this, i, j, ret, val) });
+    });
+
+  }
   
   
 
   //--------------- dim ---------------//
   
 //  //!! CHECK AND TEST ONCE HAVE ROW, COL, PAGE METHODS !!
+//       may need to change these since have written subcube methods???????//
+//          -or are special caes well handled by subcube?
+//          -or use eg  rangeInd directly?
+  
+  
 //  //[num, str] -> iterator
 //  addArrayMethod('dim', function(dim,ret) {
 //    this.toCube();
