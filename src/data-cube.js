@@ -7,9 +7,9 @@
   const { 
     assert, fill, fillEW, addArrayMethod, squeezeKey, squeezeLabel,
     keyMap, isSingle, polarize, def, toArray, copyArray, copyMap,
-    ensureKey, ensureLabel, nni, copyKey, copyLabel
+    ensureKey, ensureLabel, nni, copyKey, copyLabel, skeleton
   } = helper;
-  
+    
   //methods use standard accessors for these properties; if an 
   //absent property is on the prototype chain, methods will
   //incorrectly treat it as instance-level 
@@ -19,19 +19,22 @@
     }
   });
   
-  
+    
   //--------------- convert array to cube ---------------//
+  
+  //array -> cube, x should NOT be a cube
+  const toCube = x => {
+    Object.defineProperty(x, 'length', { writable: false });  
+    Object.defineProperty(x, '_data_cube', { value: true });
+    Object.defineProperty(x, '_s', {
+      value: [x.length,1,1],
+      writable: true
+    });
+  };
 
-  //array/cube -> cube
+  //array/cube -> cube, does nothing if already a cube
   addArrayMethod('toCube', function() {
-    if (!this._data_cube) {
-      Object.defineProperty(this, 'length', { writable: false });  
-      Object.defineProperty(this, '_data_cube', { value: true });
-      Object.defineProperty(this, '_s', {
-        value: [this.length,1,1],
-        writable: true
-      });
-    }
+    if (!this._data_cube) toCube(this);
     return this;
   });
   
@@ -40,7 +43,7 @@
   
   //array/cube[, bool] -> cu/false
   addArrayMethod('compare', function(b, asrt) {
-    this.toCube();
+    if (!this._data_cube) toCube(this);
     asrt = def(assert.single(asrt), true);
     if (this === b) return this;
     let done;
@@ -94,7 +97,8 @@
     const r = this[0] === undefined ? 1 : assert.nonNegInt(this[0]);  
     const c = this[1] === undefined ? 1 : assert.nonNegInt(this[1]);  
     const p = this[2] === undefined ? 1 : assert.nonNegInt(this[2]);  
-    const z = new Array(r*c*p).toCube();
+    const z = new Array(r*c*p);
+    toCube(z);
     z._s[0] = r;
     z._s[1] = c;
     z._s[2] = p;
@@ -143,13 +147,13 @@
   
   //-> 3-entry array
   addArrayMethod('shape', function() {
-    this.toCube();
+    if (!this._data_cube) toCube(this);
     return copyArray(this._s);
   });
     
   //[number/array] -> cube
   addArrayMethod('$shape', function(shp) {
-    this.toCube();
+    if (!this._data_cube) toCube(this);
     assert.argRange(arguments,0,1);
     var [shp,shpSingle] = polarize(shp);
     let r = 1;
@@ -194,14 +198,14 @@
     
   //[num] -> string/undefined
   addArrayMethod('label', function(dim) {
-    this.toCube();
+    if (!this._data_cube) toCube(this);
     dim = assert.dim(dim);
     if (this._l) return this._l[dim];
   });
     
   //[num], str -> cube
   addArrayMethod('$label', function(dim,val) {
-    this.toCube();
+    if (!this._data_cube) toCube(this);
     const nArg = assert.argRange(arguments,1,2);    
     if (nArg === 1) [dim,val] = [undefined,dim];
     dim = assert.dim(dim);
@@ -217,7 +221,7 @@
   
   //[num] -> string/undefined
   addArrayMethod('key', function(dim) {
-    this.toCube();
+    if (!this._data_cube) toCube(this);
     dim = assert.dim(dim);
     if (this._k) {
       const mp = this._k[dim];
@@ -227,7 +231,7 @@
     
   //[num], * -> cube
   addArrayMethod('$key', function(dim,val) {
-    this.toCube();
+    if (!this._data_cube) toCube(this);
     const nArg = assert.argRange(arguments,1,2);    
     if (nArg === 1) [dim,val] = [undefined,dim];
     dim = assert.dim(dim);
@@ -248,7 +252,8 @@
       throw Error(`'full', 'core', 'shell' or 'array' expected`);
     }
     if (ret === 'array') return copyArray(this);
-    const z = (ret === 'shell' ? new Array(this.length) : copyArray(this)).toCube();
+    const z = ret === 'shell' ? new Array(this.length) : copyArray(this);
+    toCube(z);
     if (this._data_cube) {
       z._s[0] = this._s[0];
       z._s[1] = this._s[1];
@@ -276,14 +281,14 @@
   
   //[num] -> bool
   addArrayMethod('n', function(dim) {
-    this.toCube();
+    if (!this._data_cube) toCube(this);
     dim = assert.dim(dim);
     return this._s[dim];
   });
   
   //[num, *] -> bool
   addArrayMethod('hasKey', function(dim, k) {
-    this.toCube();
+    if (!this._data_cube) toCube(this);
     dim = assert.dim(dim);
     k = assert.single(k);
     const _k = this._k;
@@ -292,6 +297,52 @@
   });
   
   
+  //--------------- at ---------------//
+  
+  //cube, num, * -> num, non-neg-index on dimension dim
+  //of x correpsonding to j - which may be a key or
+  //index (poss negative). Assume that dim is valid and
+  //j is a processed singleton value
+  // !!MOVE THIS TO HELPER!!
+  const nniFromAny = (x, dim, j) => {
+    if (j === undefined || j === null) {
+      if (x._s[dim] === 0) throw Error('empty dimension');
+      return 0;
+    }
+    if (x._k && x._k[dim]) return nni(x._k[dim].get(j), x._s[dim]);
+    return nni(j, x._s[dim]);
+  };
+  
+  addArrayMethod('at', function(r, c, p) {
+    if (!this._data_cube) toCube(this);
+    const nArg = arguments.length;
+    if (nArg === 1) {
+      return this[ nniFromAny(this, 0, assert.single(r)) ];
+    }
+    else if (nArg === 2) {
+      return this[ nniFromAny(this, 0, assert.single(r)) +
+                   nniFromAny(this, 1, assert.single(c)) * this._s[0] ];
+    }
+    else {
+      const _s = this._s;
+      return this[ nniFromAny(this, 0, assert.single(r)) +
+                   nniFromAny(this, 1, assert.single(c)) * _s[0] + 
+                   nniFromAny(this, 2, assert.single(p)) * _s[0] * _s[1] ];
+    }
+  });
+
+  addArrayMethod('pat', function(r, c, p) {
+    if (!this._data_cube) toCube(this);
+    const nArg = arguments.length;
+    if (nArg === 1) return this[ r ];
+    else if (nArg === 2) return this[ r + this._s[0]*c ];
+    else {
+      const _s = this._s;
+      return this[ r + c*_s[0] + p*_s[0]*_s[1]];
+    }
+  });
+    
+      
   //--------------- subcubes ---------------//
         
   {
@@ -315,7 +366,7 @@
 
     //*, *, *[, str] -> cube
     addArrayMethod('sc', function(row, col, page, ret) {
-      this.toCube();
+      if (!this._data_cube) toCube(this);
       ret = def(assert.single(ret), 'full');
       if (ret !== 'full' && ret !== 'core' && ret !== 'array') {
         throw Error(`'full', 'core', or 'array' expected`);
@@ -335,8 +386,7 @@
         }
       }
       if (ret === 'array') return z;
-      z.toCube();
-      if (!this._data_cube) return z;
+      toCube(z);
       //shape
       z._s[0] = nrz,  z._s[1] = ncz,  z._s[2] = npz;
       if (ret === 'core') return z;
@@ -355,7 +405,7 @@
     
     //*, *, *, *, * -> cube
     addArrayMethod('$sc', function(row, col, page, val) {
-      this.toCube();
+      if (!this._data_cube) toCube(this);
       const nArg = assert.argRange(arguments,1,4);
       switch (nArg) {
         case 1:  [row, col, page, val] = [   ,    , , row ];  break;
@@ -382,16 +432,18 @@
     });
     
     //row, col, page getters and setters
-    addArrayMethod('row',   function(j, ret) { return this.sc(   j, null, null, ret) });
-    addArrayMethod('col',   function(j, ret) { return this.sc(null,    j, null, ret) });
-    addArrayMethod('page',  function(j, ret) { return this.sc(null, null,    j, ret) });
-    addArrayMethod('$row',  function(j, val) { assert.argRange(arguments,2,2);  return this.$sc(   j, null, null, val) });
-    addArrayMethod('$col',  function(j, val) { assert.argRange(arguments,2,2);  return this.$sc(null,    j, null, val) });
-    addArrayMethod('$page', function(j, val) { assert.argRange(arguments,2,2);  return this.$sc(null, null,    j, val) });
-
+    {
+      addArrayMethod('row',   function(j, ret) { return this.sc(   j, null, null, ret) });
+      addArrayMethod('col',   function(j, ret) { return this.sc(null,    j, null, ret) });
+      addArrayMethod('page',  function(j, ret) { return this.sc(null, null,    j, ret) });
+      addArrayMethod('$row',  function(j, val) { assert.argRange(arguments,2,2);  return this.$sc(   j, null, null, val) });
+      addArrayMethod('$col',  function(j, val) { assert.argRange(arguments,2,2);  return this.$sc(null,    j, null, val) });
+      addArrayMethod('$page', function(j, val) { assert.argRange(arguments,2,2);  return this.$sc(null, null,    j, val) });
+    }
+      
     //bool, array/cube, num, *, *, * -> *
-    const downAlongBack = function(setter, x, dim, s, e, retVal) {  
-      x.toCube();
+    const downAlongBack = function(setter, x, dim, s, e, retVal) {
+      if (!x._data_cube) toCube(x);
       let mthd;
       if (setter) {
         const nArg = assert.argRange(arguments,4,6);  
@@ -428,7 +480,7 @@
 
     //array/cube[, str] -> cube
     addArrayMethod('head', function(shp, ret) {
-      this.toCube();
+      if (!this._data_cube) toCube(this);
       shp = toArray(shp);
       if (shp.length === 0 || shp.length > 3) throw Error('shape must have 1-3 entries');
       const ind = new Array(3);
@@ -450,76 +502,77 @@
   //--------------- generators: rows, cols, pages ---------------//
   
   {
-    //cube, num, str -> cube: optimized subcube function
+    //cube, num, str, num[, *] -> cube, optimized subcube function
     //for generators; gets individual row, col or page. Assumes:
-    //  -x already a loop
+    //  -x already a cube
     //  -dim a valid dimension
     //  -ret is 'full', 'core' or 'array'
+    //  -xSkel is the skelton of x when the generator was created
     //  -m is a valid non-neg index of dim
-    //  -mKey is the key cooresp to m if dim has keys
-    const singleRCP = (x, dim, ret, m, mKey) => {
-      const [nr, nc, np] = x._s;
+    //  -mKey is the key that corresponds to m if dim has keys
+    const singleRCP = (x, dim, ret, xSkel, m, mKey) => {
+      const [nr, nc, np] = xSkel._s;
+      const epp = nr * nc;
       let j = 0;
       let z;
       if (dim === 0) {
-        z = new Array(nc * np);
-        for (let p=0; p<np; p++)  for (let c=0; c<nc; c++)  z[j++] = x[m + nr*c + nr*nc*p];
+        z = new Array(nc * np);        
+        for (let p=0; p<np; p++)  for (let c=0; c<nc; c++)  z[j++] = x[m + nr*c + epp*p];
       }
       else if (dim === 1) {
         z = new Array(nr * np);
-        for (let p=0; p<np; p++)  for (let r=0; r<nr; r++)  z[j++] = x[r + nr*m + nr*nc*p];
+        for (let p=0; p<np; p++)  for (let r=0; r<nr; r++)  z[j++] = x[r + nr*m + epp*p];
       }
       else {
         z = new Array(nr * nc);
-        for (let c=0; c<nc; c++)  for (let r=0; r<nr; r++)  z[j++] = x[r + nr*c + nr*nc*m];
+        for (let c=0; c<nc; c++)  for (let r=0; r<nr; r++)  z[j++] = x[r + nr*c + epp*m];
       }
       if (ret === 'array') return z;
-      z.toCube();
-      if (!x._data_cube) return z;
+      toCube(z);
       //shape
       z._s[0] = nr,  z._s[1] = nc,  z._s[2] = np;
       z._s[dim] = 1;
       if (ret === 'core') return z;
       //extras
-      if (x._k) {
+      copyKey(xSkel,z,dim);  //xSkel does not have keys on dim
+      if (mKey !== undefined) {
         ensureKey(z); 
-        for (let d=0; d<3; d++) {
-          if (x._k[d]) {
-            if (d === dim) {
-              const mp = new Map();
-              mp.set(mKey,0);
-              z._k[d] = mp;
-            }
-            else z._k[d] = copyMap(x._k[d]);
-          }
-        }
+        const mp = new Map();
+        mp.set(mKey,0);
+        z._k[dim] = mp;
       }
-      copyLabel(x,z);
+      copyLabel(xSkel,z);
       return z;      
     };
 
     //array/cube, num[, str] -> generator
     const dimLoop = (x, dim, ret) => {
-      x.toCube();
-      dim = assert.dim(dim);
+      if (!x._data_cube) toCube(x);
       ret = def(assert.single(ret), 'none');
       const ky = x.hasKey(dim);
       const n = x._s[dim];
       if (ret === 'none') {
-        if (ky) { 
-          return (function* () { for (let j of x._k[dim].keys()) yield j })();
+        if (ky) {
+          return (function* () {
+            for (let j of x._k[dim].keys()) yield j;
+          })();
         }
-        return (function* () { for (let j=0; j<n; j++) yield j })();
+        return (function* () {
+          for (let i=0; i<n; i++) yield i;
+        })();
       }
       else {
+        const xSkel = skeleton(x,dim);
         if (ret !== 'full' && ret !== 'core' && ret !== 'array') {
-          throw Error(`'none', full', 'core', or 'array' expected`);
+          throw Error(`'none', 'full', 'core', or 'array' expected`);
         }
-        if (ky) { return (function* () { 
-          for (let [j,i] of x._k[dim].entries()) yield [j, singleRCP(x, dim, ret, i, j)];
-        })() }
-        return (function* () { 
-          for (let i=0; i<n; i++) yield [i, singleRCP(x, dim, ret, i)]; 
+        if (ky) { 
+          return (function* () {
+            for (let [j,i] of x._k[dim].entries()) yield [j, singleRCP(x, dim, ret, xSkel, i, j)];
+          })();
+        }
+        return (function* () {
+          for (let i=0; i<n; i++) yield [i, singleRCP(x, dim, ret, xSkel, i)]; 
         })();
       }
     };

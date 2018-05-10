@@ -1,11 +1,14 @@
 {	
 	'use strict';
 	
+  const clog = console.log;
+  
   const assert = require('data-cube-assert');
   const helper = require('data-cube-helper');
   require('data-cube');
   
   const arrayEq = helper.equalArray;
+  const arrayOfArrayEq = helper.equalArrayOfArray;
   const mapEq = helper.equalMap;
   const toMap = helper.toMap;
   
@@ -531,6 +534,84 @@
       [() => e.hasKey(0,'a'), false],
     ]);
   }
+  
+  
+  
+  
+  console.log('--- rows, cols, pages');
+  {
+    const ent0 = x => x.map(v => v[0]);
+    const ent1 = x => x.map(v => v[1]);
+
+    const e = [];
+    assert('rows-empty-none', () => arrayEq(  [...e.rows()] ,        []), true);
+    assert('rows-empty-full', () => arrayEq(  [...e.rows('full')] ,  []), true);
+    assert('rows-empty-core', () => arrayEq(  [...e.rows('core')] ,  []), true);
+    assert('rows-empty-array', () => arrayEq( [...e.rows('array')] , []), true);
+    assert('cols-empty-none', () => arrayEq([...e.cols()] , [0]), true);
+    assert('cols-empty-full-ind', () => arrayEq( ent0([...e.cols('full')]) , [0]), true);
+    assert('cols-empty-full-col', () => arrayOfArrayEq( ent1([...e.cols('full')]) , [[]]), true);
+    
+    const a = [5,6];
+    const aNone =  [...a.rows('none')];
+    const aFull =  [...a.rows('full')];
+    const aCore =  [...a.rows('core')];
+    const aArray = [...a.rows('array')];
+    assert('rows-array-none', () => arrayEq( aNone , [0,1]), true);
+    assert('rows-array-full-ind',  () => arrayEq( ent0(aFull) , [0,1]), true);
+    assert('rows-array-core-ind',  () => arrayEq( ent0(aCore) , [0,1]), true);
+    assert('rows-array-array-ind', () => arrayEq( ent0(aArray), [0,1]), true);
+    assert('rows-array-full-row',  () => arrayOfArrayEq( ent1(aFull) , [[5],[6]]), true);
+    assert('rows-array-core-row',  () => arrayOfArrayEq( ent1(aCore) , [[5],[6]]), true);
+    assert('rows-array-array-row', () => arrayOfArrayEq( ent1(aArray), [[5],[6]]), true);
+    assert('cols-array-none', () => arrayEq( [...a.cols()] , [0]), true);
+    assert('cols-array-full-ind', () => arrayEq( ent0([...a.cols('full')]) , [0]), true);
+    assert('cols-array-full-col', () => arrayOfArrayEq( ent1([...a.cols('full')]) , [[5,6]]), true);
+    
+    const b = helper.simpleRange(24).map(x => x+100)
+      .$shape([4,3,2])
+      .$key(1,['a','b','c'])
+      .$key(2,['I', 'II'])
+      .$label(0,'the rows')
+      .$label(1,'the columns');
+    const bRowsCore = [...b.rows('core')];
+    const bColsFull = [...b.cols('full')];
+    const bPagesArray = [...b.pages('array')];
+    
+    assert('rows-book-length' , () => bRowsCore.length,   4);
+    assert('cols-book-length' , () => bColsFull.length,   3);
+    assert('pages-book-length', () => bPagesArray.length, 2);
+            
+    assert('rows-book-none', () => arrayEq( [...b.rows()] , [0,1,2,3]), true);
+    assert('cols-book-none', () => arrayEq( [...b.cols()] , ['a','b','c']), true);
+    assert('pages-book-none',() => arrayEq( [...b.pages()], ['I','II']), true);
+    
+    assert('rows-book-core-ind',  () => arrayEq( ent0(bRowsCore)  , [0,1,2,3]), true);
+    assert('cols-book-full-key',  () => arrayEq( ent0(bColsFull)  , ['a','b','c']), true);
+    assert('pages-book-array-key',() => arrayEq( ent0(bPagesArray), ['I', 'II']), true);
+        
+    test('rows-book-core-row-0', bRowsCore[0][1], b.row(0).copy('core'));
+    test('rows-book-core-row-1', bRowsCore[1][1], b.row(1).copy('core'));
+    test('rows-book-core-row-2', bRowsCore[2][1], b.row(2).copy('core'));
+    test('rows-book-core-row-3', bRowsCore[3][1], b.row(3).copy('core'));
+     
+    test('cols-book-full-col-0', bColsFull[0][1], b.col('a'));
+    test('cols-book-full-col-1', bColsFull[1][1], b.col('b'));
+    test('cols-book-full-col-2', bColsFull[2][1], b.col('c'));
+    
+    test('pages-book-array-page-0', bPagesArray[0][1], b.page('I').copy('array'));
+    test('pages-book-array-page-1', bPagesArray[1][1], b.page('II').copy('array'));
+    
+    assert.throwEach('throw-rows', [
+      () => a.rows('a'),
+      () => a.rows(['full', a]),
+      () => b.rows('a'),
+      () => b.rows(['full', a]),
+    ]);
+  }
+  
+  
+  
   
   
   
