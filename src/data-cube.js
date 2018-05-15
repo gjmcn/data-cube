@@ -667,8 +667,103 @@
     
   }
   
+  
+  //--------------- obj ---------------//
+  
+  //[num] -> array
+  addArrayMethod('obj', function(dim) {
+    if (!this._data_cube) toCube(this);
+    dim = assert.single(dim);  //can be -1 so do not assert dim
+    const {_s, _k, _l} = this;
+    const [nr, nc, np] = _s;   
+    const [rk, ck, pk] = [0,1,2].map(d => {
+      return _k && _k[d]
+        ? Array.from(_k[d].keys()) 
+        : simpleRange(_s[d])
+    });
+    const [rl, cl, pl] = [0,1,2].map(d => _l && _l[d] || helper.dimName[d]);
+    if (dim === -1) {
+      let z = new Array(this.length);
+      let i = 0;
+      for (let p=0; p<np; p++) {
+        let pp = nr * nc * p;
+        for (let c=0; c<nc; c++) {
+          let cc = nr * c;
+          for (let r=0; r<nr; r++) {
+            z[i++] = {
+              [rl]: rk[r], 
+              [cl]: ck[c],
+              [pl]: pk[p],
+              entry: this[r + cc + pp]
+            };
+          }
+        }
+      }
+    }
+    if (dim === 0) {
+      let z = new Array(nc*np);
+      let i = 0, j = 0;
+      for (let p=0; p<np; p++) {
+        for (let c=0; c<nc; c++) {
+          let obj = {};
+          obj[cl] = ck[c];
+          obj[pl] = pk[p];
+          for (let r=0; r<nr; r++) {
+            obj[rk[r]] = this[j++];
+          }
+          z[i++] = obj;
+        }
+      }
+    }
+    else if (dim === 1) {
+      let z = new Array(nr*np);
+      let i = 0;
+      for (let p=0; p<np; p++) {
+        for (let r=0; r<nr; r++) {
+          let j = r + p*nr*nc;
+          let obj = {};
+          obj[rl] = rk[r];
+          obj[pl] = pk[p];
+          for (let c=0; c<nc; c++) {
+            obj[ck[c]] = this[j];
+            j += nr; 
+          }
+          z[i++] = obj;
+        }
+      }
+    }
+    else if (dim === 2) {
+      let z = new Array(nr*nc);
+      const epp = nr*nc;  
+      let i = 0, j = -1;
+      for (let c=0; c<nc; c++) {
+        for (let r=0; r<nr; r++) {
+          j++;
+          let obj = {};
+          obj[rl] = rk[r];
+          obj[cl] = ck[c];
+          for (let p=0; p<np; c++) {
+            obj[pk[p]] = this[j];
+            j += epp;
+          }
+          z[i++] = obj;
+        }
+      }
+      else throw Error('invalid dimension'); 
+    }
+    return z;
+  });
+  
+  
+  
 }
  
+
+
+
+
+
+
 
 
 
