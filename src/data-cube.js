@@ -192,6 +192,13 @@
     if (this._l) delete this._l;
     return this;
   });
+  
+  //[num] -> bool
+  addArrayMethod('n', function(dim) {
+    if (!this._data_cube) toCube(this);
+    dim = assert.dim(dim);
+    return this._s[dim];
+  });
        
   
   //--------------- labels ---------------//
@@ -279,12 +286,6 @@
 
   //--------------- basic ---------------//
   
-  //[num] -> bool
-  addArrayMethod('n', function(dim) {
-    if (!this._data_cube) toCube(this);
-    dim = assert.dim(dim);
-    return this._s[dim];
-  });
   
   //[num, *] -> bool
   addArrayMethod('hasKey', function(dim, k) {
@@ -299,52 +300,121 @@
   
   //--------------- entries ---------------//
   
-  //cube, num, * -> num, non-neg-index on dimension dim
-  //of x correpsonding to j - which may be a key or
-  //index (poss negative). Assume that dim is valid and
-  //j is a processed singleton value
-  // !!MOVE THIS TO HELPER!!
-  const nniFromAny = (x, dim, j) => {
-
-    REORDER TESTS???  
-    
-    if (j === undefined || j === null) {
-      if (x._s[dim] === 0) throw Error('empty dimension');
-      return 0;
-    }
-    if (x._k && x._k[dim]) return nni(x._k[dim].get(j), x._s[dim]);
-    return nni(j, x._s[dim]);
-  };
+  {
   
-  addArrayMethod('at', function(r, c, p) {
-    if (!this._data_cube) toCube(this);
-    const nArg = arguments.length;
-    if (nArg === 1) {
-      return this[ nniFromAny(this, 0, assert.single(r)) ];
-    }
-    else if (nArg === 2) {
-      return this[ nniFromAny(this, 0, assert.single(r)) +
-                   nniFromAny(this, 1, assert.single(c)) * this._s[0] ];
-    }
-    else {
-      const _s = this._s;
-      return this[ nniFromAny(this, 0, assert.single(r)) +
-                   nniFromAny(this, 1, assert.single(c)) * _s[0] + 
-                   nniFromAny(this, 2, assert.single(p)) * _s[0] * _s[1] ];
-    }
-  });
-
-  addArrayMethod('at_', function(r, c, p) {
-    if (!this._data_cube) toCube(this);
-    const nArg = arguments.length;
-    if (nArg === 1) return this[ r ];
-    else if (nArg === 2) return this[ r + this._s[0]*c ];
-    else {
-      const _s = this._s;
-      return this[ r + c*_s[0] + p*_s[0]*_s[1]];
-    }
-  });
+    //cube, num, * -> num, non-neg-index on dimension dim
+    //of x correpsonding to j - can be a key or index (possibly
+    //negative). Assume that dim is valid and j is a processed
+    //singleton value
+    const nniFromAny = (x, dim, j) => {
+      if (j === undefined || j === null) {
+        if (x._s[dim] === 0) throw Error('empty dimension');
+        return 0;
+      }
+      if (x._k && x._k[dim]) return nni(x._k[dim].get(j), x._s[dim]);
+      return nni(j, x._s[dim]);
+    };
     
+    //functions to get non-neg int for cube x and inds/keys
+    //r, c and p
+    const vecInd = [
+      () => {
+        throw Error('too few arguments');
+      },
+      (x,r) => {
+        return nniFromAny(x, 0, assert.single(r));
+      },
+      (x,r,c) => {
+        return nniFromAny(x, 0, assert.single(r)) + 
+               nniFromAny(x, 1, assert.single(c)) * x._s[0];
+      },
+      (x,r,c,p) => {
+        const _s = x._s;
+        return nniFromAny(x, 0, assert.single(r)) + 
+               nniFromAny(x, 1, assert.single(c)) * _s[0] + 
+               nniFromAny(x, 2, assert.single(p)) * _s[0] * _s[1];
+      }
+    ];
+    
+    //*[, * , *] -> *
+    addArrayMethod('at', function(r, c, p) {
+      if (!this._data_cube) toCube(this);
+      const nArg = arguments.length;
+      if (nArg === 1) {
+        return this[ nniFromAny(this, 0, assert.single(r)) ];
+      }
+      else if (nArg === 2) {
+        return this[ nniFromAny(this, 0, assert.single(r)) + 
+                     nniFromAny(this, 1, assert.single(c)) * this._s[0] ];
+      }
+      else if (nArg > 3) {
+        const _s = this._s;
+        return this[ nniFromAny(this, 0, assert.single(r)) + 
+                     nniFromAny(this, 1, assert.single(c)) * _s[0] + 
+                     nniFromAny(this, 2, assert.single(p)) * _s[0] * _s[1] ];
+      }
+      else throw Error('too few arguments');   
+    });
+  
+    //*[, *, *] -> cube
+    addArrayMethod('$at', function(r, c, p, val) {
+      if (!this._data_cube) toCube(this);
+      const nArg = assert.argRange(arguments,2,4);
+      val = assert.single(val);
+      if (nArg === 2) {
+        this[ nniFromAny(this, 0, assert.single(r)) ] = c;
+      }
+      else if (nArg === 3) {
+        this[ nniFromAny(this, 0, assert.single(r)) + 
+              nniFromAny(this, 1, assert.single(c)) * this._s[0] ] = p;
+      }
+      else {
+        const _s = this._s;
+        this[ nniFromAny(this, 0, assert.single(r)) + 
+              nniFromAny(this, 1, assert.single(c)) * _s[0] + 
+              nniFromAny(this, 2, assert.single(p)) * _s[0] * _s[1] ] = val;
+      }
+      return this;
+    });
+
+  }
+  
+  //--------------- multiple entries ---------------//
+  
+  //* -> *
+  addArrayMethod('vec', function(i) {
+    var [i,iSingle] = polarize(i);
+    const n = this.length;
+    if (iSingle) return [ this[nni(i,n)] ];
+    const z = new Array(n);
+    for (let j=0; j<n; j++) z[j] = this[nni(i[j],n)];
+    return z;
+  });
+  
+  //* -> cube
+  addArrayMethod('$vec', function(i, val) {
+    const nArg = assert.argRange(arguments,2,2);
+    var [i,iSingle] = polarize(val);
+    var [val,valSingle] = polarize(val);
+    const n = this.length;
+    if (iSingle) {
+      if (!valSingle) throw Error('shape mismatch');
+      this[nni(i,n)] = val;
+    }
+    else {
+      const ind = new Array(n);
+      for (let j=0; j<n; j++) ind[j] = nni(i[j],n);
+      if (valSingle) {
+        for (let j=0; j<n; j++) this[ind[j]] = val;
+      }
+      else {
+        if (val.length !== n) throw Error('shape mismatch');
+        for (let j=0; j<n; j++) this[ind[j]] = val[j];
+      }
+    }
+    return this;
+  });
+  
       
   //--------------- subcubes ---------------//
         
@@ -443,15 +513,15 @@
       
       addArrayMethod('$row',  function(j, val) { 
         const nArg = assert.argRange(arguments,1,2);
-        return nArg === 1 ? this.$sc(val) : this.$sc(   j, null, null, val);
+        return nArg === 1 ? this.$sc(j) : this.$sc(   j, null, null, val);
       });
       addArrayMethod('$col',  function(j, val) { 
         const nArg = assert.argRange(arguments,1,2);
-        return nArg === 1 ? this.$sc(val) : this.$sc(null,    j, null, val);
+        return nArg === 1 ? this.$sc(j) : this.$sc(null,    j, null, val);
       });
       addArrayMethod('$page', function(j, val) { 
         const nArg = assert.argRange(arguments,1,2);
-        return nArg === 1 ? this.$sc(val) : this.$sc(null, null,    j, val);
+        return nArg === 1 ? this.$sc(j) : this.$sc(null, null,    j, val);
       });
     }
       
