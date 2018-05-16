@@ -226,13 +226,13 @@
   
   //--------------- keys ---------------//
   
-  //[num] -> string/undefined
+  //[num] -> array/undefined
   addArrayMethod('key', function(dim) {
     if (!this._data_cube) toCube(this);
     dim = assert.dim(dim);
     if (this._k) {
       const mp = this._k[dim];
-      if (mp) return Array.from(mp.keys());
+      if (mp) return [...mp.keys()];
     }
   });
     
@@ -383,6 +383,7 @@
   
   //* -> *
   addArrayMethod('vec', function(i) {
+    if (!this._data_cube) toCube(this);
     var [i,iSingle] = polarize(i);
     const n = this.length;
     if (iSingle) return [ this[nni(i,n)] ];
@@ -393,6 +394,7 @@
   
   //* -> cube
   addArrayMethod('$vec', function(i, val) {
+    if (!this._data_cube) toCube(this);
     const nArg = assert.argRange(arguments,2,2);
     var [i,iSingle] = polarize(val);
     var [val,valSingle] = polarize(val);
@@ -668,22 +670,25 @@
   }
   
   
-  //--------------- obj ---------------//
+  //--------------- vble ---------------//
   
   //[num] -> array
-  addArrayMethod('obj', function(dim) {
+  addArrayMethod('vble', function(dim) {
     if (!this._data_cube) toCube(this);
-    dim = assert.single(dim);  //can be -1 so do not assert dim
+    dim = def(assert.single(dim), 0);  //dim can be -1 so do not use assert.dim
+    const prefix = ['r_', 'c_', 'p_'];
     const {_s, _k, _l} = this;
-    const [nr, nc, np] = _s;   
+    const [nr, nc, np] = _s;
     const [rk, ck, pk] = [0,1,2].map(d => {
       return _k && _k[d]
-        ? Array.from(_k[d].keys()) 
-        : simpleRange(_s[d])
+        ? [..._k[d].keys()]
+        : helper.simpleRange(_s[d]).map(ind => prefix[d] + ind);
     });
-    const [rl, cl, pl] = [0,1,2].map(d => _l && _l[d] || helper.dimName[d]);
+    const [rl, cl, pl] = 
+      [0,1,2].map(d => (_l && _l[d]) || helper.shortDimName[d]);
+    let z;
     if (dim === -1) {
-      let z = new Array(this.length);
+      z = new Array(this.length);
       let i = 0;
       for (let p=0; p<np; p++) {
         let pp = nr * nc * p;
@@ -700,8 +705,8 @@
         }
       }
     }
-    if (dim === 0) {
-      let z = new Array(nc*np);
+    else if (dim === 0) {
+      z = new Array(nc*np);
       let i = 0, j = 0;
       for (let p=0; p<np; p++) {
         for (let c=0; c<nc; c++) {
@@ -716,7 +721,7 @@
       }
     }
     else if (dim === 1) {
-      let z = new Array(nr*np);
+      z = new Array(nr*np);
       let i = 0;
       for (let p=0; p<np; p++) {
         for (let r=0; r<nr; r++) {
@@ -725,16 +730,15 @@
           obj[rl] = rk[r];
           obj[pl] = pk[p];
           for (let c=0; c<nc; c++) {
-            obj[ck[c]] = this[j];
-            j += nr; 
+            obj[ck[c]] = this[j + c*nr];
           }
           z[i++] = obj;
         }
       }
     }
     else if (dim === 2) {
-      let z = new Array(nr*nc);
       const epp = nr*nc;  
+      z = new Array(epp);
       let i = 0, j = -1;
       for (let c=0; c<nc; c++) {
         for (let r=0; r<nr; r++) {
@@ -742,20 +746,129 @@
           let obj = {};
           obj[rl] = rk[r];
           obj[cl] = ck[c];
-          for (let p=0; p<np; c++) {
-            obj[pk[p]] = this[j];
-            j += epp;
+          for (let p=0; p<np; p++) {
+            obj[pk[p]] = this[j + p*epp];
           }
           z[i++] = obj;
         }
       }
-      else throw Error('invalid dimension'); 
     }
+    else throw Error('invalid dimension'); 
     return z;
   });
   
   
+  //--------------- entrywise, no arguments ---------------//
   
+  {
+    const mathFunc = [
+      'sqrt', 'cbrt', 'abs', 'round', 'floor', 'ceil', 'exp', 'log',
+      'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
+      'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh'
+    ];
+    const numberFunc = ['isInteger', 'isFinite', 'isNaN']; 
+    const useStatic = (obj, name) => {
+      name.forEach(nm => {
+        addArrayMethod(nm, function() {
+          if (!this._data_cube) toCube(this);
+          const z = this.copy('shell');
+          const n = this.length;
+          const f = obj[nm];
+          for (let i=0; i<n; i++) z[i] = f(this[i]);
+          return z;
+        })
+      });
+    };
+    useStatic(Math, mathFunc);
+    useStatic(Number, numberFunc);
+    
+    const ewFunc = [
+      ['neg',     (x,z) => -x],
+      ['log10',   (x,z) => Math.log(x)/Math.LN10],
+      ['log2',    (x,z) => Math.log(x)/Math.LN2],
+      ['num',     (x,z) => +x],
+      ['string',  (x,z) => '' + x],
+      ['boolean', (x,z) => !!x],
+      ['date',    (x,z) => new Date(x)],
+      ['not',     (x,z) => !x],
+      ['typeof',  (x,z) => typeof x],
+      ['trim',    (x,z) => x.trim()],
+      ['toLowerCase', (x,z) => x.toLowerCase()],
+      ['toUpperCase', (x,z) => x.toUpperCase()]
+    ];
+    
+    for (let [nm,f] of ewFunc) {
+      addArrayMethod(nm, function() {
+        if (!this._data_cube) toCube(this);
+        const z = this.copy('shell');
+        const n = this.length;
+        for (let i=0; i<n; i++) z[i] = f(this[i]);
+        return z;
+      });
+    }
+
+  }
+    
+  
+  //--------------- entrywise, operator-like ---------------//
+  
+  {
+    const opLike = [
+      ['add', (a,b) => a + b],
+      ['sub', (a,b) => a - b],
+      ['mul', (a,b) => a * b],
+      ['div', (a,b) => a / b],
+      ['rem', (a,b) => a % b],
+      ['pow', Math.pow],
+      ['eq', (a,b) => a === b],
+      ['neq', (a,b) => a !== b],
+      ['lt', (a,b) => a < b],
+      ['lte', (a,b) => a <= b],
+      ['gt', (a,b) => a > b],
+      ['gte', (a,b) => a >= b],
+      ['lof', (a,b) => Math.min],
+      ['gof', (a,b) => Math.max],	
+      ['toExponential', (a,b) => a.toExponential(b)],
+      ['toFixed', (a,b) => a.toFixed(b)],
+      ['toPrecision', (a,b) => a.toPrecision(b)],
+      ['charAt', (a,b) => a.charAt(b)],
+      ['repeat', (a,b) => a.repeat(b)],
+      ['search', (a,b) => a.search(b)],
+      ['test', (a,b) => a.test(b)],
+      ['and', (a,b) => a && b],
+      ['or', (a,b) => a || b]
+    ];
+  
+    for (let [nm,f] of opLike) {
+      addArrayMethod(nm, function(a) {
+        if (!this._data_cube) toCube(this);
+        var [a,aSingle] = polarize(a);
+        const n = this.length;
+        let z;
+        if (aSingle) {
+          z = this.copy('shell');
+          for (let i=0; i<n; i++) z[i] = f(this[i],a);
+        }
+        else {
+          const na = a.length; 
+          if (n === 1) {
+            z = a.copy('core');
+            const this_0 = this[0];
+            for (let i=0; i<na; i++) z[i] = f(this_0,a[i]);
+          }
+          else {
+            z = this.copy('shell');
+            if (n !== na) throw Error('shape mismatch');
+            for (let i=0; i<n; i++) z[i] = f(this[i],a[i]);
+          }
+        }
+        return z;
+      });
+    }
+  
+  }
+  
+
 }
  
 
