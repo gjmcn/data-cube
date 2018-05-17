@@ -5,6 +5,8 @@
   
   const assert = require('data-cube-assert');
   const helper = require('data-cube-helper');
+  const _isEqual = require('lodash.isequal');
+  
   require('data-cube');
   
   const arrayEq = helper.equalArray;
@@ -938,10 +940,164 @@
     ]);
   }
   
+  console.log('--- vble');
+  {
+    
+    const e = [0,1,2].cube();
+    assert('vble-empty-dim-0', () => _isEqual(e.vble(0),
+      [ { col: 'c_0', page: 'p_0' }, { col: 'c_0', page: 'p_1' } ]), true);
+    assert('vble-empty-dim-1', () => _isEqual(e.vble(1), []), true);
+    assert('vble-empty-dim-2', () => _isEqual(e.vble(2), []), true);
+    assert('vble-empty-dim-neg-1', () => _isEqual(e.vble(-1), []), true);
+    
+    const b = [11,12,13,14,15,16,17,18,19,20,
+         21,22,23,24,25,26,27,28,29,30,
+         31,32,33,34]
+      .$shape([3,4,2])
+      .$key(['Alice','Bob','Cath'])
+      .$key(1,['math','biol','chem','phys'])
+      .$key(2,['Autumn','Spring'])
+      .$label(0,'Student')
+      .$label(1,'Subject')
+      .$label(2,'Term');
+    
+    assert('vble-book-dim-0', () => _isEqual( b.vble(),
+      [ { Subject: 'math', Term: 'Autumn', Alice: 11, Bob: 12, Cath: 13 },
+        { Subject: 'biol', Term: 'Autumn', Alice: 14, Bob: 15, Cath: 16 },
+        { Subject: 'chem', Term: 'Autumn', Alice: 17, Bob: 18, Cath: 19 },
+        { Subject: 'phys', Term: 'Autumn', Alice: 20, Bob: 21, Cath: 22 },
+        { Subject: 'math', Term: 'Spring', Alice: 23, Bob: 24, Cath: 25 },
+        { Subject: 'biol', Term: 'Spring', Alice: 26, Bob: 27, Cath: 28 },
+        { Subject: 'chem', Term: 'Spring', Alice: 29, Bob: 30, Cath: 31 },
+        { Subject: 'phys', Term: 'Spring', Alice: 32, Bob: 33, Cath: 34 }
+      ]), true);
   
+    assert('vble-book-dim-1', () => _isEqual( b.vble(1),
+      [ { Student: 'Alice',
+          Term: 'Autumn',
+          math: 11,
+          biol: 14,
+          chem: 17,
+          phys: 20 },
+        { Student: 'Bob',
+          Term: 'Autumn',
+          math: 12,
+          biol: 15,
+          chem: 18,
+          phys: 21 },
+        { Student: 'Cath',
+          Term: 'Autumn',
+          math: 13,
+          biol: 16,
+          chem: 19,
+          phys: 22 },
+        { Student: 'Alice',
+          Term: 'Spring',
+          math: 23,
+          biol: 26,
+          chem: 29,
+          phys: 32 },
+        { Student: 'Bob',
+          Term: 'Spring',
+          math: 24,
+          biol: 27,
+          chem: 30,
+          phys: 33 },
+        { Student: 'Cath',
+          Term: 'Spring',
+          math: 25,
+          biol: 28,
+          chem: 31,
+          phys: 34 }
+      ]), true);
   
+
+    assert('vble-book-dim-2', () => _isEqual( b.vble(2),
+      [ { Student: 'Alice', Subject: 'math', Autumn: 11, Spring: 23 },
+        { Student: 'Bob', Subject: 'math', Autumn: 12, Spring: 24 },
+        { Student: 'Cath', Subject: 'math', Autumn: 13, Spring: 25 },
+        { Student: 'Alice', Subject: 'biol', Autumn: 14, Spring: 26 },
+        { Student: 'Bob', Subject: 'biol', Autumn: 15, Spring: 27 },
+        { Student: 'Cath', Subject: 'biol', Autumn: 16, Spring: 28 },
+        { Student: 'Alice', Subject: 'chem', Autumn: 17, Spring: 29 },
+        { Student: 'Bob', Subject: 'chem', Autumn: 18, Spring: 30 },
+        { Student: 'Cath', Subject: 'chem', Autumn: 19, Spring: 31 },
+        { Student: 'Alice', Subject: 'phys', Autumn: 20, Spring: 32 },
+        { Student: 'Bob', Subject: 'phys', Autumn: 21, Spring: 33 },
+        { Student: 'Cath', Subject: 'phys', Autumn: 22, Spring: 34 }
+      ]), true);
+    
+    assert('vble-book-dim-neg-1', () => _isEqual( b.vble(-1),
+      [ { Student: 'Alice', Subject: 'math', Term: 'Autumn', entry: 11 },
+        { Student: 'Bob', Subject: 'math', Term: 'Autumn', entry: 12 },
+        { Student: 'Cath', Subject: 'math', Term: 'Autumn', entry: 13 },
+        { Student: 'Alice', Subject: 'biol', Term: 'Autumn', entry: 14 },
+        { Student: 'Bob', Subject: 'biol', Term: 'Autumn', entry: 15 },
+        { Student: 'Cath', Subject: 'biol', Term: 'Autumn', entry: 16 },
+        { Student: 'Alice', Subject: 'chem', Term: 'Autumn', entry: 17 },
+        { Student: 'Bob', Subject: 'chem', Term: 'Autumn', entry: 18 },
+        { Student: 'Cath', Subject: 'chem', Term: 'Autumn', entry: 19 },
+        { Student: 'Alice', Subject: 'phys', Term: 'Autumn', entry: 20 },
+        { Student: 'Bob', Subject: 'phys', Term: 'Autumn', entry: 21 },
+        { Student: 'Cath', Subject: 'phys', Term: 'Autumn', entry: 22 },
+        { Student: 'Alice', Subject: 'math', Term: 'Spring', entry: 23 },
+        { Student: 'Bob', Subject: 'math', Term: 'Spring', entry: 24 },
+        { Student: 'Cath', Subject: 'math', Term: 'Spring', entry: 25 },
+        { Student: 'Alice', Subject: 'biol', Term: 'Spring', entry: 26 },
+        { Student: 'Bob', Subject: 'biol', Term: 'Spring', entry: 27 },
+        { Student: 'Cath', Subject: 'biol', Term: 'Spring', entry: 28 },
+        { Student: 'Alice', Subject: 'chem', Term: 'Spring', entry: 29 },
+        { Student: 'Bob', Subject: 'chem', Term: 'Spring', entry: 30 },
+        { Student: 'Cath', Subject: 'chem', Term: 'Spring', entry: 31 },
+        { Student: 'Alice', Subject: 'phys', Term: 'Spring', entry: 32 },
+        { Student: 'Bob', Subject: 'phys', Term: 'Spring', entry: 33 },
+        { Student: 'Cath', Subject: 'phys', Term: 'Spring', entry: 34 }
+      ]), true);
   
+    const m = ['a','b','c','d','e','f']
+      .$shape([2,3])
+      .$key(1,['55',true,55])  //two keys convert to same string
+      .$label(1,'COLS');
+    
+    assert('vble-matrix-dim-0', () => _isEqual( m.vble(0),
+      [ { COLS: '55', page: 'p_0', r_0: 'a', r_1: 'b' },
+        { COLS: true, page: 'p_0', r_0: 'c', r_1: 'd' },
+        { COLS: 55, page: 'p_0', r_0: 'e', r_1: 'f' }
+      ]), true);
   
+    assert('vble-matrix-dim-1', () => _isEqual( m.vble(1),
+      [ { '55': 'e', row: 'r_0', page: 'p_0', true: 'c' },
+        { '55': 'f', row: 'r_1', page: 'p_0', true: 'd' }
+      ]), true);
+        
+    assert('vble-matrix-dim-2', () => _isEqual( m.vble(2),
+      [ { row: 'r_0', COLS: '55', p_0: 'a' },
+        { row: 'r_1', COLS: '55', p_0: 'b' },
+        { row: 'r_0', COLS: true, p_0: 'c' },
+        { row: 'r_1', COLS: true, p_0: 'd' },
+        { row: 'r_0', COLS: 55, p_0: 'e' },
+        { row: 'r_1', COLS: 55, p_0: 'f' } 
+      ]), true);
+    
+    assert('vble-matrix-dim-neg-1', () => _isEqual( m.vble([-1]),
+      [ { row: 'r_0', COLS: '55', page: 'p_0', entry: 'a' },
+        { row: 'r_1', COLS: '55', page: 'p_0', entry: 'b' },
+        { row: 'r_0', COLS: true, page: 'p_0', entry: 'c' },
+        { row: 'r_1', COLS: true, page: 'p_0', entry: 'd' },
+        { row: 'r_0', COLS: 55, page: 'p_0', entry: 'e' },
+        { row: 'r_1', COLS: 55, page: 'p_0', entry: 'f' }
+      ]), true);
+  
+    assert.throwEach('throw-vble', [
+      () => b.vble(3),
+      () => b.vble('1'),
+      () => b.vble([[1]]),
+      () => b.vble([1,2])
+    ]);
+    
+  }
+
+
   
   console.log('Tests finished');
 }
