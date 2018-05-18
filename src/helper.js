@@ -121,16 +121,7 @@
       }
       return v;
     },     
-    
-    //func -> num, time in ms to execute synchronous function f;
-    //Node.js only
-    timer: f => {
-      const start = process.hrtime();
-      f();
-      const t = process.hrtime(start);
-      return Math.round((t[0]*1e9 + t[1])/1e6);
-    },
-    
+        
     //array/cube, * -> array/cube, assign val to each entry of x;
     //fast version of Array.fill()
     fill: (x,val) => {

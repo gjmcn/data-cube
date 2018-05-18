@@ -5,11 +5,11 @@
   const assert = require('./assert.js');
   let h, testing;
   try {
-    testing = './dist/index.js\n(delete dist to test ./src/data-cube.js)';
-    h = require('../dist/index.js');
+    testing = './dist/data-cube.js\n(delete dist to test ./src/data-cube.js)';
+    h = require('../dist/data-cube.js');
   }
   catch (e) {
-    testing = './src/data-cube.js\n(dist/index.js does not exist)';
+    testing = './src/data-cube.js\n(dist/data-cube.js does not exist)';
     h = require( './data-cube.js');
   }
     
@@ -1543,12 +1543,6 @@
 
   console.log('\nTests finished');
 }
-
-
-
-
-
-
 
 
 
