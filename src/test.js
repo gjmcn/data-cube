@@ -1,19 +1,18 @@
 {	
 	'use strict';
-	
-  const clog = console.log;
-  
-  const assert = require('data-cube-assert');
-  const helper = require('data-cube-helper');
+	    
   const _isEqual = require('lodash.isequal');
-  
-  require('data-cube');
-  
-  const arrayEq = helper.equalArray;
-  const arrayOfArrayEq = helper.equalArrayOfArray;
-  const mapEq = helper.equalMap;
-  const toMap = helper.toMap;
-  
+  const assert = require('./assert.js');
+  let h, testing;
+  try {
+    testing = './dist/index.js\n(delete dist to test ./src/data-cube.js)';
+    h = require('../dist/index.js');
+  }
+  catch (e) {
+    testing = './src/data-cube.js\n(dist/index.js does not exist)';
+    h = require( './data-cube.js');
+  }
+    
   //test a.compare(b)
   const test = (name, a, b) => {
     try { 
@@ -36,10 +35,454 @@
 	};
   
   
-  //--------------- tests ---------------//
+  console.log(`Testing: ${testing}\n`);
   
-  console.log('Testing data-cube');
+  //--------------- tests: helper functions ---------------//
   
+  console.log('--- helper');
+  {
+
+    //assert functions
+    {
+      assert.each('assert-non-neg-int', [
+        [() => h.assert.nonNegInt(5), 5],
+        [() => h.assert.nonNegInt(0), 0]
+      ]);
+      assert.throwEach('invalid-assert-non-neg-int', [
+        () => h.assert.nonNegInt(-2),
+        () => h.assert.nonNegInt(1.2),
+        () => h.assert.nonNegInt(Infinity),
+        () => h.assert.nonNegInt(NaN),
+        () => h.assert.nonNegInt('2'),
+        () => h.assert.nonNegInt([2])
+      ]);
+
+      assert.each('assert-pos-int', [
+        [() => h.assert.posInt(5), 5]
+      ]);
+      assert.throwEach('invalid-assert-pos-int', [
+        () => h.assert.posInt(-2),
+        () => h.assert.posInt(0),
+        () => h.assert.posInt(1.2),
+        () => h.assert.posInt(Infinity),
+        () => h.assert.posInt(NaN),
+        () => h.assert.posInt('2'),
+        () => h.assert.posInt([2])
+      ]);
+
+      assert.each('assert-number', [
+        [() => h.assert.number(5), 5],
+        [() => h.assert.number(0), 0],
+        [() => h.assert.number(-2.3), -2.3]
+      ]);
+      assert.throwEach('invalid-assert-number', [
+        () => h.assert.number('2'),
+        () => h.assert.number(false),
+        () => h.assert.number([]),
+        () => h.assert.number([2]),
+        () => h.assert.number([0])
+      ]);
+
+      {
+        const obj = {a:5};
+        const a0 = [];
+        const a1 = [5];
+        const a2 = [5,6];
+        assert.each('assert-single', [
+          [() => h.assert.single(5), 5],
+          [() => h.assert.single([5]), 5],
+          [() => h.assert.single(obj), obj],
+          [() => h.assert.single([obj]), obj],
+          [() => h.assert.single([a0]), a0],
+          [() => h.assert.single([a1]), a1],
+          [() => h.assert.single([a2]), a2]
+        ]);
+        assert.throwEach('invalid-assert-single', [
+          () => h.assert.single([]),
+          () => h.assert.single([5,6]),
+        ]);
+      }
+
+      {
+        assert.each('assert-dim', [
+          [() => h.assert.dim(0), 0],
+          [() => h.assert.dim(1), 1],
+          [() => h.assert.dim(2), 2],
+          [() => h.assert.dim(undefined), 0],
+          [() => h.assert.dim(), 0],
+          [() => h.assert.dim([0]), 0],
+          [() => h.assert.dim([1]), 1],
+          [() => h.assert.dim([2]), 2],
+          [() => h.assert.dim([undefined]), 0]
+        ]);
+        assert.throwEach('invalid-assert-dim', [
+          () => h.assert.dim(-1),
+          () => h.assert.dim(2.3),
+          () => h.assert.dim(NaN),
+          () => h.assert.dim([[undefined]]),
+          () => h.assert.dim(3),
+          () => h.assert.dim('1'),
+          () => h.assert.dim([0,1]),
+          () => h.assert.dim([]),
+          () => h.assert.dim([[0]]),
+          () => h.assert.dim([[]]),
+          () => h.assert.dim(['0']),
+          () => h.assert.dim(['2']),
+          () => h.assert.dim([false]),
+          () => h.assert.dim(''),
+          () => h.assert.dim(null)
+        ]);    
+      }
+    }
+
+    //isSingle
+    {
+      assert.each('is-single', [
+        [() => h.isSingle(5), true],
+        [() => h.isSingle([5]), true],
+        [() => h.isSingle({a:5}), true],
+        [() => h.isSingle([{a:5}]), true],
+        [() => h.isSingle([[]]), true],
+        [() => h.isSingle([[5]]), true],
+        [() => h.isSingle([[5,6]]), true],
+        [() => h.isSingle([]), false],
+        [() => h.isSingle([5,6]), false]
+      ]);
+    }
+
+    //equalArray
+    {
+      const obj = {a:5};
+      assert('equal-array-1', () => h.equalArray([2,'a'],[2,'a']), true);
+      assert('equal-array-2', () => h.equalArray([2,obj],[2,obj]), true);
+      assert('equal-array-3', () => h.equalArray([],[]), true);
+      assert('equal-array-4', () => h.equalArray([2,'a'],[2,'b']), false);
+      assert('equal-array-5', () => h.equalArray([2,'a',true],[2,'a']), false);
+      assert('equal-array-6', () => h.equalArray([2,obj],[2,{a:5}]), false);
+    }
+
+    //equalArrayOfArray
+    {
+      const obj = {a:5};
+      assert('equal-array-of-array-1', () => h.equalArrayOfArray( [], [] ), true);
+      assert('equal-array-of-array-2', () => h.equalArrayOfArray( [[]], [[]] ), true);
+      assert('equal-array-of-array-3', () => h.equalArrayOfArray( [[5]], [[5]] ), true);
+      assert('equal-array-of-array-4', () => h.equalArrayOfArray( [[5,6]], [[5,6]] ), true);
+      assert('equal-array-of-array-5', () => h.equalArrayOfArray( [[5,obj],[6]], [[5,obj],[6]] ), true);
+      assert('equal-array-of-array-6', () => h.equalArrayOfArray( [[5,6,7],[8,9,10]], [[5,6,7],[8,9,10]] ), true);
+      assert('equal-array-of-array-7', () => h.equalArrayOfArray( [[5,6]], [[5]] ), false);
+      assert('equal-array-of-array-8', () => h.equalArrayOfArray( [[5]], [[5,6]] ), false);
+      assert('equal-array-of-array-9', () => h.equalArrayOfArray( [[5,6]], [[5,6,7]] ), false);
+      assert('equal-array-of-array-10', () => h.equalArrayOfArray( [[5,6],[]], [[5,6]] ), false);
+      assert('equal-array-of-array-11', () => h.equalArrayOfArray( [[obj]], [{a:5}] ), false);
+      assert('equal-array-of-array-12', () => h.equalArrayOfArray( [[5,6],['7',8]], [[5,6],[7,8]] ), false);
+      assert('equal-array-of-array-13', () => h.equalArrayOfArray( [5,6], [5,6] ), false);
+      assert('equal-array-of-array-14', () => h.equalArrayOfArray( [[[5,6]]], [[[5,6]]] ), false);
+      assert('equal-array-of-array-15', () => h.equalArrayOfArray( 'abc', 'abc' ), false);
+    }
+
+    //toArray
+    {
+      const obj = {a:5};
+      const a0 = [];
+      const a1 = [5];
+      const a2 = [5,6];
+      const a3 = [obj];
+      assert.each('to-array', [
+        [() => h.equalArray(h.toArray(5), [5]), true],
+        [() => h.equalArray(h.toArray(obj), [obj]), true],
+        [() => h.toArray(a0), a0],
+        [() => h.toArray(a1), a1],
+        [() => h.toArray(a2), a2],
+        [() => h.toArray(a3), a3]
+      ]);
+    }
+
+    //copArray
+    {
+      obj = {a:5};
+      assert.each('copy-array', [
+        [() => h.equalArray(h.copyArray([]), []), true],
+        [() => h.equalArray(h.copyArray([5]), [5]), true],
+        [() => h.equalArray(h.copyArray([5,obj]), [5,obj]), true],
+        [() => h.equalArray(h.copyArray([5,obj]), [5,{a:5}]), false]
+      ]);
+    }
+
+    //equalMap
+    {
+      const obj = {};
+      const m0    = new Map();
+      const m0_1  = new Map();
+      const m1    = new Map([ ['a', 5] ]);
+      const m1_1  = new Map([ ['a', 5] ]);
+      const m2    = new Map([ ['a', 5],   ['b',6] ]);
+      const m2_1  = new Map([ ['a', 5],   ['b',6] ]);
+      const m2_2  = new Map([ ['a', 5],   ['b',7] ]);
+      const m2_3  = new Map([ ['a', {}],  ['b',6] ]);
+      const m2_4  = new Map([ ['a', {}],  ['b',6] ]);
+      const m2_5  = new Map([ ['c', 5],   ['b',6] ]);
+      const m2_6  = new Map([ [{} , 5],   ['b',6] ]);
+      const m2_7  = new Map([ [{} , 5],   ['b',6] ]);
+      const m2_8  = new Map([ [obj, 5],   ['b',6] ]);
+      const m2_9  = new Map([ [obj, 5],   ['b',6] ]);
+      const m2_10 = new Map([ ['a', obj], ['b',6] ]);
+      const m2_11 = new Map([ ['a', obj], ['b',6] ]);
+      const m2_12 = new Map([ ['b', 6],   ['a',5] ]);
+      assert('equal-map-1',  () => h.equalMap(m0,m0_1), true);
+      assert('equal-map-2',  () => h.equalMap(m1,m1_1), true);
+      assert('equal-map-3',  () => h.equalMap(m2,m2_1), true);
+      assert('equal-map-4',  () => h.equalMap(m2_8,m2_9), true);
+      assert('equal-map-5',  () => h.equalMap(m2_10,m2_11), true);
+      assert('equal-map-6',  () => h.equalMap(m0,m1), false);
+      assert('equal-map-7',  () => h.equalMap(m1,m2), false);
+      assert('equal-map-8',  () => h.equalMap(m2,m2_2), false);
+      assert('equal-map-9',  () => h.equalMap(m2_3,m2_4), false);
+      assert('equal-map-10', () => h.equalMap(m2,m2_5), false);
+      assert('equal-map-11', () => h.equalMap(m2_6,m2_7), false);
+      assert('equal-map-12', () => h.equalMap(m2,m2_12), false);
+    }
+
+    //toMap
+    {
+      const obj = {};
+      assert('to-map-1', () => 
+             h.equalMap( h.toMap(), new Map() ), true);
+      assert('to-map-2', () => 
+             h.equalMap( h.toMap('a',5), new Map([ ['a',5] ]) ), true);
+      assert('to-map-3', () => 
+             h.equalMap( h.toMap('a',5,'b',6), new Map([ ['a',5], ['b',6] ]) ), true);
+      assert('to-map-4', () => 
+             h.equalMap( h.toMap('a',5,'b',obj), new Map([ ['a',5], ['b',obj] ]) ), true);
+      assert('to-map-5', () => 
+             h.equalMap( h.toMap(obj,5,'b',6), new Map([ [obj,5], ['b',6] ]) ), true);
+      assert.throw('throw-to-map-1', () => h.toMap(1));
+      assert.throw('throw-to-map-2', () => h.toMap('a','b','c'));
+      assert.throw('throw-to-map-3', () => h.toMap('a','b','a','c'));
+      assert.throw('throw-to-map-4', () => h.toMap(0,1,obj,3,obj,4));
+    }
+
+    //copyMap
+    {
+      const obj = {};
+      const m0 = new Map();
+      const m1 = new Map([ ['a', 5] ]);
+      const m2 = new Map([ ['a', 5],   ['b',6] ]);
+      const m3 = new Map([ ['a', {}],  ['b',6] ]);
+      const m4 = new Map([ [{} , 5],   ['b',6] ]);
+      const m5 = new Map([ [obj, 5],   ['b',6] ]);
+      const m6 = new Map([ ['a', obj], ['b',6] ]);
+      assert('copy-map-0',  () => 
+             h.equalMap(h.copyMap(m0), new Map()), true);
+      assert('copy-map-1',  () => 
+             h.equalMap(h.copyMap(m1), new Map([ ['a', 5] ])), true);
+      assert('copy-map-2',  () => 
+             h.equalMap(h.copyMap(m2), new Map([ ['a', 5],   ['b',6] ])), true);
+      assert('copy-map-3',  () => 
+             h.equalMap(h.copyMap(m3), new Map([ ['a', {}],  ['b',6] ])), false);
+      assert('copy-map-4',  () => 
+             h.equalMap(h.copyMap(m4), new Map([ [{} , 5],   ['b',6] ])), false);
+      assert('copy-map-5',  () => 
+             h.equalMap(h.copyMap(m5), new Map([ [obj, 5],   ['b',6] ])), true);
+      assert('copy-map-6',  () => 
+             h.equalMap(h.copyMap(m6), new Map([ ['a', obj], ['b',6] ])), true);
+    }
+
+    //keyMap
+    {
+      const obj = {};
+      assert('key-map-1', () => 
+             h.equalMap( h.keyMap([]), new Map() ), true);
+      assert('key-map-2', () => 
+             h.equalMap( h.keyMap(['a']), new Map([ ['a',0] ]) ), true);
+      assert('key-map-3', () =>
+             h.equalMap( h.keyMap(['a',obj]), new Map([ ['a',0], [obj,1] ]) ), true);
+      assert('key-map-4', () =>   
+             h.equalMap( h.keyMap([false,true,5]), new Map([ [false,0], [true,1], [5,2] ]) ), true);
+      assert('key-map-5', () =>   
+             h.equalMap( h.keyMap(['a','b',5]), new Map([ ['a',0], ['b',1], [5,2] ]) ), true);
+      assert.throw('throw-key-map-1', () => h.keyMap([5,undefined]));
+      assert.throw('throw-key-map-2', () => h.keyMap([null]));
+      assert.throw('throw-key-map-3', () => h.keyMap([5,5]));
+      assert.throw('throw-key-map-4', () => h.keyMap([0,1,2,1]));
+    }
+
+    //polarize
+    {
+      const obj = {a:5};
+      const a0 = [];
+      const a1 = [5];
+      const a2 = [5,6];
+      const a3 = [obj,5,[]];
+      assert.each('polarize', [
+        [() => h.equalArray(h.polarize(5), [5,true]), true],
+        [() => h.equalArray(h.polarize(a1), [5,true]), true],
+        [() => h.equalArray(h.polarize(undefined), [undefined,true]), true],
+        [() => h.equalArray(h.polarize([undefined]), [undefined,true]), true],
+        [() => h.equalArray(h.polarize(obj), [obj,true]), true],
+        [() => h.equalArray(h.polarize([obj]), [obj,true]), true],
+        [() => h.equalArray(h.polarize([a0]), [a0,true]), true],
+        [() => h.equalArray(h.polarize([a2]), [a2,true]), true],
+        [() => h.equalArray(h.polarize([a3]), [a3,true]), true],
+        [() => h.equalArray(h.polarize(a0), [a0,false]), true],
+        [() => h.equalArray(h.polarize(a2), [a2,false]), true],
+        [() => h.equalArray(h.polarize(a3), [a3,false]), true]
+      ]);
+    }
+
+    //simpleRange
+    {
+      assert('simple-range-1', () => h.equalArray(h.simpleRange(0), []), true);
+      assert('simple-range-2', () => h.equalArray(h.simpleRange(1), [0]), true);
+      assert('simple-range-3', () => h.equalArray(h.simpleRange(2), [0,1]), true);
+      assert('simple-range-4', () => h.equalArray(h.simpleRange(3), [0,1,2]), true);
+      assert.throw('throw-simple-range-1', () => h.simpleRange('2'));
+      assert.throw('throw-simple-range-2', () => h.simpleRange([2]));
+    }
+
+    //fill, fillEW
+    {
+      assert('fill-1', () => h.equalArray( h.fill(new Array(1), 5), [5] ), true);
+      assert('fill-2', () => h.equalArray( h.fill(new Array(2), 'a'), ['a','a']), true);
+      assert('fill-3', () => Array.isArray(h.fill([], 5)), true);
+      assert('fill-4', () => h.fill([], 5).length, 0);
+
+      assert('fill-ew-1', () => h.equalArray( h.fillEW([4], [5]), [5] ), true);
+      assert('fill-ew-2', () => h.equalArray( h.fillEW(new Array(2), [5,'a']), [5,'a'] ), true);
+      assert('fill-ew-3', () => Array.isArray(h.fillEW([], [])), true);
+      assert('fill-ew-4', () => h.fillEW([], []).length, 0);
+      assert.throw('invalid-fill-ew-1', () => h.fillEW(new Array(3), [5,'a']));
+    }
+
+    //nni
+    {
+      assert.each('nni', [
+        [() => h.nni(0,3), 0],
+        [() => h.nni(2,3), 2],
+        [() => h.nni(-1,3), 2],
+        [() => h.nni(-3,3), 0],
+        [() => h.nni(0,1), 0],
+        [() => h.nni(-1,1), 0]
+      ]);
+      assert.throwEach('throw-nni', [
+        () => h.nni(3,3),
+        () => h.nni(-4,3),
+        () => h.nni('1',3),
+        () => h.nni(Infinity,3),
+        () => h.nni(1,1),
+        () => h.nni(0,0),
+        () => h.nni(1,0),
+        () => h.nni(-1,0),
+      ]);
+    }
+
+    //rangeKey
+    {
+      const e = new Map();    
+      assert('range-key-0', () => h.equalArray(h.rangeKey(null, null, e), []), true);
+      assert.throw('throw-range-key-0', () => h.rangeKey('a', null, e));
+      assert.throw('throw-range-key-1', () => h.rangeKey(null, 'a', e));
+      assert.throw('throw-range-key-2', () => h.rangeKey('a', 'a', e));
+
+      const obj = {};    
+      const mp = new Map([ ['a',0], [obj,1], [55,2], ['d',3], ['e',4] ]);
+      const allKeys = ['a', obj, 55, 'd', 'e'];
+      assert('range-key-1', () => h.equalArray(h.rangeKey(null, null, mp), allKeys), true);
+      assert('range-key-2', () => h.equalArray(h.rangeKey('a', undefined, mp), allKeys), true);
+      assert('range-key-3', () => h.equalArray(h.rangeKey(undefined, 'e', mp), allKeys), true);
+      assert('range-key-4', () => h.equalArray(h.rangeKey('a', 55, mp), ['a', obj, 55]), true);
+      assert('range-key-5', () => h.equalArray(h.rangeKey(obj, 'd', mp), [obj, 55, 'd']), true);
+      assert('range-key-6', () => h.equalArray(h.rangeKey(obj, obj, mp), [obj]), true);
+      assert('range-key-7', () => h.equalArray(h.rangeKey('a','a', mp), ['a']), true);
+      assert('range-key-8', () => h.equalArray(h.rangeKey('e','e', mp), ['e']), true);
+      assert('range-key-9', () => h.equalArray(h.rangeKey('e',null, mp), ['e']), true);
+      assert('range-key-10', () => h.equalArray(h.rangeKey(null,'a', mp), ['a']), true);
+      assert.throw('throw-range-key-3', () => h.rangeKey('b', null, mp));
+      assert.throw('throw-range-key-4', () => h.rangeKey(null, 'b', mp));
+      assert.throw('throw-range-key-5', () => h.rangeKey('b', 'b', mp));
+      assert.throw('throw-range-key-6', () => h.rangeKey('e','a', mp));
+      assert.throw('throw-range-key-7', () => h.rangeKey(55,obj, mp));
+
+      const s = new Map([ ['a',0] ]);
+      assert('range-key-11', () => h.equalArray(h.rangeKey('a','a',s), ['a']), true);
+      assert('range-key-12', () => h.equalArray(h.rangeKey(null,'a',s), ['a']), true);
+      assert('range-key-13', () => h.equalArray(h.rangeKey('a',null,s), ['a']), true);
+      assert('range-key-14', () => h.equalArray(h.rangeKey(null,null,s), ['a']), true);
+      assert.throw('throw-range-key-8', () => h.rangeKey('b',null,s));
+      assert.throw('throw-range-key-9', () => h.rangeKey(null,'b',s));
+      assert.throw('throw-range-key-10', () => h.rangeKey('b','b',s));
+    }
+
+    //firstKey
+    {
+      const e = new Map();    
+      assert('first-key-0', () => h.equalArray(h.firstKey(0, e), []), true);
+      assert('first-key-1', () => h.equalArray(h.firstKey(1, e), []), true);
+      assert('first-key-2', () => h.equalArray(h.firstKey(3, e), []), true);
+
+      const s = new Map([ ['a',0] ]);   
+      assert('first-key-3', () => h.equalArray(h.firstKey(0, s), []), true);
+      assert('first-key-4', () => h.equalArray(h.firstKey(1, s), ['a']), true);
+      assert('first-key-5', () => h.equalArray(h.firstKey(3, s), ['a']), true);
+
+      const obj = {};    
+      const mp = new Map([ ['a',0], [obj,1], [55,2], ['d',3], ['e',4] ]);
+      const allKeys = ['a', obj, 55, 'd', 'e'];
+      assert('first-key-6', () => h.equalArray(h.firstKey(0, mp), []), true);
+      assert('first-key-7', () => h.equalArray(h.firstKey(1, mp), ['a']), true);
+      assert('first-key-8', () => h.equalArray(h.firstKey(3, mp), ['a', obj, 55]), true);
+      assert('first-key-9', () => h.equalArray(h.firstKey(5, mp), allKeys), true);
+      assert('first-key-10', () => h.equalArray(h.firstKey(7, mp), allKeys), true);
+    }
+
+    //rangeInd
+    {
+      assert('range-ind-0', () => h.equalArray(h.rangeInd(0,0), [0]), true);
+      assert('range-ind-1', () => h.equalArray(h.rangeInd(3,3), [3]), true);
+      assert('range-ind-2', () => h.equalArray(h.rangeInd(0,1), [0,1]), true);
+      assert('range-ind-3', () => h.equalArray(h.rangeInd(3,4), [3,4]), true);
+      assert('range-ind-4', () => h.equalArray(h.rangeInd(0,2), [0,1,2]), true);
+      assert('range-ind-5', () => h.equalArray(h.rangeInd(3,5), [3,4,5]), true);
+
+      assert.throw('throw-range-ind-0', () => h.rangeInd(0,-1));
+      assert.throw('throw-range-ind-1', () => h.rangeInd(3,2));
+    }
+
+    //indInd
+    {
+      assert('ind-ind-0', () => h.equalArray(h.indInd([0],1), [0]), true);
+      assert('ind-ind-1', () => h.equalArray(h.indInd([0,1,2],3), [0,1,2]), true);
+      assert('ind-ind-2', () => h.equalArray(h.indInd([-3,1,0,2],3), [0,1,0,2]), true);
+      assert('ind-ind-3', () => h.equalArray(h.indInd([],0), []), true);
+      assert('ind-ind-4', () => h.equalArray(h.indInd([],1), []), true);
+      assert('ind-ind-5', () => h.equalArray(h.indInd([],3), []), true);
+
+      assert.throw('throw-ind-ind-0', () => h.indInd([0],0));
+      assert.throw('throw-ind-ind-1', () => h.indInd([1],0));
+      assert.throw('throw-ind-ind-2', () => h.indInd([-1],0));
+      assert.throw('throw-ind-ind-3', () => h.indInd([3],3));
+    }
+
+    //keyInd
+    {
+      const obj = {};    
+      const mp = new Map([ ['a',0], [obj,1], [55,2], ['d',3], ['e',4] ]);
+      const allKeys = ['a', obj, 55, 'd', 'e'];
+      assert('key-ind-0', () => h.equalArray(h.keyInd(allKeys,mp), [0,1,2,3,4]), true);
+      assert('key-ind-1', () => h.equalArray(h.keyInd(allKeys.slice(0).reverse(),mp), [4,3,2,1,0]), true);
+      assert('key-ind-2', () => h.equalArray(h.keyInd([],mp), []), true);
+      assert('key-ind-3', () => h.equalArray(h.keyInd([55,obj,obj,55],mp), [2,1,1,2]), true);
+      assert.throw('throw-key-ind-0', () => h.keyInd(['b'],mp));
+
+      const e = new Map(); 
+      assert('key-ind-4', () => h.equalArray(h.keyInd([],e), []), true);
+      assert.throw('throw-key-ind-1', () => h.keyInd(['b'], e));
+    }
+  
+  }
+  
+  //--------------- tests: cube methods ---------------//
+    
   console.log('--- compare');
   {
     //these tests use cubes made 'from scratch' (i.e. no cube
@@ -67,7 +510,7 @@
     const ve = baseArray.slice();
     ve._data_cube = true;
     ve._s = [5,1,1];
-    ve._k = [ toMap('a',0,'b',1,'c',2,'d',3,'e',4), undefined, undefined ];
+    ve._k = [ h.toMap('a',0,'b',1,'c',2,'d',3,'e',4), undefined, undefined ];
     ve._l = ['rows', undefined, undefined];
     const m = [10,11,12,13,14,15];
     m._data_cube = true;
@@ -75,7 +518,7 @@
     const me = [10,11,12,13,14,15];
     me._data_cube = true;
     me._s = [2,3,1];
-    me._k = [ undefined, toMap('a',0,'b',1,'c',2), undefined ];
+    me._k = [ undefined, h.toMap('a',0,'b',1,'c',2), undefined ];
     me._l = ['rows', 'columns', undefined];
     const b = [10,11,12,13,14,15];
     b._data_cube = true;
@@ -83,7 +526,7 @@
     const be = [10,11,12,13,14,15];
     be._data_cube = true;
     be._s = [1,2,3];
-    be._k = [ undefined, undefined, toMap('a',0,'b',1,'c',2) ];
+    be._k = [ undefined, undefined, h.toMap('a',0,'b',1,'c',2) ];
     be._l = ['rows', undefined, 'pages'];
     
     assert.cube('compare-check-1', v0);
@@ -133,14 +576,14 @@
     v._l = ['rows', undefined, undefined];  //still missing row keys
     test.throw('throw-compare-dict-dict-1', v, ve);
     test.throw('throw-compare-dict-dict-2', ve, v);
-    v._k = [ toMap('a',0,'b',1,'c',2,'dd',3,'e',4), undefined, undefined ];  //key dd is wrong
+    v._k = [ h.toMap('a',0,'b',1,'c',2,'dd',3,'e',4), undefined, undefined ];  //key dd is wrong
     test.throw('throw-compare-dict-dict-3', v, ve);
     test.throw('throw-compare-dict-dict-4', ve, v);
-    v._k[0] = toMap('a',0,'b',1,'c',2,'d',3,'e',4);
+    v._k[0] = h.toMap('a',0,'b',1,'c',2,'d',3,'e',4);
     test('compare-dict-dict-1', v, ve);
     test('compare-dict-dict-2', ve, v);
     
-    m._k = [ undefined, toMap('a',0,'b',1,'c',2), undefined ];
+    m._k = [ undefined, h.toMap('a',0,'b',1,'c',2), undefined ];
     m._l = ['rows', undefined, undefined];  //still missing column label
     test.throw('throw-compare-matrix-matrix-1', m, me);
     test.throw('throw-compare-matrix-matrix-2', me, m);
@@ -148,7 +591,7 @@
     test('compare-matrix-matrix-1', m, me);
     test('compare-matrix-matrix-2', me, m);
 
-    b._k = [ undefined, undefined, toMap('a',0,'b',1,'c',2) ];
+    b._k = [ undefined, undefined, h.toMap('a',0,'b',1,'c',2) ];
     b._l = ['rows', undefined, 'paGes'];  //'G' should not be uppercase
     test.throw('throw-compare-book-book-1', b, be);
     test.throw('throw-compare-book-book-2', be, b);
@@ -178,80 +621,80 @@
     const s = [].cube(); 
     assert.each('cube-1-entry-0', [
       [() => assert.cube(s), undefined],
-      [() => arrayEq(s, [undefined]), true],
-      [() => arrayEq(s._s, [1,1,1]), true]
+      [() => h.equalArray(s, [undefined]), true],
+      [() => h.equalArray(s._s, [1,1,1]), true]
     ]);
     const s_1 = [1].cube(5);  
     assert.each('cube-1-entry-1', [
       [() => assert.cube(s_1), undefined],
-      [() => arrayEq(s_1, [5]), true],
-      [() => arrayEq(s_1._s, [1,1,1]), true]
+      [() => h.equalArray(s_1, [5]), true],
+      [() => h.equalArray(s_1._s, [1,1,1]), true]
     ]);
     const e = [0].cube();
     assert.each('cube-empty-vector', [
       [() => assert.cube(e), undefined],
-      [() => arrayEq(e, []), true],
-      [() => arrayEq(e._s, [0,1,1]), true]
+      [() => h.equalArray(e, []), true],
+      [() => h.equalArray(e._s, [0,1,1]), true]
     ]);
     const v = [2].cube();
     assert.each('cube-vector-0', [
       [() => assert.cube(v), undefined],
-      [() => arrayEq(v, [undefined,undefined]), true],
-      [() => arrayEq(v._s, [2,1,1]), true]
+      [() => h.equalArray(v, [undefined,undefined]), true],
+      [() => h.equalArray(v._s, [2,1,1]), true]
     ]);
     const v_1 = [2].cube(5);
     assert.each('cube-vector-1', [
       [() => assert.cube(v_1), undefined],
-      [() => arrayEq(v_1, [5,5]), true],
-      [() => arrayEq(v_1._s, [2,1,1]), true]
+      [() => h.equalArray(v_1, [5,5]), true],
+      [() => h.equalArray(v_1._s, [2,1,1]), true]
     ]);
     const v_2 = [2].cube(a);
     assert.each('cube-vector-2', [
       [() => assert.cube(v_2), undefined],
-      [() => arrayEq(v_2, [5,obj]), true],
-      [() => arrayEq(v_2._s, [2,1,1]), true]
+      [() => h.equalArray(v_2, [5,obj]), true],
+      [() => h.equalArray(v_2._s, [2,1,1]), true]
     ]);
     const v_3 = [2].cube([a]);
     assert.each('cube-vector-3', [
       [() => assert.cube(v_3), undefined],
-      [() => arrayEq(v_3, [a,a]), true],
-      [() => arrayEq(v_3._s, [2,1,1]), true]
+      [() => h.equalArray(v_3, [a,a]), true],
+      [() => h.equalArray(v_3._s, [2,1,1]), true]
     ]);
     const v_4 = [2].cube([a_1]);
     assert.each('cube-vector-4', [
       [() => assert.cube(v_4), undefined],
-      [() => arrayEq(v_4, [a_1,a_1]), true],
-      [() => arrayEq(v_4._s, [2,1,1]), true]
+      [() => h.equalArray(v_4, [a_1,a_1]), true],
+      [() => h.equalArray(v_4._s, [2,1,1]), true]
     ]);
     const v_5 = [2].cube(a_1);
     assert.each('cube-vector-5', [
       [() => assert.cube(v_5), undefined],
-      [() => arrayEq(v_5, [undefined,undefined]), true],
-      [() => arrayEq(v_5._s, [2,1,1]), true]
+      [() => h.equalArray(v_5, [undefined,undefined]), true],
+      [() => h.equalArray(v_5._s, [2,1,1]), true]
     ]);
     const m = [0,3].cube();
     assert.each('cube-matrix-0', [
       [() => assert.cube(m), undefined],
-      [() => arrayEq(m, []), true],
-      [() => arrayEq(m._s, [0,3,1]), true]
+      [() => h.equalArray(m, []), true],
+      [() => h.equalArray(m._s, [0,3,1]), true]
     ]);
     const m_1 = [2,3].cube([4,5,6,7,8,9]);
     assert.each('cube-matrix-1', [
       [() => assert.cube(m_1), undefined],
-      [() => arrayEq(m_1, [4,5,6,7,8,9]), true],
-      [() => arrayEq(m_1._s, [2,3,1]), true]
+      [() => h.equalArray(m_1, [4,5,6,7,8,9]), true],
+      [() => h.equalArray(m_1._s, [2,3,1]), true]
     ]);
     const b = [,undefined,3].cube([4,5,6]);
     assert.each('cube-book-0', [
       [() => assert.cube(b), undefined],
-      [() => arrayEq(b, [4,5,6]), true],
-      [() => arrayEq(b._s, [1,1,3]), true]
+      [() => h.equalArray(b, [4,5,6]), true],
+      [() => h.equalArray(b._s, [1,1,3]), true]
     ]);
     const b_1 = [2,3,2].cube(true);
     assert.each('cube-book-1', [
       [() => assert.cube(b_1), undefined],
-      [() => arrayEq(b_1, (new Array(12)).fill(true)), true],
-      [() => arrayEq(b_1._s, [2,3,2]), true]
+      [() => h.equalArray(b_1, (new Array(12)).fill(true)), true],
+      [() => h.equalArray(b_1._s, [2,3,2]), true]
     ]);
     
   }
@@ -336,15 +779,15 @@
   
   console.log('--- shape');
   {
-    assert('shape-array-1', () => arrayEq([].shape(), [0,1,1]), true);
-    assert('shape-array-2', () => arrayEq([5].shape(), [1,1,1]), true);
-    assert('shape-array-3', () => arrayEq([5,6].shape(), [2,1,1]), true);
-    assert('shape-empty-1', () => arrayEq([0].cube().shape(), [0,1,1]), true);
-    assert('shape-empty-2', () => arrayEq([1,0,5].cube().shape(), [1,0,5]), true);
-    assert('shape-empty-3', () => arrayEq([,,0].cube().shape(), [1,1,0]), true);
-    assert('shape-vector', () => arrayEq([3].cube().shape(), [3,1,1]), true);
-    assert('shape-matrix', () => arrayEq([2,4].cube().shape(), [2,4,1]), true);
-    assert('shape-book', () => arrayEq([4,3,2].cube().shape(), [4,3,2]), true);
+    assert('shape-array-1', () => h.equalArray([].shape(), [0,1,1]), true);
+    assert('shape-array-2', () => h.equalArray([5].shape(), [1,1,1]), true);
+    assert('shape-array-3', () => h.equalArray([5,6].shape(), [2,1,1]), true);
+    assert('shape-empty-1', () => h.equalArray([0].cube().shape(), [0,1,1]), true);
+    assert('shape-empty-2', () => h.equalArray([1,0,5].cube().shape(), [1,0,5]), true);
+    assert('shape-empty-3', () => h.equalArray([,,0].cube().shape(), [1,1,0]), true);
+    assert('shape-vector', () => h.equalArray([3].cube().shape(), [3,1,1]), true);
+    assert('shape-matrix', () => h.equalArray([2,4].cube().shape(), [2,4,1]), true);
+    assert('shape-book', () => h.equalArray([4,3,2].cube().shape(), [4,3,2]), true);
   }
   
   console.log('--- $shape');
@@ -408,7 +851,7 @@
   
     assert.each('label-1', [
       [() => assert.cube(e), undefined],
-      [() => arrayEq(e._l, [,'columns',,]), true],
+      [() => h.equalArray(e._l, [,'columns',,]), true],
       [() => e.label(), undefined],
       [() => e.label(1), 'columns'],
       [() => e.label(1,10,20), 'columns'],
@@ -417,7 +860,7 @@
   
     assert.each('label-2', [
       [() => assert.cube(m), undefined],
-      [() => arrayEq(m._l, ['1','columns','' + obj]), true],
+      [() => h.equalArray(m._l, ['1','columns','' + obj]), true],
       [() => m.label(), '1'],
       [() => m.label(1), 'columns'],
       [() => m.label(2), '' + obj]
@@ -456,23 +899,23 @@
 
     assert.each('key-1', [
       [() => assert.cube(e), undefined],
-      [() => arrayEq(e.key(), []), true],
-      [() => arrayEq(e.key(1), ['a']), true],
-      [() => arrayEq(e.key(2), ['b']), true]
+      [() => h.equalArray(e.key(), []), true],
+      [() => h.equalArray(e.key(1), ['a']), true],
+      [() => h.equalArray(e.key(2), ['b']), true]
     ]);
     
     assert.each('key-2', [
       [() => assert.cube(v), undefined],
-      [() => arrayEq(v.key([undefined]), ['a',obj]), true],
+      [() => h.equalArray(v.key([undefined]), ['a',obj]), true],
       [() => v.key(1), undefined],
       [() => v.key(2), undefined]
     ]);
     
     assert.each('key-3', [
       [() => assert.cube(b), undefined],
-      [() => arrayEq(b.key(0), [obj,'' + obj]), true],
-      [() => arrayEq(b.key(1), [10,20,30]), true],
-      [() => arrayEq(b.key(2), ['a','b',true,false]), true]
+      [() => h.equalArray(b.key(0), [obj,'' + obj]), true],
+      [() => h.equalArray(b.key(1), [10,20,30]), true],
+      [() => h.equalArray(b.key(2), ['a','b',true,false]), true]
     ]);
     
     assert.each('key-4', [
@@ -874,31 +1317,31 @@
     const ent1 = x => x.map(v => v[1]);
 
     const e = [];
-    assert('rows-empty-none', () => arrayEq(  [...e.rows()] ,        []), true);
-    assert('rows-empty-full', () => arrayEq(  [...e.rows('full')] ,  []), true);
-    assert('rows-empty-core', () => arrayEq(  [...e.rows('core')] ,  []), true);
-    assert('rows-empty-array', () => arrayEq( [...e.rows('array')] , []), true);
-    assert('cols-empty-none', () => arrayEq([...e.cols()] , [0]), true);
-    assert('cols-empty-full-ind', () => arrayEq( ent0([...e.cols('full')]) , [0]), true);
-    assert('cols-empty-full-col', () => arrayOfArrayEq( ent1([...e.cols('full')]) , [[]]), true);
+    assert('rows-empty-none', () => h.equalArray(  [...e.rows()] ,        []), true);
+    assert('rows-empty-full', () => h.equalArray(  [...e.rows('full')] ,  []), true);
+    assert('rows-empty-core', () => h.equalArray(  [...e.rows('core')] ,  []), true);
+    assert('rows-empty-array', () => h.equalArray( [...e.rows('array')] , []), true);
+    assert('cols-empty-none', () => h.equalArray([...e.cols()] , [0]), true);
+    assert('cols-empty-full-ind', () => h.equalArray( ent0([...e.cols('full')]) , [0]), true);
+    assert('cols-empty-full-col', () => h.equalArrayOfArray( ent1([...e.cols('full')]) , [[]]), true);
     
     const a = [5,6];
     const aNone =  [...a.rows('none')];
     const aFull =  [...a.rows('full')];
     const aCore =  [...a.rows('core')];
     const aArray = [...a.rows('array')];
-    assert('rows-array-none', () => arrayEq( aNone , [0,1]), true);
-    assert('rows-array-full-ind',  () => arrayEq( ent0(aFull) , [0,1]), true);
-    assert('rows-array-core-ind',  () => arrayEq( ent0(aCore) , [0,1]), true);
-    assert('rows-array-array-ind', () => arrayEq( ent0(aArray), [0,1]), true);
-    assert('rows-array-full-row',  () => arrayOfArrayEq( ent1(aFull) , [[5],[6]]), true);
-    assert('rows-array-core-row',  () => arrayOfArrayEq( ent1(aCore) , [[5],[6]]), true);
-    assert('rows-array-array-row', () => arrayOfArrayEq( ent1(aArray), [[5],[6]]), true);
-    assert('cols-array-none', () => arrayEq( [...a.cols()] , [0]), true);
-    assert('cols-array-full-ind', () => arrayEq( ent0([...a.cols('full')]) , [0]), true);
-    assert('cols-array-full-col', () => arrayOfArrayEq( ent1([...a.cols('full')]) , [[5,6]]), true);
+    assert('rows-array-none', () => h.equalArray( aNone , [0,1]), true);
+    assert('rows-array-full-ind',  () => h.equalArray( ent0(aFull) , [0,1]), true);
+    assert('rows-array-core-ind',  () => h.equalArray( ent0(aCore) , [0,1]), true);
+    assert('rows-array-array-ind', () => h.equalArray( ent0(aArray), [0,1]), true);
+    assert('rows-array-full-row',  () => h.equalArrayOfArray( ent1(aFull) , [[5],[6]]), true);
+    assert('rows-array-core-row',  () => h.equalArrayOfArray( ent1(aCore) , [[5],[6]]), true);
+    assert('rows-array-array-row', () => h.equalArrayOfArray( ent1(aArray), [[5],[6]]), true);
+    assert('cols-array-none', () => h.equalArray( [...a.cols()] , [0]), true);
+    assert('cols-array-full-ind', () => h.equalArray( ent0([...a.cols('full')]) , [0]), true);
+    assert('cols-array-full-col', () => h.equalArrayOfArray( ent1([...a.cols('full')]) , [[5,6]]), true);
     
-    const b = helper.simpleRange(24).map(x => x+100)
+    const b = h.simpleRange(24).map(x => x+100)
       .$shape([4,3,2])
       .$key(1,['a','b','c'])
       .$key(2,['I', 'II'])
@@ -912,13 +1355,13 @@
     assert('cols-book-length' , () => bColsFull.length,   3);
     assert('pages-book-length', () => bPagesArray.length, 2);
             
-    assert('rows-book-none', () => arrayEq( [...b.rows()] , [0,1,2,3]), true);
-    assert('cols-book-none', () => arrayEq( [...b.cols()] , ['a','b','c']), true);
-    assert('pages-book-none',() => arrayEq( [...b.pages()], ['I','II']), true);
+    assert('rows-book-none', () => h.equalArray( [...b.rows()] , [0,1,2,3]), true);
+    assert('cols-book-none', () => h.equalArray( [...b.cols()] , ['a','b','c']), true);
+    assert('pages-book-none',() => h.equalArray( [...b.pages()], ['I','II']), true);
     
-    assert('rows-book-core-ind',  () => arrayEq( ent0(bRowsCore)  , [0,1,2,3]), true);
-    assert('cols-book-full-key',  () => arrayEq( ent0(bColsFull)  , ['a','b','c']), true);
-    assert('pages-book-array-key',() => arrayEq( ent0(bPagesArray), ['I', 'II']), true);
+    assert('rows-book-core-ind',  () => h.equalArray( ent0(bRowsCore)  , [0,1,2,3]), true);
+    assert('cols-book-full-key',  () => h.equalArray( ent0(bColsFull)  , ['a','b','c']), true);
+    assert('pages-book-array-key',() => h.equalArray( ent0(bPagesArray), ['I', 'II']), true);
         
     test('rows-book-core-row-0', bRowsCore[0][1], b.row(0).copy('core'));
     test('rows-book-core-row-1', bRowsCore[1][1], b.row(1).copy('core'));
@@ -1098,8 +1541,7 @@
   }
 
 
-  
-  console.log('Tests finished');
+  console.log('\nTests finished');
 }
 
 

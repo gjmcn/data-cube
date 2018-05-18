@@ -3,7 +3,9 @@
   
   //--------------- prep ---------------//
 
-	const helper = require('data-cube-helper');
+	const helper = require('./helper.js');
+  module.exports = helper;
+  
   const { 
     assert, fill, fillEW, addArrayMethod, squeezeKey, squeezeLabel,
     keyMap, isSingle, polarize, def, toArray, copyArray, copyMap,
@@ -64,7 +66,7 @@
         for (let i=0; i<3; i++) { //both this and b have keys on at least one dim
           if (tk[i]) {
             if (!bk[i]) return done(`keys-indices, ${helper.dimName[i]}s`);
-            if (!helper.equalMap(tk[i],bk[i])) return done(`${helper.keyName[i]} not equal`);    
+            if (!helper.equalMap(tk[i],bk[i])) return done(`${helper.dimName[i]} keys not equal`);    
           }
           else if (bk[i]) return done('indices-keys');
         }
