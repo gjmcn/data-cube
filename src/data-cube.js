@@ -4,8 +4,7 @@
   
   //--------------- prep ---------------//
 
-	const helper = require('./helper.js');
-  module.exports = helper;
+	const helper = require('data-cube-helper');
   
   const { 
     assert, fill, fillEW, addArrayMethod, squeezeKey, squeezeLabel,

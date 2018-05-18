@@ -2,7 +2,7 @@
   "name": "data-cube",
   "version": "0.1.0",
   "description": "Treat JavaScript arrays as multidimensional tables.",
-  "main": "dist/index.js",
+  "main": "dist/data-cube.js",
   "scripts": {
     "test": "node src/test.js"
   },
@@ -17,10 +17,13 @@
   },
   "homepage": "https://github.com/gjmcn/data-cube#readme",
   "devDependencies": {
+    "data-cube-assert": "^0.1.0",
     "lodash.isequal": "^4.5.0",
     "rollup-plugin-commonjs": "^9.1.0",
     "rollup-plugin-node-resolve": "^3.3.0",
     "rollup-plugin-uglify": "^3.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "data-cube-helper": "^0.1.0" 
+  }
 }
