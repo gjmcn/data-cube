@@ -304,78 +304,54 @@
   
   {
   
-    //cube, num, * -> num, non-neg-index on dimension dim
-    //of x correpsonding to j - can be a key or index (possibly
-    //negative). Assume that dim is valid and j is a processed
-    //singleton value
+    //non-empty-cube, num, * -> num: non-neg-index on dimension
+    //dim of x corresponding to singelton value j; j can be a
+    //key or index (possibly negative)
     const nniFromAny = (x, dim, j) => {
-      if (j === undefined || j === null) {
-        if (x._s[dim] === 0) throw Error('empty dimension');
-        return 0;
-      }
-      if (x._k && x._k[dim]) return nni(x._k[dim].get(j), x._s[dim]);
+      if (j === undefined || j === null) return 0;
+      if (x._k && x._k[dim]) return assert.number(x._k[dim].get(j));
       return nni(j, x._s[dim]);
     };
-    
-    //functions to get non-neg int for cube x and inds/keys
-    //r, c and p
-    const vecInd = [
-      () => {
-        throw Error('too few arguments');
-      },
-      (x,r) => {
-        return nniFromAny(x, 0, assert.single(r));
-      },
-      (x,r,c) => {
-        return nniFromAny(x, 0, assert.single(r)) + 
-               nniFromAny(x, 1, assert.single(c)) * x._s[0];
-      },
-      (x,r,c,p) => {
-        const _s = x._s;
-        return nniFromAny(x, 0, assert.single(r)) + 
-               nniFromAny(x, 1, assert.single(c)) * _s[0] + 
-               nniFromAny(x, 2, assert.single(p)) * _s[0] * _s[1];
-      }
-    ];
-    
-    //*[, * , *] -> *
+        
+    //[*, * , *] -> *
     addArrayMethod('at', function(r, c, p) {
       if (!this._data_cube) toCube(this);
+      if (this.length === 0) throw Error('cube has no entries');
       const nArg = arguments.length;
-      if (nArg === 1) {
+      if (nArg <= 1) {
         return this[ nniFromAny(this, 0, assert.single(r)) ];
       }
       else if (nArg === 2) {
         return this[ nniFromAny(this, 0, assert.single(r)) + 
                      nniFromAny(this, 1, assert.single(c)) * this._s[0] ];
       }
-      else if (nArg > 3) {
+      else {
         const _s = this._s;
         return this[ nniFromAny(this, 0, assert.single(r)) + 
                      nniFromAny(this, 1, assert.single(c)) * _s[0] + 
                      nniFromAny(this, 2, assert.single(p)) * _s[0] * _s[1] ];
       }
-      else throw Error('too few arguments');   
     });
   
-    //*[, *, *] -> cube
+    //*[, *, *, *] -> cube
     addArrayMethod('$at', function(r, c, p, val) {
       if (!this._data_cube) toCube(this);
-      const nArg = assert.argRange(arguments,2,4);
-      val = assert.single(val);
+      if (this.length === 0) throw Error('cube has no entries');
+      const nArg = assert.argRange(arguments,1,4);
       if (nArg === 2) {
-        this[ nniFromAny(this, 0, assert.single(r)) ] = c;
+        this[ nniFromAny(this, 0, assert.single(r)) ] = assert.single(c);
       }
       else if (nArg === 3) {
         this[ nniFromAny(this, 0, assert.single(r)) + 
-              nniFromAny(this, 1, assert.single(c)) * this._s[0] ] = p;
+              nniFromAny(this, 1, assert.single(c)) * this._s[0] ] = assert.single(p);
       }
-      else {
+      else if (nArg === 4) {
         const _s = this._s;
         this[ nniFromAny(this, 0, assert.single(r)) + 
               nniFromAny(this, 1, assert.single(c)) * _s[0] + 
-              nniFromAny(this, 2, assert.single(p)) * _s[0] * _s[1] ] = val;
+              nniFromAny(this, 2, assert.single(p)) * _s[0] * _s[1] ] = assert.single(val);
       }
+      else this[0] = assert.single(r);
       return this;
     });
 
@@ -383,43 +359,51 @@
   
   //--------------- multiple entries ---------------//
   
-  //* -> *
+  //* -> array
   addArrayMethod('vec', function(i) {
-    if (!this._data_cube) toCube(this);
+    if (!this._data_cube) toCube(this);    
     var [i,iSingle] = polarize(i);
     const n = this.length;
-    if (iSingle) return [ this[nni(i,n)] ];
-    const z = new Array(n);
-    for (let j=0; j<n; j++) z[j] = this[nni(i[j],n)];
+    if (iSingle) {
+      if (i === undefined || i === null) return copyArray(this);
+      else return [ this[nni(i,n)] ];
+    }
+    const ni = i.length;
+    const z = new Array(ni);
+    for (let j=0; j<ni; j++) z[j] = this[ nni(i[j],n) ];
     return z;
   });
   
-  //* -> cube
+  //*[, *] -> cube
   addArrayMethod('$vec', function(i, val) {
     if (!this._data_cube) toCube(this);
-    const nArg = assert.argRange(arguments,2,2);
-    var [i,iSingle] = polarize(val);
-    var [val,valSingle] = polarize(val);
+    const nArg = assert.argRange(arguments,1,2);
+    if (arguments.length === 1) [i, val] = [null, i];
     const n = this.length;
+    var [i,iSingle] = polarize(i);
+    var [val,valSingle] = polarize(val);
     if (iSingle) {
-      if (!valSingle) throw Error('shape mismatch');
-      this[nni(i,n)] = val;
+      if (i === undefined || i === null) (valSingle ? fill : fillEW)(this,val);
+      else {
+        if (!valSingle) throw Error('shape mismatch');
+        this[nni(i,n)] = val;
+      }
+      return this;
+    }
+    const ni = i.length;
+    const ind = new Array(ni);
+    for (let j=0; j<ni; j++) ind[j] = nni(i[j],n);
+    if (valSingle) {
+      for (let j=0; j<ni; j++) this[ind[j]] = val;
     }
     else {
-      const ind = new Array(n);
-      for (let j=0; j<n; j++) ind[j] = nni(i[j],n);
-      if (valSingle) {
-        for (let j=0; j<n; j++) this[ind[j]] = val;
-      }
-      else {
-        if (val.length !== n) throw Error('shape mismatch');
-        for (let j=0; j<n; j++) this[ind[j]] = val[j];
-      }
+      if (val.length !== ni) throw Error('shape mismatch');
+      for (let j=0; j<ni; j++) this[ind[j]] = val[j];
     }
     return this;
   });
-  
-      
+
+
   //--------------- subcubes ---------------//
         
   {
