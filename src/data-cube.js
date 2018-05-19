@@ -388,17 +388,18 @@
         if (!valSingle) throw Error('shape mismatch');
         this[nni(i,n)] = val;
       }
-      return this;
-    }
-    const ni = i.length;
-    const ind = new Array(ni);
-    for (let j=0; j<ni; j++) ind[j] = nni(i[j],n);
-    if (valSingle) {
-      for (let j=0; j<ni; j++) this[ind[j]] = val;
     }
     else {
-      if (val.length !== ni) throw Error('shape mismatch');
-      for (let j=0; j<ni; j++) this[ind[j]] = val[j];
+      const ni = i.length;
+      const ind = new Array(ni);
+      for (let j=0; j<ni; j++) ind[j] = nni(i[j],n);
+      if (valSingle) {
+        for (let j=0; j<ni; j++) this[ind[j]] = val;
+      }
+      else {
+        if (val.length !== ni) throw Error('shape mismatch');
+        for (let j=0; j<ni; j++) this[ind[j]] = val[j];
+      }
     }
     return this;
   });
