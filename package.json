@@ -4,7 +4,8 @@
   "description": "Treat JavaScript arrays as multidimensional tables.",
   "main": "dist/data-cube.js",
   "scripts": {
-    "test": "node src/test.js"
+    "test": "node src/test.js",
+    "build": "rollup -c && node src/test.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "data-cube-assert": "^0.1.0",
     "lodash.isequal": "^4.5.0",
+    "rollup": "^0.59.1",
     "rollup-plugin-commonjs": "^9.1.0",
     "rollup-plugin-node-resolve": "^3.3.0",
     "rollup-plugin-uglify": "^3.0.0"

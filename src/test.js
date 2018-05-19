@@ -6,12 +6,12 @@
   const h = require('data-cube-helper');
   
   try {
-    testing = './dist/data-cube.js\n(delete dist to test ./src/data-cube.js)';
     require('../dist/data-cube.js');
+    testing = './dist/data-cube.js\n(delete dist to test ./src/data-cube.js)';
   }
   catch (e) {
-    testing = './src/data-cube.js\n(dist/data-cube.js does not exist)';
     require( './data-cube.js');
+    testing = './src/data-cube.js\n(dist/data-cube.js does not exist)';
   }
     
   //test a.compare(b)
