@@ -749,11 +749,13 @@
   
   {
     const mathFunc = [
-      'sqrt', 'cbrt', 'abs', 'round', 'floor', 'ceil', 'exp', 'log',
+      'sqrt', 'cbrt', 'abs', 'round', 'floor', 'ceil', 'trunc', 'sign',
+      'exp', 'expm1', 'log', 'log10', 'log2', 'log1p',
       'sin', 'cos', 'tan', 'asin', 'acos', 'atan',
       'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh'
     ];
     const numberFunc = ['isInteger', 'isFinite', 'isNaN']; 
+    
     const useStatic = (obj, name) => {
       name.forEach(nm => {
         addArrayMethod(nm, function() {
@@ -763,25 +765,23 @@
           const f = obj[nm];
           for (let i=0; i<n; i++) z[i] = f(this[i]);
           return z;
-        })
+        });
       });
     };
     useStatic(Math, mathFunc);
     useStatic(Number, numberFunc);
     
     const ewFunc = [
-      ['neg',     (x,z) => -x],
-      ['log10',   (x,z) => Math.log(x)/Math.LN10],
-      ['log2',    (x,z) => Math.log(x)/Math.LN2],
-      ['num',     (x,z) => +x],
-      ['string',  (x,z) => '' + x],
-      ['boolean', (x,z) => !!x],
-      ['date',    (x,z) => new Date(x)],
-      ['not',     (x,z) => !x],
-      ['typeof',  (x,z) => typeof x],
-      ['trim',    (x,z) => x.trim()],
-      ['toLowerCase', (x,z) => x.toLowerCase()],
-      ['toUpperCase', (x,z) => x.toUpperCase()]
+      ['neg',     x => -x],
+      ['number',  x => +x],
+      ['string',  x => '' + x],
+      ['boolean', x => !!x],
+      ['date',    x => new Date(x)],
+      ['not',     x => !x],
+      ['typeof',  x => typeof x],
+      ['trim',    x => x.trim()],
+      ['toLowerCase', x => x.toLowerCase()],
+      ['toUpperCase', x => x.toUpperCase()]
     ];
     
     for (let [nm,f] of ewFunc) {
@@ -807,6 +807,8 @@
       ['div', (a,b) => a / b],
       ['rem', (a,b) => a % b],
       ['pow', Math.pow],
+      ['atan2', Math.atan2],
+      ['hypot', Math.hypot],
       ['eq', (a,b) => a === b],
       ['neq', (a,b) => a !== b],
       ['lt', (a,b) => a < b],
@@ -825,10 +827,16 @@
       ['and', (a,b) => a && b],
       ['or', (a,b) => a || b]
     ];
-  
+    
     for (let [nm,f] of opLike) {
       addArrayMethod(nm, function(a) {
         if (!this._data_cube) toCube(this);
+        const nArg = arguments.length;
+        if (nArg > 1) {
+          let curr = this[nm](a);
+          for (let j=1; j<nArg; j++) curr = curr[nm](arguments[j]);
+          return curr;
+        }
         var [a,aSingle] = polarize(a);
         const n = this.length;
         let z;
@@ -839,23 +847,119 @@
         else {
           const na = a.length; 
           if (n === 1) {
-            z = a.copy('core');
+            z = a.copy('shell');
             const this_0 = this[0];
             for (let i=0; i<na; i++) z[i] = f(this_0,a[i]);
           }
           else {
-            z = this.copy('shell');
             if (n !== na) throw Error('shape mismatch');
+            z = this.copy('shell');
             for (let i=0; i<n; i++) z[i] = f(this[i],a[i]);
           }
         }
         return z;
       });
     }
-  
+        
   }
   
-
+  
+  //--------------- entrywise, method ---------------//
+  
+  addArrayMethod('method', function(nm) {
+    if (!this._data_cube) toCube(this);
+    const z = this.copy('shell');
+    const n = this.length;
+    var [nm,nmSingle] = polarize(nm);
+    if (!nmSingle && nm.length !== n) throw Error('shape mismatch');
+    const na = arguments.length - 1;
+    if (na < 1) {
+      if (nmSingle) {
+        for (let i=0; i<n; i++) z[i] = this[i][nm]();
+      }
+      else {
+        for (let i=0; i<n; i++) z[i] = this[i][nm[i]]();
+      }
+      return z;
+    }
+    const getArg = new Array(na);
+    for (let i=0; i<na; i++) {
+      let [a, aSingle] = polarize(arguments[i+1]);
+      if (aSingle) getArg[i] = () => a;
+      else {
+        if (a.length !== n) throw Error('shape mismatch');
+        getArg[i] = j => a[j];
+      } 
+    }
+    const getAllArg = j => {
+      const arg = Array(na);
+      for (let i=0; i<na; i++) arg[i] = getArg[i](j);
+      return arg;
+    }
+    if (nmSingle) {
+      for (let i=0; i<n; i++) z[i] = this[i][nm](...getAllArg(i));
+    }
+    else {
+      for (let i=0; i<n; i++) z[i] = this[i][nm[i]](...getAllArg(i));
+    }
+    return z;
+  });
+  
+  
+  //--------------- entrywise, prop ---------------//
+  
+  addArrayMethod('prop', function(nm) {
+    if (!this._data_cube) toCube(this);
+    const n = this.length;
+    var [nm,nmSingle] = polarize(nm);
+    const z = this.copy('shell');
+    if (nmSingle) {
+      for (let i=0; i<n; i++) z[i] = this[i][nm];
+    } 
+    else {
+      if (nm.length !== n) throw Error('shape mismatch');
+      for (let i=0; i<n; i++) z[i] = this[i][nm[i]];
+    }
+    return z;
+  });
+  
+  addArrayMethod('$prop', function() {
+    if (!this._data_cube) toCube(this);
+    const n = this.length;
+    const nArg = arguments.length;
+    if (nArg % 2 !== 0) throw Error('even number of arguments expected');
+    const nPair = nArg/2;
+    const name = new Array(nPair);
+    const nameSingle = new Array(nPair);
+    const val = new Array(nPair);
+    const valSingle = new Array(nPair);
+    for (let i=0; i<nPair; i++) {
+      [name[i], nameSingle[i]] = polarize(arguments[2*i]);
+      [val[i],  valSingle[i]]  = polarize(arguments[2*i + 1]);
+      if (!nameSingle[i] && name[i].length !== n) throw Error('shape mismatch');
+      if (!valSingle[i]   && val[i].length  !== n) throw Error('shape mismatch');
+    }
+    for (let i=0; i<nPair; i++) {
+      let name_i = name[i];
+      let val_i  = val[i];
+      if (nameSingle[i]) {
+        if (valSingle[i]) {
+          if (typeof val_i === 'function') { for (let j=0; j<n; j++) this[name_i] = val_i(this[j],j,this) }
+          else                             { for (let j=0; j<n; j++) this[name_i] = val_i }
+        }
+        else                               { for (let j=0; j<n; j++) this[name_i] = val_i[j] }
+      }
+      else {
+        if (valSingle[i]) {
+          if (typeof val_i === 'function') { for (let j=0; j<n; j++) this[name_i[j]] = val_i(this[j],j,this) }
+          else                             { for (let j=0; j<n; j++) this[name_i[j]] = val_i }
+        }
+        else                               { for (let j=0; j<n; j++) this[name_i[j]] = val_i[j] }
+      }
+      return z;  
+    }      
+  });
+    
 }
  
 
