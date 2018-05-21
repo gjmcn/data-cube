@@ -24,7 +24,7 @@
     
   //--------------- convert array to cube ---------------//
   
-  //array -> cube, x should NOT be a cube
+  //array ->, x should NOT be a cube
   const toCube = x => {
     Object.defineProperty(x, 'length', { writable: false });  
     Object.defineProperty(x, '_data_cube', { value: true });
@@ -745,7 +745,7 @@
   });
   
   
-  //--------------- entrywise, no arguments ---------------//
+  //--------------- entrywise: no arguments ---------------//
   
   {
     const mathFunc = [
@@ -756,6 +756,7 @@
     ];
     const numberFunc = ['isInteger', 'isFinite', 'isNaN']; 
     
+    //-> cube
     const useStatic = (obj, name) => {
       name.forEach(nm => {
         addArrayMethod(nm, function() {
@@ -784,6 +785,7 @@
       ['toUpperCase', x => x.toUpperCase()]
     ];
     
+    //-> cube
     for (let [nm,f] of ewFunc) {
       addArrayMethod(nm, function() {
         if (!this._data_cube) toCube(this);
@@ -797,7 +799,7 @@
   }
     
   
-  //--------------- entrywise, operator-like ---------------//
+  //--------------- entrywise: operator-like ---------------//
   
   {
     const opLike = [
@@ -828,6 +830,8 @@
       ['or', (a,b) => a || b]
     ];
     
+    
+    //*[, *, *, *, ...] -> cube
     for (let [nm,f] of opLike) {
       addArrayMethod(nm, function(a) {
         if (!this._data_cube) toCube(this);
@@ -864,9 +868,9 @@
   }
   
   
-  //--------------- entrywise, method ---------------//
+  //--------------- entrywise: method ---------------//
   
-  //* -> cube 
+  //*[, *, *, *, ...] -> cube
   addArrayMethod('method', function(nm, ...mthdArg) {
     if (!this._data_cube) toCube(this);
     const z = this.copy('shell');
@@ -889,7 +893,7 @@
       } 
     }
     const getAllArg = j => {
-      const arg = Array(na);
+      const arg = new Array(na);
       for (let i=0; i<na; i++) arg[i] = getArg[i](j);
       return arg;
     }
@@ -898,20 +902,20 @@
   });
   
   
-  //--------------- entrywise, prop ---------------//
+  //--------------- entrywise: prop, style, attr ---------------//
   
   {
 
-    //str,* -> cube
-    const getInfo = (x,mthd,nm) => {
+    //array/cube, str, * -> cube
+    const getInfo = (x, mthd, nm) => {
       if (!x._data_cube) toCube(x);
       const n = x.length;
       var [nm,nmSingle] = polarize(nm);
+      if (!nmSingle && nm.length !== n) throw Error('shape mismatch');
       const z = x.copy('shell');
       const getName = nmSingle ? () => nm : i => nm[i];
-      if (!nmSingle && nm.length !== n) throw Error('shape mismatch');
       if      (mthd === 'prop')     { for (let i=0; i<n; i++) z[i] = x[i][getName(i)] }
-      else if (mthd === 'style')    { for (let i=0; i<n; i++) z[i] = getComputedStyle(x[i])[getName(i)] }
+      else if (mthd === 'style')    { for (let i=0; i<n; i++) z[i] = window.getComputedStyle(x[i])[getName(i)] }
       else if (mthd === 'attr')     { for (let i=0; i<n; i++) z[i] = x[i].getAttribute(getName(i)) }
       else if (mthd === 'hasAttr')  { for (let i=0; i<n; i++) z[i] = x[i].hasAttribute(getName(i)) }
       else if (mthd === 'hasClass') { for (let i=0; i<n; i++) z[i] = x[i].classList.contains(getName(i)) }
@@ -922,62 +926,71 @@
     //* -> cube
     ['prop','attr','style','hasAttr','hasClass'].forEach(mthd => {
       addArrayMethod(mthd, function(nm) {
-        return getInfo(this,mthd,nm);
+        return getInfo(this, mthd, nm);
       });
-    })
+    });
 
     //array/cube, str, array -> cube
     const setInfo = (x, mthd, nameVal) => {
-      if (!this._data_cube) toCube(this);
+      if (!x._data_cube) toCube(x);
+      const n = x.length;
       const nArg = nameVal.length;
       if (nArg < 2 || nArg % 2 !== 0) throw Error('invalid number of arguments');
-      const nPair = nArg/2;
-      let nameSingle, valSingle;
-      const name = new Array(nPair);
+      const nPair = nArg / 2;
       const getName = new Array(nPair);
-      const val = new Array(nPair);
-      const getVal = new Array(nPair);
+      const getVal  = new Array(nPair);
       for (let i=0; i<nPair; i++) {
-        [name[i], nameSingle] = polarize(nameVal[2*i]);
-        [val[i],  valSingle]  = polarize(nameVal[2*i + 1]);
-        if (!nameSingle && name[i].length !== n) throw Error('shape mismatch');
-        if (!valSingle   && val[i].length  !== n) throw Error('shape mismatch');
-        getName[i] = nameSingle ? () => name[i] : j => name[i][j];
-        getVal[i]  =  valSingle ? () =>  val[i] : j =>  val[i][j];
+        let [name, nameSingle] = polarize(nameVal[2*i]);
+        let [val,  valSingle]  = polarize(nameVal[2*i + 1]);
+        if (!nameSingle && name.length !== n) throw Error('shape mismatch');
+        if (!valSingle  &&  val.length !== n) throw Error('shape mismatch');
+        getName[i] = nameSingle ? () => name : j => name[j];
+        if (!valSingle)                     getVal[i] =  j => val[j];
+        else if (typeof val === 'function') getVal[i] =  j => val(x[j],j,x);
+        else                                getVal[i] = () => val;
       }
-      const n = this.length;
       for (let i=0; i<nPair; i++) {
+        let getName_i = getName[i];
+        let getVal_i = getVal[i];
         if (mthd === '$prop') {
-          
-          !!!!!!!!!!!!!!!!HERE - PROBLEM IS THAT VAL_I NOT DEFINED ANYMORE
-          ALSO: 
-          -what if want to set prop to a function?
-          -what if set attr or style fails? - may have already set some vals
-          -say are unusual setters since cannot omit get args
-          
-          
-          
-          if (typeof val_i === 'function') {
-            for (let j=0; j<n; j++) this[getName[i](j)] = getVal[i](j)(this[j],j,this);
-          }
-          else {
-            for (let j=0; j<n; j++) this[getName[i](j)] = getVal[i](j);
-          }
-
-      
-        return z;  
-      }      
-    });
+          for (let j=0; j<n; j++) x[j][getName_i(j)] = getVal_i(j);
+        }
+        else if (mthd === '$style') {
+          for (let j=0; j<n; j++) x[j].style[getName_i(j)] = getVal_i(j);
+        }
+        else if (mthd === '$attr') {
+          for (let j=0; j<n; j++) x[j].setAttribute(getName_i(j), getVal_i(j));
+        }
+        else throw Error('invalid argument');
+      }
+      return x;
+    };
         
-    //str
+    //*, *[, *, *, *, * ...] -> cube
     ['$prop','$attr','$style'].forEach(mthd => {
-      addArrayMethod(mthd, function(mthd, ...nameVal) {
-        return getInfo(this, mthd, nameVal);
+      addArrayMethod(mthd, function(...nameVal) {
+        return setInfo(this, mthd, nameVal);
       });
-    })    
-
+    });
+    
   }
     
+
+  //--------------- entrywise, cmap ---------------//
+
+  addArrayMethod('cmap', function(f, asThis) {
+    if (!this._data_cube) toCube(this);
+    const z = this.map(assert.single(f), assert.single(asThis));
+    toCube(z);
+    z._s[0] = this._s[0];
+    z._s[1] = this._s[1];
+    z._s[2] = this._s[2];
+    copyKey(this,z);
+    copyLabel(this,z);
+    return z;
+  });
+  
+  
 }
  
 
