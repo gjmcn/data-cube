@@ -925,14 +925,14 @@
       return z;
     };
 
-    //* -> cube
+    //* -> array/cube
     ['prop','attr','style','hasAttr','hasClass'].forEach(mthd => {
       addArrayMethod(mthd, function(nm) {
         return getInfo(this, mthd, nm);
       });
     });
 
-    //array/cube, str, array -> cube. Only converts x to a
+    //array/cube, str, array -> array/cube. Only converts x to a
     //cube if mthd is '$prop'; other methods are HTML methods.
     const setInfo = (x, mthd, nameVal) => {
       if (mthd === '$prop' && !x._data_cube) toCube(x);
@@ -969,7 +969,7 @@
       return x;
     };
         
-    //*, *[, *, *, *, * ...] -> cube
+    //*, *[, *, *, *, * ...] -> array/cube
     ['$prop','$attr','$style'].forEach(mthd => {
       addArrayMethod(mthd, function(...nameVal) {
         return setInfo(this, mthd, nameVal);
@@ -993,6 +993,118 @@
     return z;
   });
   
+  
+  //--------------- reduction ---------------//
+  
+  {
+  
+    //array/cube, num, function, * -> cube
+    const reduce = (x, dim, f, init) => {
+      if (!x._data_cube) toCube(x);
+      dim = def(assert.single(dim), 0);  //dim can be -1 so do not use assert.dim
+      const n = x.length;
+      const [nr, nc, np] = x._s;
+      let z;
+      if (dim === -1) {
+        let v = init;
+        for (let i=0; i<n; i++) {
+          v = f(v,x[i]);
+        }
+        z = [v];
+        z.toCube();
+      }
+      else {
+        const epp = nr*nc
+        if (dim === 0) {
+          z = new Array(nc*np);
+          let i = 0;
+          for (let p=0; p<np; p++) {
+            let pp = epp*p;
+            for (let c=0; c<nc; c++) {
+              let cc = nr*c;
+              let v = init;
+              for (let r=0; r<nr; r++) {
+                v = f(v,x[r + cc + pp]);
+              }
+              z[i++] = v;
+            }
+          }
+        }
+        else if (dim === 1) {
+          z = new Array(nr*np);
+          let i = 0;
+          for (let p=0; p<np; p++) {
+            let pp = epp*p;
+            for (let r=0; r<nr; r++) {
+              let v = init;
+              for (let c=0; c<nc; c++) {
+                v = f(v,x[r + c*nr + pp]);
+              }
+              z[i++] = v;
+            }
+          }
+        }
+        else if (dim === 2) {
+          z = new Array(nr*nc);
+          let i = 0;
+          for (let c=0; c<nc; c++) {
+            let cc = nr*c;
+            for (let r=0; r<nr; r++) {
+              let v = init;
+              for (let p=0; p<np; p++) {
+                v = f(v,x[r + cc + p*epp]);
+              }
+              z[i++] = v;
+            }
+          }
+        }
+        else throw Error('invalid dimension');
+        z.toCube();
+        z._s[0] = nr;
+        z._s[1] = nc;
+        z._s[2] = np;
+        z._s[dim] = 1;
+        copyKey(x,z,dim);
+        copyLabel(x,z,dim);
+      }
+      return z;
+    };
+    
+    addArrayMethod('sum', function(dim) {
+      return reduce(this, dim, (a,b) => a + b, 0);
+    });
+    addArrayMethod('prod', function(dim) {
+      return reduce(this, dim, (a,b) => a * b, 1);
+    });
+    addArrayMethod('truthy', function(dim) {
+      return reduce(this, dim, (a,b) => a + !!b, 0);
+    });
+    addArrayMethod('fuse', function(dim, sep) {
+      sep = def(assert.single(sep), ',')
+      return reduce(this, dim, (a,b) => a + b, sep);
+    });
+    
+    ['mean','geoMean'].forEach(nm => {
+      addArrayMethod(nm, function(dim) {
+        const geo = nm === 'geoMean';
+        const z = this[geo ? 'prod' : 'sum'](dim);  //from sum/prod: dim is valid; this and z are cubes
+        if (dim === -1) z[0] = geo ? z[0]^(1/this.length) : z[0]/this.length;
+        else {
+          const n = z.length;
+          let v = this._s[dim];
+          if (geo) {
+            v = 1/v;
+            for (let i=0; i<n; i++) z[i] ^= v;
+          }
+          else {
+            for (let i=0; i<n; i++) z[i] /= v;
+          }
+        }
+        return z;
+      });
+    });
+      
+  }
   
 }
  
