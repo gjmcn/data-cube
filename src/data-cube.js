@@ -906,13 +906,15 @@
   
   {
 
-    //array/cube, str, * -> cube
+    //array/cube, str, * -> array/cube. Only converts x to a
+    //cube and returns a cube if mthd is 'prop'; other methods
+    //are HTML methods.
     const getInfo = (x, mthd, nm) => {
-      if (!x._data_cube) toCube(x);
+      if (mthd === 'prop' && !x._data_cube) toCube(x);
       const n = x.length;
       var [nm,nmSingle] = polarize(nm);
       if (!nmSingle && nm.length !== n) throw Error('shape mismatch');
-      const z = x.copy('shell');
+      const z = (mthd === 'prop') ? x.copy('shell') : new Array(n);
       const getName = nmSingle ? () => nm : i => nm[i];
       if      (mthd === 'prop')     { for (let i=0; i<n; i++) z[i] = x[i][getName(i)] }
       else if (mthd === 'style')    { for (let i=0; i<n; i++) z[i] = window.getComputedStyle(x[i])[getName(i)] }
@@ -930,9 +932,10 @@
       });
     });
 
-    //array/cube, str, array -> cube
+    //array/cube, str, array -> cube. Only converts x to a
+    //cube if mthd is '$prop'; other methods are HTML methods.
     const setInfo = (x, mthd, nameVal) => {
-      if (!x._data_cube) toCube(x);
+      if (mthd === '$prop' && !x._data_cube) toCube(x);
       const n = x.length;
       const nArg = nameVal.length;
       if (nArg < 2 || nArg % 2 !== 0) throw Error('invalid number of arguments');
