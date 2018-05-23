@@ -1070,6 +1070,7 @@
       return z;
     };
     
+    //num -> cube
     addArrayMethod('sum', function(dim) {
       return reduce(this, dim, (a,b) => a + b, 0);
     });
@@ -1084,10 +1085,12 @@
       return reduce(this, dim, (a,b) => a + b, sep);
     });
     
+    //num -> cube
     ['mean','geoMean'].forEach(nm => {
       addArrayMethod(nm, function(dim) {
+        dim = def(assert.single(dim), 0);  //sum/prod cheks valid; still need singlton and def here
         const geo = nm === 'geoMean';
-        const z = this[geo ? 'prod' : 'sum'](dim);  //from sum/prod: dim is valid; this and z are cubes
+        const z = this[geo ? 'prod' : 'sum'](dim);  //this and z are cubes from sum/prod
         if (dim === -1) z[0] = geo ? z[0]^(1/this.length) : z[0]/this.length;
         else {
           const n = z.length;
@@ -1105,9 +1108,74 @@
     });
       
   }
+ 
   
+  //--------------- convert data ---------------//
+  
+  //!!NOTE: THIS IS MAY GET REMOVED SINCE IS A SPECIAL CASE OF 'unvble'
+  //-> cube, this typically an array/vector; all entries assumed to
+  //be an object with the same own properties - properties (enumerable own)
+  //of first entry used to extract vals from all and as column keys
+  addArrayMethod('toMatrix', function() {
+    if (!this._data_cube) toCube(this);
+    const nr = this.length;
+    if (nr === 0) throw Error('non-empty array/cube expected');
+    const ky = Object.keys(this[0]);
+    const nc = ky.length;
+    const z = [nr,nc].cube();
+    z.$key(1,ky);
+    for (let r=0; r<nr; r++) {
+      let obj = this[r];
+      for (let c=0; c<nc; c++) {
+        z[r + nr*c] = obj[ky[c]];  
+      }
+    }
+    return z; 
+  });
+  
+  
+  //--------------- which ---------------//
+  
+  //[func] -> array
+  addArrayMethod('which', function(f) {
+    if (!this._data_cube) toCube(this);             
+    f = assert.single(f);
+    const n = this.length;
+    const z = new Array(n);
+    let j = 0;
+    if (f !== undefined) {
+      assert.func(f);
+      for (let i=0; i<n; i++) {
+        if (f(this[i], i, this)) z[j++] = i;
+      }
+    }
+    else {
+      for (let i=0; i<n; i++) {
+        if (this[i]) z[j++] = i;
+      }
+    }
+    z.length = j;
+    return z;
+  });
+  
+
 }
  
 
 
 
+
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
