@@ -902,7 +902,8 @@
   });
   
   
-  //--------------- entrywise: prop, style, attr ---------------//
+  //--------------- entrywise: prop ---------------//
+  //--------------- (and for now, some html style, attr and class methods) ---------------//
   
   {
 
@@ -916,11 +917,11 @@
       if (!nmSingle && nm.length !== n) throw Error('shape mismatch');
       const z = (mthd === 'prop') ? x.copy('shell') : new Array(n);
       const getName = nmSingle ? () => nm : i => nm[i];
-      if      (mthd === 'prop')     { for (let i=0; i<n; i++) z[i] = x[i][getName(i)] }
-      else if (mthd === 'style')    { for (let i=0; i<n; i++) z[i] = window.getComputedStyle(x[i])[getName(i)] }
-      else if (mthd === 'attr')     { for (let i=0; i<n; i++) z[i] = x[i].getAttribute(getName(i)) }
-      else if (mthd === 'hasAttr')  { for (let i=0; i<n; i++) z[i] = x[i].hasAttribute(getName(i)) }
-      else if (mthd === 'hasClass') { for (let i=0; i<n; i++) z[i] = x[i].classList.contains(getName(i)) }
+      if      (mthd === 'prop')        { for (let i=0; i<n; i++) z[i] = x[i][getName(i)] }
+      else if (mthd === 'style')       { for (let i=0; i<n; i++) z[i] = window.getComputedStyle(x[i])[getName(i)] }
+      else if (mthd === 'attr')        { for (let i=0; i<n; i++) z[i] = x[i].getAttribute(getName(i)) }
+      else if (mthd === 'hasAttr')     { for (let i=0; i<n; i++) z[i] = x[i].hasAttribute(getName(i)) }
+      else if (mthd === 'hasClass')    { for (let i=0; i<n; i++) z[i] = x[i].classList.contains(getName(i)) }
       else throw Error('invalid argument');
       return z;
     };
@@ -1199,17 +1200,4 @@
 
 
 
-                 
-                 
-                 
-                 
-                 
-                 
-                 
-                 
-                 
-                 
-                 
-                 
-                 
-                 
+      
