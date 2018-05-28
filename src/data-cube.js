@@ -300,7 +300,7 @@
   });
   
   
-  //--------------- entries ---------------//
+  //--------------- at, $at ---------------//
   
   {
   
@@ -357,7 +357,7 @@
 
   }
   
-  //--------------- multiple entries ---------------//
+  //--------------- vec, $vec ---------------//
   
   //* -> array
   addArrayMethod('vec', function(i) {
@@ -997,19 +997,19 @@
   //--------------- reduction ---------------//
   
   {
-  
-    //array/cube, num, function, * -> cube
-    const reduce = (x, dim, f, init) => {
-      if (!x._data_cube) toCube(x);
+
+    //num, function[, *] -> cube
+    addArrayMethod('fold', function(dim, f, init) {
+      if (!this._data_cube) toCube(this);
       dim = def(assert.single(dim), 0);  //dim can be -1 so do not use assert.dim
-      const n = x.length;
-      const [nr, nc, np] = x._s;
-      let z;
+      init = assert.single(init);
+      const n = this.length;
+      const [nr, nc, np] = this._s;
+      let v, z;
+      const start = (init === undefined) ? 1 : 0;
       if (dim === -1) {
-        let v = init;
-        for (let i=0; i<n; i++) {
-          v = f(v,x[i]);
-        }
+        v = (init === undefined) ? this[0] : init;
+        for (let i=start; i<n; i++) v = f(v, this[i], i, this);
         z = [v];
         z.toCube();
       }
@@ -1022,10 +1022,8 @@
             let pp = epp*p;
             for (let c=0; c<nc; c++) {
               let cc = nr*c;
-              let v = init;
-              for (let r=0; r<nr; r++) {
-                v = f(v,x[r + cc + pp]);
-              }
+              v = (init === undefined) ? this[cc + pp] : init;
+              for (let r=start; r<nr; r++) v = f(v, this[r + cc + pp], r, this); 
               z[i++] = v;
             }
           }
@@ -1036,10 +1034,8 @@
           for (let p=0; p<np; p++) {
             let pp = epp*p;
             for (let r=0; r<nr; r++) {
-              let v = init;
-              for (let c=0; c<nc; c++) {
-                v = f(v,x[r + c*nr + pp]);
-              }
+              v = (init === undefined) ? this[r + pp] : init;
+              for (let c=start; c<nc; c++) v = f(v, this[r + c*nr + pp], c, this);
               z[i++] = v;
             }
           }
@@ -1050,10 +1046,8 @@
           for (let c=0; c<nc; c++) {
             let cc = nr*c;
             for (let r=0; r<nr; r++) {
-              let v = init;
-              for (let p=0; p<np; p++) {
-                v = f(v,x[r + cc + p*epp]);
-              }
+              v = (init === undefined) ? this[r + cc] : init;
+              for (let p=start; p<np; p++) v = f(v, this[r + cc + p*epp], p, this);
               z[i++] = v;
             }
           }
@@ -1064,31 +1058,65 @@
         z._s[1] = nc;
         z._s[2] = np;
         z._s[dim] = 1;
-        copyKey(x,z,dim);
-        copyLabel(x,z,dim);
+        copyKey(this,z,dim);
+        copyLabel(this,z,dim);
       }
       return z;
-    };
+    });
     
     //num -> cube
-    addArrayMethod('sum', function(dim) {
-      return reduce(this, dim, (a,b) => a + b, 0);
+    [
+      ['sum'    , (a,b) => a + b   , 0],
+      ['prod'   , (a,b) => a * b   , 1],
+      ['all'    , (a,b) => a && b  , true],
+      ['any'    , (a,b) => a || b  , false],
+      ['truthy' , (a,b) => a + !!b , 0],
+      ['min'    , (a,b) => Math.min(a,b) ,  Infinity],  //do not pass Math.min since fold will pass it 4 args 
+      ['max'    , (a,b) => Math.max(a,b) , -Infinity],      
+      ['first'  , (a,b,i) => (a === Infinity && b) ? i : a, Infinity],
+      ['last'   , (a,b,i) => b ? i : a, -Infinity],
+    ].forEach(ar => {
+      addArrayMethod(ar[0], function(dim) { 
+        return this.fold(dim, ar[1], ar[2]);
+      });
     });
-    addArrayMethod('prod', function(dim) {
-      return reduce(this, dim, (a,b) => a * b, 1);
+              
+    //num -> cube
+    addArrayMethod('range', function(dim) {
+      const mn = this.min(dim);
+      const mx = this.max(dim);
+      const nm = mx.length;
+      for (let i=0; i<nm; i++) mx[i] -= mn[i];
+      return mx;
     });
-    addArrayMethod('truthy', function(dim) {
-      return reduce(this, dim, (a,b) => a + !!b, 0);
+        
+    //[bool] -> func, fold func for minPosn or maxPosn
+    const minMax = mx => {
+      if (mx) return (a,b,i) => a[0] < b ? [b,i] : a;
+      else    return (a,b,i) => a[0] > b ? [b,i] : a;
+    };
+      
+    //num -> cube
+    ['minPosn', 'maxPosn'].forEach((nm,j) => {
+      addArrayMethod(nm, function(dim) { 
+        let z = this.fold(dim, minMax(j), [j ? -Infinity : Infinity, null]);
+        dim = def(assert.single(dim), 0);
+        const nz = z.length;
+        if (dim !== -1 && this._k && this._k[dim]) {
+          const ky = this.key(dim);
+          for (let i=0; i<nz; i++) z[i] = ky[z[i][1]];
+        }
+        else {
+          for (let i=0; i<nz; i++) z[i] = z[i][1];
+        }
+        return z;
+      })
     });
-    addArrayMethod('fuse', function(dim, sep) {
-      sep = def(assert.single(sep), ',')
-      return reduce(this, dim, (a,b) => a + b, sep);
-    });
-    
+  
     //num -> cube
     ['mean','geoMean'].forEach(nm => {
       addArrayMethod(nm, function(dim) {
-        dim = def(assert.single(dim), 0);  //sum/prod cheks valid; still need singlton and def here
+        dim = def(assert.single(dim), 0);
         const geo = nm === 'geoMean';
         const z = this[geo ? 'prod' : 'sum'](dim);  //this and z are cubes from sum/prod
         if (dim === -1) z[0] = geo ? z[0]^(1/this.length) : z[0]/this.length;
@@ -1106,7 +1134,13 @@
         return z;
       });
     });
-      
+    
+    //num[, str] -> cube
+    addArrayMethod('fuse', function(dim, sep) {
+      sep = def(assert.single(sep), ',')
+      return this.fold(dim, (a,b) => `${a}${sep}${b}`);
+    });
+          
   }
  
   
