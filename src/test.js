@@ -1358,6 +1358,51 @@
     
   }
   
+  console.log('--- which');
+  {  
+    test('which-empty-0', [].which(), []);
+    test('which-empty-1', [].which(a => true), []);
+    test('which-empty-2', [1,0].cube().which(), []);
+    test('which-empty-3', [1,0].cube().which(a => true), []);
+  
+    test('which-singleton-0', [5].which(), [0]);
+    test('which-singleton-1', [0].which(), []);
+    test('which-singleton-2', [5].which(a => a > 2), [0]);
+    test('which-singleton-3', [0].which(a => a > 2), []);
+
+    const v = ['', 5, false, true, null, undefined];
+    test('which-vector-0', v.which(), [1,3]);
+    test('which-vector-1', v.which(undefined), [1,3]);
+    test('which-vector-2', v.which(a => !a), [0,2,4,5]);
+    test('which-vector-3', v.which([a => !a]), [0,2,4,5]);
+    test('which-vector-4', v.which((a,i) => i % 2 === 0), [0,2,4]);
+    test('which-vector-5', v.which((a,i,u) => typeof u[i] === 'boolean'), [2,3]);
+    test('which-vector-6', [4].cube().which(), []);
+    test('which-vector-7', [4].cube().which(a => !a), [0,1,2,3]);
+    test('which-vector-8', [4].cube(1).which(), [0,1,2,3]);
+  
+    const b = [11,12,13,14,15,16,17,18,19,20,
+               21,22,23,24,25,26,27,28,29,30,
+               31,32,33,34]
+      .$shape([3,4,2])
+      .$key(['Alice','Bob','Cath'])
+      .$key(2,['Autumn','Spring'])
+      .$label(0,'Student')
+      .$label(1,'Subject')
+      .$label(2,'Term');
+    const allInd = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
+    test('which-book-0', b.which(), allInd);
+    test('which-book-1', b.which(a => a > 20 && a % 4 === 0), [13,17,21]);
+    test('which-book-2', b.which(a => a > 100), []);
+    test('which-book-3', b.which(a => a > 10), allInd);
+    
+    assert.throwEach('throw-which', [
+      () => [1,0,2].which(null),
+      () => [1,0,2].which([[a => a]]),
+    ]);
+  
+  }
+  
   
   console.log('\nTests finished');
 }
