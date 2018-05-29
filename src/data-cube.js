@@ -995,90 +995,135 @@
   });
   
   
-  //--------------- reduction ---------------//
+  //--------------- fold - all fold methods ---------------//
   
   {
 
-    //num, function[, *] -> cube
-    addArrayMethod('fold', function(dim, f, init) {
-      if (!this._data_cube) toCube(this);
+    //num, func[, *], bool -> cube
+    const foldCumu = (dim, f, init, cu) => {
+      if (!x._data_cube) toCube(x);
       dim = def(assert.single(dim), 0);  //dim can be -1 so do not use assert.dim
       init = assert.single(init);
-      const n = this.length;
-      const [nr, nc, np] = this._s;
+      const n = x.length;
+      const [nr, nc, np] = x._s;
       let v, z;
       const start = (init === undefined) ? 1 : 0;
       if (dim === -1) {
-        v = (init === undefined) ? this[0] : init;
-        for (let i=start; i<n; i++) v = f(v, this[i], i, this);
-        z = [v];
-        z.toCube();
+        v = (init === undefined) ? x[0] : init;
+        if (cu) {
+          z = [n].cube();
+          if (start && n) z[0] = v;
+          for (let i=start; i<n; i++) z[i] = v = f(v, x[i], i, x);
+        }
+        else {
+          for (let i=start; i<n; i++) v = f(v, x[i], i, x);
+          z = [v];
+          z.toCube();
+        }
       }
       else {
-        const epp = nr*nc
+        const epp = nr*nc;
+        //setup z here in case callback changes keys or labels
+        if (cu) z = x.copy('shell');
+        else {
+          if      (dim === 0) z = [ 1, nc, np].cube();
+          else if (dim === 1) z = [nr,  1, np].cube();
+          else if (dim === 2) z = [nr, nc,  1].cube();
+          copyKey(x,z,dim);
+          copyLabel(x,z,dim);
+        }
         if (dim === 0) {
-          z = new Array(nc*np);
           let i = 0;
           for (let p=0; p<np; p++) {
             let pp = epp*p;
             for (let c=0; c<nc; c++) {
               let cc = nr*c;
-              v = (init === undefined) ? this[cc + pp] : init;
-              for (let r=start; r<nr; r++) v = f(v, this[r + cc + pp], r, this); 
-              z[i++] = v;
+              v = (init === undefined) ? x[cc + pp] : init;
+              if (cu) {
+                if (start && n) z[cc + pp] = v;
+                for (let r=start; r<nr; r++) {
+                  let vInd = r + cc + pp;
+                  z[vInd] = v = f(v, x[vInd], r, x);
+                }
+              }
+              else {
+                for (let r=start; r<nr; r++) v = f(v, x[r + cc + pp], r, x); 
+                z[i++] = v;
+              }
             }
           }
         }
         else if (dim === 1) {
-          z = new Array(nr*np);
           let i = 0;
           for (let p=0; p<np; p++) {
             let pp = epp*p;
             for (let r=0; r<nr; r++) {
-              v = (init === undefined) ? this[r + pp] : init;
-              for (let c=start; c<nc; c++) v = f(v, this[r + c*nr + pp], c, this);
-              z[i++] = v;
+              v = (init === undefined) ? x[r + pp] : init;
+              if (cu) {
+                if (start && n) z[r + pp] = v;
+                for (let c=start; c<nc; c++) {
+                  let vInd = r + c*nr + pp;
+                  z[vInd] = v = f(v, x[vInd], c, x);
+                }
+              }
+              else {
+                for (let c=start; c<nc; c++) v = f(v, x[r + c*nr + pp], c, x);
+                z[i++] = v;
+              }
             }
           }
         }
         else if (dim === 2) {
-          z = new Array(nr*nc);
           let i = 0;
           for (let c=0; c<nc; c++) {
             let cc = nr*c;
             for (let r=0; r<nr; r++) {
-              v = (init === undefined) ? this[r + cc] : init;
-              for (let p=start; p<np; p++) v = f(v, this[r + cc + p*epp], p, this);
-              z[i++] = v;
+              v = (init === undefined) ? x[r + cc] : init;
+              if (cu) {
+                if (start && n) z[r + cc] = v;
+                for (let p=start; p<np; p++) {
+                  vInd = r + cc + p*epp;
+                  z[vInd] = v = f(v, x[vInd], p, x);
+                }
+              }
+              else {
+                for (let p=start; p<np; p++) v = f(v, x[r + cc + p*epp], p, x);
+                z[i++] = v;
+              }
             }
           }
         }
         else throw Error('invalid dimension');
-        z.toCube();
-        z._s[0] = nr;
-        z._s[1] = nc;
-        z._s[2] = np;
-        z._s[dim] = 1;
-        copyKey(this,z,dim);
-        copyLabel(this,z,dim);
       }
       return z;
+    };
+
+    //num, func[, *] -> cube
+    addArrayMethod('fold', function(dim, f, init) {
+      return foldCumu(dim, f, init, false);
+    });
+    addArrayMethod('cumu', function(dim, f, init) {
+      return foldCumu(dim, f, init, true);
     });
     
     //num -> cube
-    [
+    const basic = [
       ['sum'    , (a,b) => a + b   , 0],
       ['prod'   , (a,b) => a * b   , 1],
       ['all'    , (a,b) => a && b  , true],
       ['any'    , (a,b) => a || b  , false],
       ['truthy' , (a,b) => a + !!b , 0],
       ['min'    , (a,b) => Math.min(a,b) ,  Infinity],  //do not pass Math.min since fold will pass it 4 args 
-      ['max'    , (a,b) => Math.max(a,b) , -Infinity],      
-      ['first'  , (a,b,i) => (a === Infinity && b) ? i : a, Infinity],
-      ['last'   , (a,b,i) => b ? i : a, -Infinity],
-    ].forEach(ar => {
+      ['max'    , (a,b) => Math.max(a,b) , -Infinity]
+    ]
+    basic.forEach(ar => {
       addArrayMethod(ar[0], function(dim) { 
         return this.fold(dim, ar[1], ar[2]);
+      });
+    });
+    basic.forEach(ar => {
+      addArrayMethod('cumu' + ar[0][0].toUpperCase() + ar[0].slice(1), function(dim) { 
+        return this.cumu(dim, ar[1], ar[2]);
       });
     });
               
@@ -1137,11 +1182,84 @@
     });
     
     //num[, str] -> cube
-    addArrayMethod('fuse', function(dim, sep) {
+    addArrayMethod('sew', function(dim, sep) {
       sep = def(assert.single(sep), ',')
       return this.fold(dim, (a,b) => `${a}${sep}${b}`);
     });
-          
+    
+    //num[, bool] -> cube
+    addArrayMethod('var', function(dim, n) {
+      dim = def(assert.single(dim), 0);
+      n = def(assert.single(n), true);
+      const f = (a, newValue) => {
+        const count = a[0] + 1;
+        const delta = newValue - a[1];
+        const mean = a[1] + (delta / count);
+        const M2 = a[2] + (delta * (newValue - mean));
+        return [count, mean, M2];
+      };
+      const z = this.fold(dim, f, [[0, 0, 0]]);  //this now a cube, dim is valid
+      const nz = z.length;
+      let nDiv = (dim === -1) ? this.length : this._s[dim];
+      if (!n) nDiv--;
+      for (let i=0; i<nz; i++) z[i] = z[i][2] / nDiv;
+      return z;
+    });
+    
+    //num[, bool] -> cube
+    addArrayMethod('sd', function(dim, n) {
+      const z = this.var(dim,n);
+      const nz = z.length;
+      for (let i=0; i<nz; i++) z[i] = Math.sqrt(z[i]);
+      return z;
+    });
+    
+    //num[, func, string] -> cube
+    addArrayMethod('wrap', function(dim, ret) {
+      if (!this._data_cube) toCube(this);
+      dim = assert.dim(dim);
+      const [nr, nc, np] = this._s;
+      const _k = this._k;
+      const indFactory = d => (_k && _k[d]) ? ky => _k[d].get(ky) : i => i;
+      let z;
+      if (dim === 0) {
+        z = [1,nc,np].cube();
+        const ind_c = indFactory(1),
+              ind_p = indFactory(2);
+        for (let p of this.pages()) {
+          let pi = ind_p(p);
+          for (let c of this.cols()) {
+            z[ind_c(c) + nc*pi] = this.sc(null, c, p, ret);         
+          }
+        }
+      }
+      else if (dim === 1) {
+        z = [nr,1,np].cube();
+        const ind_r = indFactory(0),
+              ind_p = indFactory(2);
+        for (let p of this.pages()) {
+          let pi = ind_p(p);
+          for (let r of this.rows()) {
+            z[ind_r(r) + nr*pi] = this.sc(r, null, p, ret);         
+          }
+        }
+      }
+      else {  //dim is 2
+        z = [nr,nc,1].cube();
+        const ind_r = indFactory(0),
+              ind_c = indFactory(1);
+        for (let c of this.cols()) {
+          let ci = ind_c(c);
+          for (let r of this.rows()) {
+            z[ind_r(r) + nr*ci] = this.sc(r, c, null, ret);         
+          }
+        }
+      }
+      copyKey(this, z, dim);
+      copyLabel(this, z, dim);
+      return z;
+    });
+
   }
  
   
