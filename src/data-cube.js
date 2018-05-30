@@ -1108,13 +1108,13 @@
     
     //num -> cube
     const basic = [
-      ['sum'      , (a,b) => a + b   , 0],
-      ['prod'     , (a,b) => a * b   , 1],
-      ['all'      , (a,b) => a && b  , true],
-      ['any'      , (a,b) => a || b  , false],
-      ['truthy'   , (a,b) => a + !!b , 0],
-      ['min'      , (a,b) => Math.min(a,b) ,  Infinity],  //do not pass Math.min since fold will pass it 4 args 
-      ['max'      , (a,b) => Math.max(a,b) , -Infinity]
+      ['sum'    , (a,b) => a + b   , 0],
+      ['prod'   , (a,b) => a * b   , 1],
+      ['all'    , (a,b) => a && b  , true],
+      ['any'    , (a,b) => a || b  , false],
+      ['truthy' , (a,b) => a + !!b , 0],
+      ['min'    , (a,b) => Math.min(a,b) ,  Infinity],  //do not pass Math.min since fold will pass it 4 args 
+      ['max'    , (a,b) => Math.max(a,b) , -Infinity]
     ]
     basic.forEach(ar => {
       addArrayMethod(ar[0], function(dim) { 
