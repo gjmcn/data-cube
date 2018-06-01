@@ -1112,7 +1112,7 @@
       ['prod'   , (a,b) => a * b   , 1],
       ['all'    , (a,b) => a && b  , true],
       ['any'    , (a,b) => a || b  , false],
-      ['truthy' , (a,b) => a + !!b , 0],
+      ['count' , (a,b) => a + !!b , 0],
       ['min'    , (a,b) => Math.min(a,b) ,  Infinity],  //do not pass Math.min since fold will pass it 4 args 
       ['max'    , (a,b) => Math.max(a,b) , -Infinity]
     ]
@@ -1201,9 +1201,9 @@
     });
     
     //num[, bool] -> cube
-    addArrayMethod('var', function(dim, n) {
+    addArrayMethod('var', function(dim, dof) {
       dim = def(assert.single(dim), 0);
-      n = def(assert.single(n), true);
+      dof = assert.nonNegInt(def(assert.single(dof), 0));
       const f = (a, newValue) => {
         const count = a[0] + 1;
         const delta = newValue - a[1];
@@ -1213,10 +1213,9 @@
       };
       const z = this.fold(dim, f, [[0, 0, 0]]);  //this now a cube, dim is valid
       const nz = z.length;
-      let nDiv = (dim === -1) ? this.length : this._s[dim];
-      if (!n) nDiv--;
+      let nDiv = (dim === -1 ? this.length : this._s[dim]) - dof;
       for (let i=0; i<nz; i++) z[i] = z[i][2] / nDiv;
-      return z;
+      return z;      
     });
     
     //num[, bool] -> cube
