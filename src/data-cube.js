@@ -1003,32 +1003,38 @@
     const foldCumu = (x, dim, f, init, cu) => {
       if (!x._data_cube) toCube(x);
       dim = def(assert.single(dim), 0);  //dim can be -1 so do not use assert.dim
+      f = assert.func(assert.single(f));
       init = assert.single(init);
       const n = x.length;
-      let v, z;
-      const start = (init === undefined) ? 1 : 0;
+      let start, v, z;
+      if (init === undefined) {
+        if (!n) throw Error('must supply init if array/cube empty');
+        start = 1;
+      }
+      else start = 0;
       if (dim === -1) {
-        v = (init === undefined) ? x[0] : init;
+        v = start ? x[0] : init;
         if (cu) {
           z = [n].cube();
-          if (start && n) z[0] = v;
+          if (start) z[0] = v;
           for (let i=start; i<n; i++) z[i] = v = f(v, x[i], i, x);
         }
         else {
           for (let i=start; i<n; i++) v = f(v, x[i], i, x);
           z = [v];
-          z.toCube();
+          toCube(z);
         }
-      }
+      }      
       else {
+        //get shape and setup z first in case callback changes shape, keys or labels
         const [nr, nc, np] = x._s;
         const epp = nr*nc;
-        //setup z here in case callback changes keys or labels
         if (cu) z = x.copy('shell');
         else {
           if      (dim === 0) z = [ 1, nc, np].cube();
           else if (dim === 1) z = [nr,  1, np].cube();
           else if (dim === 2) z = [nr, nc,  1].cube();
+          else throw Error('invalid dimension');
           copyKey(x,z,dim);
           copyLabel(x,z,dim);
         }
@@ -1038,9 +1044,9 @@
             let pp = epp*p;
             for (let c=0; c<nc; c++) {
               let cc = nr*c;
-              v = (init === undefined) ? x[cc + pp] : init;
+              v = start ? x[cc + pp] : init;
               if (cu) {
-                if (start && n) z[cc + pp] = v;
+                if (start) z[cc + pp] = v;
                 for (let r=start; r<nr; r++) {
                   let vInd = r + cc + pp;
                   z[vInd] = v = f(v, x[vInd], r, x);
@@ -1058,9 +1064,9 @@
           for (let p=0; p<np; p++) {
             let pp = epp*p;
             for (let r=0; r<nr; r++) {
-              v = (init === undefined) ? x[r + pp] : init;
+              v = start ? x[r + pp] : init;
               if (cu) {
-                if (start && n) z[r + pp] = v;
+                if (start) z[r + pp] = v;
                 for (let c=start; c<nc; c++) {
                   let vInd = r + c*nr + pp;
                   z[vInd] = v = f(v, x[vInd], c, x);
@@ -1078,9 +1084,9 @@
           for (let c=0; c<nc; c++) {
             let cc = nr*c;
             for (let r=0; r<nr; r++) {
-              v = (init === undefined) ? x[r + cc] : init;
+              v = start ? x[r + cc] : init;
               if (cu) {
-                if (start && n) z[r + cc] = v;
+                if (start) z[r + cc] = v;
                 for (let p=start; p<np; p++) {
                   vInd = r + cc + p*epp;
                   z[vInd] = v = f(v, x[vInd], p, x);
