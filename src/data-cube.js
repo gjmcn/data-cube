@@ -7,8 +7,8 @@
 	const helper = require('data-cube-helper');
   
   const { 
-    assert, fill, fillEW, addArrayMethod, squeezeKey, squeezeLabel,
-    keyMap, isSingle, polarize, def, toArray, copyArray, copyMap,
+    assert, fill, fillEW, addArrayMethod, keyMap,
+    isSingle, polarize, def, toArray, copyArray, copyMap,
     ensureKey, ensureLabel, nni, copyKey, copyLabel, skeleton
   } = helper;
     
@@ -209,22 +209,33 @@
   addArrayMethod('label', function(dim) {
     if (!this._data_cube) toCube(this);
     dim = assert.dim(dim);
-    if (this._l) return this._l[dim];
+    if (this._l) return this._l[dim] || null;
+    return null;
   });
     
   //[num], str -> cube
   addArrayMethod('$label', function(dim,val) {
     if (!this._data_cube) toCube(this);
-    const nArg = assert.argRange(arguments,1,2);    
+    const nArg = assert.argRange(arguments,1,2); 
     if (nArg === 1) [dim,val] = [undefined,dim];
     dim = assert.dim(dim);
-    val = '' + assert.single(val);
-    if (val === '') throw Error('label cannot be empty string');    
-    ensureLabel(this);
-    this._l[dim] = val;
+    val = assert.single(val);
+    if (val === null) {
+      const _l = this._l;
+      if (_l && _l[dim]) {
+        _l[dim] = undefined;
+        if (!_l[0] && !_l[1] && !_l[2]) delete this._l;
+      }
+    }
+    else {
+      val = '' + val;
+      if (val === '') throw Error('label cannot be empty string');    
+      ensureLabel(this);
+      this._l[dim] = val;
+    }
     return this;
   });
-    
+  
   
   //--------------- keys ---------------//
   
@@ -236,6 +247,7 @@
       const mp = this._k[dim];
       if (mp) return [...mp.keys()];
     }
+    return null;
   });
     
   //[num], * -> cube
@@ -244,13 +256,34 @@
     const nArg = assert.argRange(arguments,1,2);    
     if (nArg === 1) [dim,val] = [undefined,dim];
     dim = assert.dim(dim);
-    const mp = keyMap(toArray(val));
-    if (this._s[dim] !== mp.size) throw Error('shape mismatch');
-    ensureKey(this);
-    this._k[dim] = mp;
+    val = toArray(val);
+    if (val.length === 1 && val[0] === null) {
+      const _k = this._k;
+      if (_k && _k[dim]) {
+        _k[dim] = undefined;
+        if (!_k[0] && !_k[1] && !_k[2]) delete this._k;
+      }
+    }
+    else {
+      const mp = keyMap(val);
+      if (this._s[dim] !== mp.size) throw Error('shape mismatch');
+      ensureKey(this);
+      this._k[dim] = mp;
+    }
     return this;
   });
   
+
+  //--------------- $strip ---------------//
+  
+  //-> cube
+  addArrayMethod('$strip', function() {
+    if (!this._data_cube) toCube(this);
+    assert.argRange(arguments,0,0);    
+    delete this._k;
+    delete this._l;
+    return this;
+  });
   
   //--------------- copy ---------------//
       
@@ -1112,23 +1145,24 @@
       return foldCumu(this, dim, f, init, true);
     });
     
-    //num -> cube
     const basic = [
-      ['sum'    , (a,b) => a + b   , 0],
-      ['prod'   , (a,b) => a * b   , 1],
-      ['all'    , (a,b) => a && b  , true],
-      ['any'    , (a,b) => a || b  , false],
-      ['count' , (a,b) => a + !!b , 0],
-      ['min'    , (a,b) => Math.min(a,b) ,  Infinity],  //do not pass Math.min since fold will pass it 4 args 
-      ['max'    , (a,b) => Math.max(a,b) , -Infinity]
-    ]
+      ['sum'   , (a,b) => a + (+b)      , 0],
+      ['prod'  , (a,b) => a * b         , 1],
+      ['all'   , (a,b) => a && !!b      , true],
+      ['any'   , (a,b) => a || !!b      , false],
+      ['count' , (a,b) => a + !!b       , 0],
+      ['min'   , (a,b) => Math.min(a,b) ,  Infinity],  //do not pass Math.min since fold will pass it 4 args 
+      ['max'   , (a,b) => Math.max(a,b) , -Infinity]
+    ];
+    
+    //num -> cube
     basic.forEach(ar => {
-      addArrayMethod(ar[0], function(dim) { 
+      addArrayMethod(ar[0], function(dim) {
         return this.fold(dim, ar[1], ar[2]);
       });
     });
     basic.forEach(ar => {
-      addArrayMethod('cumu' + ar[0][0].toUpperCase() + ar[0].slice(1), function(dim) { 
+      addArrayMethod('cumu' + ar[0][0].toUpperCase() + ar[0].slice(1), function(dim) {
         return this.cumu(dim, ar[1], ar[2]);
       });
     });
