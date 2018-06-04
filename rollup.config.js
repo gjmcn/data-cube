@@ -8,7 +8,7 @@ export default {
     extend: false,
     file: 'dist/data-cube.js',
     format: 'umd',
-    name: '_data_cube_helper'
+    name: '_data_cube'
   },
   plugins: [
     commonjs({
