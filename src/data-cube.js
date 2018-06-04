@@ -1188,22 +1188,25 @@
       );
     });
     
-    //[bool] -> func, fold func for minPosn or maxPosn
+    //[bool] -> func: fold func for minPosn/maxPosn
     const minMax = mx => {
       if (mx) return (a,b,i) => a[0] < b ? [b,i] : a;
       else    return (a,b,i) => a[0] > b ? [b,i] : a;
     };
-      
+          
     //num -> cube
     ['minPosn', 'maxPosn', 'cumuMinPosn', 'cumuMaxPosn'].forEach((nm,j) => {
       addArrayMethod(nm, function(dim) {
         const mx = j % 2;
         let z = this[j > 1 ? 'cumu' : 'fold'](dim, minMax(mx), [[mx ? -Infinity : Infinity, null]]);
-        dim = def(assert.single(dim), 0);
         const nz = z.length;
+        dim = def(assert.single(dim), 0);
         if (dim !== -1 && this._k && this._k[dim]) {
           const ky = this.key(dim);
-          for (let i=0; i<nz; i++) z[i] = ky[z[i][1]];
+          for (let i=0; i<nz; i++) {
+            let ind = z[i][1];  //null if this._s[dim] is 0 (and folding) or poss if non-finite entries
+            z[i] = (ind === null) ? null : ky[ind];
+          }
         }
         else {
           for (let i=0; i<nz; i++) z[i] = z[i][1];
@@ -1211,24 +1214,23 @@
         return z;
       });
     });
-
+        
     //num -> cube
     ['mean','geoMean'].forEach(nm => {
       addArrayMethod(nm, function(dim) {
-        dim = def(assert.single(dim), 0);
         const geo = nm === 'geoMean';
-        const z = this[geo ? 'prod' : 'sum'](dim);  //this and z are cubes from sum/prod
-        if (dim === -1) z[0] = geo ? z[0]^(1/this.length) : z[0]/this.length;
+        const z = this[geo ? 'prod' : 'sum'](dim);
+        dim = def(assert.single(dim), 0);
+        if (dim === -1) {
+          z[0] = geo
+            ? Math.pow(z[0], (1/this.length))
+            : z[0] / this.length;
+        }
         else {
           const n = z.length;
-          let v = this._s[dim];
-          if (geo) {
-            v = 1/v;
-            for (let i=0; i<n; i++) z[i] ^= v;
-          }
-          else {
-            for (let i=0; i<n; i++) z[i] /= v;
-          }
+          let v = 1 / this._s[dim];
+          if (geo) { for (let i=0; i<n; i++) z[i]  = Math.pow(z[i],v) }
+          else     { for (let i=0; i<n; i++) z[i] *= v }
         }
         return z;
       });
@@ -1236,8 +1238,17 @@
     
     //num[, str] -> cube
     addArrayMethod('sew', function(dim, sep) {
-      sep = def(assert.single(sep), ',')
-      return this.fold(dim, (a,b) => `${a}${sep}${b}`);
+      if (!this._data_cube) toCube(this);
+      sep = def(assert.single(sep), ',');
+      const z = this.fold(
+        dim,
+        (a,b) => `${a}${sep}${b === null || b === undefined ? '' : b}`,
+        ''
+      );
+      const n = z.length;
+      const sepLen = sep.length;  
+      for (let i=0; i<n; i++) z[i] = z[i].slice(sepLen);
+      return z;
     });
     
     //num[, bool] -> cube
