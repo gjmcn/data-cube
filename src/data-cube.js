@@ -22,6 +22,24 @@
   });
   
     
+  //--------------- restrict native mutator methods ---------------//
+  
+  {
+    const orig = {};
+    ['copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift',
+     'sort', 'splice', 'unshift'].forEach(nm => {
+      orig[nm] = Array.prototype[nm];
+      delete Array.prototype[nm];
+      addArrayMethod(nm, function() {
+        if (this._data_cube) {
+          throw Error(`native array method ${nm} cannot be used with cubes`);
+        }
+        return orig[nm].apply(this, arguments);
+      });
+    }); 
+  }
+
+  
   //--------------- convert array to cube ---------------//
   
   //array ->, x should NOT be a cube

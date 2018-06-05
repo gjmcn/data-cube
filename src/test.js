@@ -38,9 +38,48 @@
   
   console.log(`Testing: ${testing}\n`);
   
-
-  //--------------- tests: cube methods ---------------//
+  
+  //--------------- tests ---------------//
     
+  console.log('--- native mutators');
+  {
+   
+    const a = [5,6,7];
+    a.copyWithin(0,1);
+    assert('native-copyWithin', () => h.equalArray(a, [6,7,7]), true);
+    a.fill(8);
+    assert('native-fill', () => h.equalArray(a, [8,8,8]), true);
+    a.pop();
+    assert('native-pop', () => h.equalArray(a, [8,8]), true);
+    a.push(9);
+    assert('native-push', () => h.equalArray(a, [8,8,9]), true);
+    a.reverse();
+    assert('native-reverse', () => h.equalArray(a, [9,8,8]), true);
+    a.shift();
+    assert('native-shift', () => h.equalArray(a, [8,8]), true);
+    a[0] = 9;
+    a.sort();
+    assert('native-sort', () => h.equalArray(a, [8,9]), true);
+    a.splice(0,1);
+    assert('native-splice', () => h.equalArray(a, [9]), true);
+    a.unshift(10);
+    assert('native-unshift', () => h.equalArray(a, [10,9]), true);
+    
+    const c = [5,6,7].toCube();
+    assert.throw('throw-native-copyWithin', () => c.copyWithin(0,1));
+    assert.throw('throw-native-fill', () => c.fill(8));
+    assert.throw('throw-native-pop', () => c.pop());
+    assert.throw('throw-native-push', () => c.push(9));
+    assert.throw('throw-native-reverse', () => c.reverse());
+    assert.throw('throw-native-shift', () => c.shift());
+    assert.throw('throw-native-sort', () => c.sort());
+    assert.throw('throw-native-splice', () => c.splice(0,1));
+    assert.throw('throw-native-unshift', () => c.unshift(10));
+    assert.cube('native-mutator-no-change-0', c);
+    test('native-mutator-no-change-1', c, [5,6,7]);
+  
+  }
+  
   console.log('--- compare');
   {
     //these tests use cubes made 'from scratch' (i.e. no cube
@@ -538,7 +577,7 @@
     ]);
   }
   
-  console.log('--- subcube');
+  console.log('--- subcubes');
   {
     //empty array
     const e = [];
@@ -869,7 +908,7 @@
     ]);
   }
   
-  console.log('--- rows, cols, pages');
+  console.log('--- generators');
   {
     const ent0 = x => x.map(v => v[0]);
     const ent1 = x => x.map(v => v[1]);
