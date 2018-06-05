@@ -1357,28 +1357,76 @@
   }
  
   
-  //--------------- convert data ---------------//
   
-  //!!NOTE: THIS IS MAY GET REMOVED SINCE IS A SPECIAL CASE OF 'unvble'
-  //-> cube, this typically an array/vector; all entries assumed to
-  //be an object with the same own properties - properties (enumerable own)
-  //of first entry used to extract vals from all and as column keys
-  addArrayMethod('toMatrix', function() {
-    if (!this._data_cube) toCube(this);
-    const nr = this.length;
-    if (nr === 0) throw Error('non-empty array/cube expected');
-    const ky = Object.keys(this[0]);
-    const nc = ky.length;
-    const z = [nr,nc].cube();
-    z.$key(1,ky);
-    for (let r=0; r<nr; r++) {
-      let obj = this[r];
-      for (let c=0; c<nc; c++) {
-        z[r + nr*c] = obj[ky[c]];  
+  //--------------- concatenate ---------------//
+  
+  {
+    //cube, array/cube -> map/undefined, if a has keys on dim d,
+    //checks b does and appends them to keys of a. Error if:
+    //  -keys on a, but not b
+    //  -a and b share a key
+    //returns (extended) keys of a or undefined
+    const appendKeys = (a,b,d) => {
+      if (a._k && a._k[d]) {
+        if (!b._data_cube || !b._k || !b._k[d]) {
+          throw Error(`${helper.dimName[d]} keys expected`);
+        }
+        const ak = a._k[d];
+        const bk = b._k[d];
+        let i = ak.size;
+        for (let k of bk) ak.set(k, i++);
+        if (ak.size !== i) throw Error('duplicate key');
+        return ak;
       }
-    }
-    return z; 
-  });
+    };
+    
+    
+    //ASSUME CAN BE MUTATED PRRIOT OT ERROR SINCE IS THE NEW ARRAY THAT 
+    //WILL ULTIMATELY BE RETURNED
+    //  WILL START OF AS A COPY OF THIS AND SERVE AS THE INIT OF THE REDUCTION
+    
+    //precube, *, num => cube, fold functions for
+    //vertical, horizontal and 'back' concatenation
+    const vConc(a,b,i) => {
+      const nar = a._s[0],  nac = a._s[1],  nap = a._s[2];
+      if (Array.isArray(b)) {
+
+        let nbr, nbc, nbp;
+        if (b._data_cube){
+          nbr = b._s[0],  nbc = b._s[1],  nbp = b._s[2]; 
+        }
+        else  nbr = b.length,  nbc = 1,  nbp = 1; 
+        if (nac !== nbc || nap !== nbp) throw Error('shape mismatch');
+        const narNew = nar + nbr;
+        appendKeys(a,b,0);  //does nothing if has no row keys
+        a.length += nbr*nac*nap;
+        for (let p=0; p<nap; p++) {
+          pp =   !!!!!!!!!!NEED TO THINK CAREFULLY ABOUT INDXING INTO THE DIFFERENT ARRAYS!!!!!!!
+          for (let c=0; c<nac; c++) {
+            for (let r=0; r<nbr; r++) {
+              a[]
+          }
+        }
+      }
+      else {
+        if (nac !== 1 || nap !== 1) throw Error('shape mismatch');
+        if (a._k && a._k[0]) throw Error(`row keys expected`);
+        a.length++;
+        a[nar] = b;    
+      }
+      return a;
+    };
+    
+    
+    TO DO:
+    -SET UP PRECUBE A - COPY OF THIS, BUT MUST BE ABLE TO EXTEND LENGTH - skeleton useful?
+    -GENERALISE vConc TO OTHER DIMS OR AT LEAST PULL OUT ~COMMON CODE
+    
+    
+    
+  }
+  
+  
   
   
   //--------------- which ---------------//
@@ -1403,6 +1451,30 @@
     }
     z.length = j;
     return z;
+  });
+  
+  
+  //--------------- convert data ---------------//
+  
+  //!!NOTE: THIS IS MAY GET REMOVED SINCE IS A SPECIAL CASE OF 'unvble'
+  //-> cube, this typically an array/vector; all entries assumed to
+  //be an object with the same own properties - properties (enumerable own)
+  //of first entry used to extract vals from all and as column keys
+  addArrayMethod('toMatrix', function() {
+    if (!this._data_cube) toCube(this);
+    const nr = this.length;
+    if (nr === 0) throw Error('non-empty array/cube expected');
+    const ky = Object.keys(this[0]);
+    const nc = ky.length;
+    const z = [nr,nc].cube();
+    z.$key(1,ky);
+    for (let r=0; r<nr; r++) {
+      let obj = this[r];
+      for (let c=0; c<nc; c++) {
+        z[r + nr*c] = obj[ky[c]];  
+      }
+    }
+    return z; 
   });
   
 
