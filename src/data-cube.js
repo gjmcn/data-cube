@@ -44,21 +44,29 @@
   
   //array ->, x should NOT be a cube
   const toCube = x => {
-    Object.defineProperty(x, 'length', { writable: false });  
+    Object.defineProperty(x, 'length', { writable: false });
     Object.defineProperty(x, '_data_cube', { value: true });
     Object.defineProperty(x, '_s', {
       value: [x.length,1,1],
       writable: true
     });
   };
-
+  
   //array/cube -> cube, does nothing if already a cube
   addArrayMethod('toCube', function() {
     if (!this._data_cube) toCube(this);
     return this;
   });
   
-    
+  
+  //array ->, x assumed a valid cube except for fixed length
+  //and _data_cube property
+  const completeCube = x => {
+    Object.defineProperty(x, 'length', { writable: false });
+    Object.defineProperty(x, '_data_cube', { value: true });
+  };
+  
+  
   //--------------- compare ---------------//
   
   //array/cube[, bool] -> cu/false
@@ -1361,73 +1369,153 @@
   //--------------- concatenate ---------------//
   
   {
-    //cube, array/cube -> map/undefined, if a has keys on dim d,
-    //checks b does and appends them to keys of a. Error if:
-    //  -keys on a, but not b
-    //  -a and b share a key
-    //returns (extended) keys of a or undefined
-    const appendKeys = (a,b,d) => {
-      if (a._k && a._k[d]) {
-        if (!b._data_cube || !b._k || !b._k[d]) {
-          throw Error(`${helper.dimName[d]} keys expected`);
+    
+    //skeleton, array, num => obj. If sk has keys on
+    //dim, they are extended to include keys of args
+    //on dim. Asssume dim is 0, 1 or 2. Returned obj has props:
+    //  -kind: array same length as args, entries indicate
+    //   if corresponding arg is a cube ('dc'), array ('ar')
+    //   or non-array ('na')
+    //  -dimLen: length of dim for each arg (undefined
+    //   if arg a non-array)
+    //  -naAll, true if all args are non-arrays
+    //  -naAny, true if any args are non-arrays
+    const prep(sk, args, dim) => {
+      const skKey = sk._k && sk._k[dim],
+            nArg = args.length,
+            kind = new Array(nArg),
+            dimLen = new Array(nArg),
+            naAll = true,
+            naAny = false;
+      for (let i=0; i<nArg; i++) {
+        let a = args[i];
+        if (Array.isArray(a)) {
+          const aLen = a.length;
+          if (a._data_cube) {
+            for (let d=0; d<3; d++) {
+              if (d !== dim && sk._s[d] !== a._s[d]) throw Error('shape mismatch');               
+            }
+            if (skKey) {
+              if (!a._k || !a._k[dim]) throw Error(helper.dimName[dim] + ' keys expected');
+              let ak = a._k[dim];
+              let j = skKey.size;
+              for (let k of ak) skKey.set(k, j++);
+            }  
+            kind[i] = 'dc';
+            dimLen[i] = a._s[dim];
+          }
+          else {  //a is a standard array
+            if (dim === 0) {
+              if (sk._s[1] !== 1 || sk._s[2] !== 1) throw Error('shape mismatch');
+              dimLen[i] = aLen;
+            }
+            else if (dim === 1) {
+              if (sk._s[0] !== aLen || sk._s[2] !== 1) throw Error('shape mismatch');    
+              dimLen[i] = 1;
+            }
+            else {  // dim is 2
+              if (sk._s[0] !== aLen || sk._s[1] !== 1) throw Error('shape mismatch');
+              dimLen[i] = 1;
+            }
+            if (skKey) throw Error(helper.dimName[dim] + ' keys expected');
+            kind[i] = 'ar';
+          }
+          sk._s[dim] += dimLen[i];
+          sk.length += aLen;
+          naAll = false;
         }
-        const ak = a._k[d];
-        const bk = b._k[d];
-        let i = ak.size;
-        for (let k of bk) ak.set(k, i++);
-        if (ak.size !== i) throw Error('duplicate key');
-        return ak;
+        else {  //a is a non-array
+          for (let d=0; d<3; d++) {
+            if (d !== dim && sk._s[d] !== 1) throw Error('shape mismatch');               
+          }
+          if (skKey) throw Error(helper.dimName[dim] + ' keys expected');
+          kind[i] = 'na';
+          sk._s[dim]++;
+          sk.length++;
+          naAny = true;
+        }
       }
+      if (skKey && skKey.size !== sk._s[dim]) throw Error('duplicate key');
+      return {kind, dimLen, naAll, naAny};
     };
     
-    
-    //ASSUME CAN BE MUTATED PRRIOT OT ERROR SINCE IS THE NEW ARRAY THAT 
-    //WILL ULTIMATELY BE RETURNED
-    //  WILL START OF AS A COPY OF THIS AND SERVE AS THE INIT OF THE REDUCTION
-    
-    //precube, *, num => cube, fold functions for
-    //vertical, horizontal and 'back' concatenation
-    const vConc(a,b,i) => {
-      const nar = a._s[0],  nac = a._s[1],  nap = a._s[2];
-      if (Array.isArray(b)) {
-
-        let nbr, nbc, nbp;
-        if (b._data_cube){
-          nbr = b._s[0],  nbc = b._s[1],  nbp = b._s[2]; 
+    //[*, *, *, ...] -> cube
+    ['v', 'h', 'b'].forEach((nm, dim) => {
+      addArrayMethod(nm, function(...args) {
+        if (!this._data_cube) toCube(this);
+        const k = skeleton(this),
+              {kind, dimLen, naAll, naAny} = prep(sk, args, dim),  //SLOW? DO NOT UNPACK ALL?
+              nArg = args.length,
+              nThis = this.length,
+              nr = sk._s[0],
+              nc = sk._s[1],
+              np = sk._s[2];
+        if (naAll) {
+          const nSk = sk.length;
+          for (let i=0; i<nThis; i++) sk[i] = this[i];
+          for (let i=nThis; i<nSk; i++) sk[i] = args[i];
         }
-        else  nbr = b.length,  nbc = 1,  nbp = 1; 
-        if (nac !== nbc || nap !== nbp) throw Error('shape mismatch');
-        const narNew = nar + nbr;
-        appendKeys(a,b,0);  //does nothing if has no row keys
-        a.length += nbr*nac*nap;
-        for (let p=0; p<nap; p++) {
-          pp =   !!!!!!!!!!NEED TO THINK CAREFULLY ABOUT INDXING INTO THE DIFFERENT ARRAYS!!!!!!!
-          for (let c=0; c<nac; c++) {
-            for (let r=0; r<nbr; r++) {
-              a[]
+        else if (  //can concat all entries in order    
+                 naAny ||
+                 (dim === 1 && nc === 1 && np === 1) ||
+                 (dim === 2 && np === 1) ||
+                 (dim === 3)
+                ) {      
+          let i;
+          for (i=0; i<nThis; i++) sk[i] = this[i];
+          for (let j=0; i<nArg; j++) {
+            let a = args[j];
+            if (kind[i] === 'na') sk[i++] = a;
+            else { 
+              for (let k=0; k<a.length; k++) sk[i++] = a[k];
+            }
           }
         }
-      }
-      else {
-        if (nac !== 1 || nap !== 1) throw Error('shape mismatch');
-        if (a._k && a._k[0]) throw Error(`row keys expected`);
-        a.length++;
-        a[nar] = b;    
-      }
-      return a;
-    };
-    
-    
-    TO DO:
-    -SET UP PRECUBE A - COPY OF THIS, BUT MUST BE ABLE TO EXTEND LENGTH - skeleton useful?
-    -GENERALISE vConc TO OTHER DIMS OR AT LEAST PULL OUT ~COMMON CODE
-    
-    
-    
+        else {  //all args are cubes
+          let start = 0;
+          for (let i=-1; i<nArg; i++);
+            let a = (i === -1) ? this : args[i];
+            let nra, nca, npa;
+            if (a._s) [nra, nca, npa] = a._s;
+            else {
+              nra = a.length,
+              nca = 1,
+              npa = 1;
+            }
+            if (dim === 0) {
+              for (let p=0; p<np; p++) {          
+                let pa = p * nra * nca,
+                    pSk = p * nr * nc;          
+                for (let c=0; c<nc; c++) {
+                  let ca = c * nra,
+                      cSk = c * nr;
+                  for (let r=0; r<nra; r++) {
+                    sk[r + start + cSk + pSk] = a[r + ca + pa];
+                  }
+                }
+              }
+              start += nra; 
+            }
+            else {  //dim is 1 since dim 2 handled above 
+              for (let p=0; p<np; p++) {          
+                let pa = p * nra * nca,
+                    pSk = p * nr * nc;
+                for (let r=0; r<nra; r++) {
+                  for (let c=0; c<nc; c++) {
+                    sk[r + start + c*nr + pSk] = a[r + c*nra + pa];
+                  }
+                }
+              }
+              start += nrc; 
+            }
+          }
+        }
+        completeCube(sk);
+        return sk;
+      });
+    });
   }
-  
-  
-  
+    
   
   //--------------- which ---------------//
   
