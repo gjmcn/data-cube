@@ -1370,23 +1370,15 @@
   
   {
     
-    //skeleton, array, num => obj. If sk has keys on
-    //dim, they are extended to include keys of args
-    //on dim. Asssume dim is 0, 1 or 2. Returned obj has props:
-    //  -kind: array same length as args, entries indicate
-    //   if corresponding arg is a cube ('dc'), array ('ar')
-    //   or non-array ('na')
-    //  -dimLen: length of dim for each arg (undefined
-    //   if arg a non-array)
-    //  -naAll, true if all args are non-arrays
-    //  -naAny, true if any args are non-arrays
-    const prep(sk, args, dim) => {
+    //skeleton, array, num => obj. If sk has keys on dim,
+    //they are extended to include keys of args on dim.
+    //Returns Infinity if all args are non-arrays, true if at
+    //least one arg is a non-array, false if all args are non-arrays.
+    const prep = (sk, args, dim) => {
       const skKey = sk._k && sk._k[dim],
-            nArg = args.length,
-            kind = new Array(nArg),
-            dimLen = new Array(nArg),
-            naAll = true,
-            naAny = false;
+            nArg = args.length;
+      let naAll = true,
+          naAny = false;
       for (let i=0; i<nArg; i++) {
         let a = args[i];
         if (Array.isArray(a)) {
@@ -1399,28 +1391,25 @@
               if (!a._k || !a._k[dim]) throw Error(helper.dimName[dim] + ' keys expected');
               let ak = a._k[dim];
               let j = skKey.size;
-              for (let k of ak) skKey.set(k, j++);
-            }  
-            kind[i] = 'dc';
-            dimLen[i] = a._s[dim];
+              for (let k of ak.keys()) skKey.set(k, j++);
+            }
+            sk._s[dim] += a._s[dim];
           }
           else {  //a is a standard array
             if (dim === 0) {
               if (sk._s[1] !== 1 || sk._s[2] !== 1) throw Error('shape mismatch');
-              dimLen[i] = aLen;
+              sk._s[dim] += aLen;
             }
             else if (dim === 1) {
               if (sk._s[0] !== aLen || sk._s[2] !== 1) throw Error('shape mismatch');    
-              dimLen[i] = 1;
+              sk._s[dim]++;
             }
             else {  // dim is 2
               if (sk._s[0] !== aLen || sk._s[1] !== 1) throw Error('shape mismatch');
-              dimLen[i] = 1;
+              sk._s[dim]++;
             }
             if (skKey) throw Error(helper.dimName[dim] + ' keys expected');
-            kind[i] = 'ar';
           }
-          sk._s[dim] += dimLen[i];
           sk.length += aLen;
           naAll = false;
         }
@@ -1429,59 +1418,54 @@
             if (d !== dim && sk._s[d] !== 1) throw Error('shape mismatch');               
           }
           if (skKey) throw Error(helper.dimName[dim] + ' keys expected');
-          kind[i] = 'na';
           sk._s[dim]++;
           sk.length++;
           naAny = true;
         }
       }
       if (skKey && skKey.size !== sk._s[dim]) throw Error('duplicate key');
-      return {kind, dimLen, naAll, naAny};
+      return naAll ? Infinity : !!naAny;
     };
     
     //[*, *, *, ...] -> cube
-    ['v', 'h', 'b'].forEach((nm, dim) => {
+    ['v', 'h', 'd'].forEach((nm, dim) => {
       addArrayMethod(nm, function(...args) {
         if (!this._data_cube) toCube(this);
-        const k = skeleton(this),
-              {kind, dimLen, naAll, naAny} = prep(sk, args, dim),  //SLOW? DO NOT UNPACK ALL?
+        const sk = skeleton(this),
+              nonAr = prep(sk, args, dim),
               nArg = args.length,
               nThis = this.length,
               nr = sk._s[0],
               nc = sk._s[1],
               np = sk._s[2];
-        if (naAll) {
+        if (nonAr === Infinity) {
           const nSk = sk.length;
-          for (let i=0; i<nThis; i++) sk[i] = this[i];
-          for (let i=nThis; i<nSk; i++) sk[i] = args[i];
-        }
-        else if (  //can concat all entries in order    
-                 naAny ||
-                 (dim === 1 && nc === 1 && np === 1) ||
-                 (dim === 2 && np === 1) ||
-                 (dim === 3)
-                ) {      
           let i;
           for (i=0; i<nThis; i++) sk[i] = this[i];
-          for (let j=0; i<nArg; j++) {
+          for (let j=0; j<nArg; j++) sk[i++] = args[j];
+        }
+        else if ( //can concat all entries in order (note: these conditions
+                  //include all valid cases where any arg is a standard array)   
+                 nonAr ||
+                 (dim === 0 && nc === 1 && np === 1) ||
+                 (dim === 1 && np === 1) ||
+                 (dim === 2)
+                ) {
+          let i;
+          for (i=0; i<nThis; i++) sk[i] = this[i];
+          for (let j=0; j<nArg; j++) {
             let a = args[j];
-            if (kind[i] === 'na') sk[i++] = a;
-            else { 
+            if (Array.isArray(a)) {
               for (let k=0; k<a.length; k++) sk[i++] = a[k];
-            }
+            } 
+            else sk[i++] = a;
           }
         }
         else {  //all args are cubes
           let start = 0;
-          for (let i=-1; i<nArg; i++);
+          for (let i=-1; i<nArg; i++) {
             let a = (i === -1) ? this : args[i];
-            let nra, nca, npa;
-            if (a._s) [nra, nca, npa] = a._s;
-            else {
-              nra = a.length,
-              nca = 1,
-              npa = 1;
-            }
+            let [nra, nca, npa] = a._s;
             if (dim === 0) {
               for (let p=0; p<np; p++) {          
                 let pa = p * nra * nca,
@@ -1514,6 +1498,7 @@
         return sk;
       });
     });
+  
   }
     
   
