@@ -1265,22 +1265,25 @@
     //num[, str] -> cube
     addArrayMethod('sew', function(dim, sep) {
       if (!this._data_cube) toCube(this);
-      sep = def(assert.single(sep), ',');
+      sep = '' + def(assert.single(sep), ',');
       const z = this.fold(
         dim,
         (a,b) => `${a}${sep}${b === null || b === undefined ? '' : b}`,
         ''
       );
-      const n = z.length;
-      const sepLen = sep.length;  
-      for (let i=0; i<n; i++) z[i] = z[i].slice(sepLen);
+      if (sep) {  //sep is non-empty string - trim first sep from each entry
+        const sepLen = sep.length;
+        const n = z.length;
+        for (let i=0; i<n; i++) z[i] = z[i].slice(sepLen);
+      }
       return z;
     });
     
-    //num[, bool] -> cube
-    addArrayMethod('var', function(dim, dof) {
+    //num[, num] -> cube
+    addArrayMethod('var', function(dim, delta) {
+      if (!this._data_cube) toCube(this);
       dim = def(assert.single(dim), 0);
-      dof = assert.nonNegInt(def(assert.single(dof), 0));
+      delta = assert.nonNegInt(def(assert.single(delta), 0));
       const f = (a, newValue) => {
         const count = a[0] + 1;
         const delta = newValue - a[1];
@@ -1288,33 +1291,39 @@
         const M2 = a[2] + (delta * (newValue - mean));
         return [count, mean, M2];
       };
-      const z = this.fold(dim, f, [[0, 0, 0]]);  //this now a cube, dim is valid
+      const z = this.fold(dim, f, [[0, 0, 0]]);
       const nz = z.length;
-      let nDiv = (dim === -1 ? this.length : this._s[dim]) - dof;
-      for (let i=0; i<nz; i++) z[i] = z[i][2] / nDiv;
+      const nDim = (dim === -1) ? this.length : this._s[dim];
+      if (nDim < 2) {
+        for (let i=0; i<nz; i++) z[i] = NaN;
+      }
+      else {
+        let nDiv = nDim - delta;
+        for (let i=0; i<nz; i++) z[i] = z[i][2] / nDiv;
+      }
       return z;      
     });
-    
-    //num[, bool] -> cube
-    addArrayMethod('sd', function(dim, n) {
-      const z = this.var(dim,n);
+        
+    //num[, num] -> cube
+    addArrayMethod('sd', function(dim, delta) {
+      const z = this.var(dim,delta);
       const nz = z.length;
       for (let i=0; i<nz; i++) z[i] = Math.sqrt(z[i]);
       return z;
     });
-    
-    //num[, func, string] -> cube
-    addArrayMethod('wrap', function(dim, ret) {
+        
+    //num[, string] -> cube
+    addArrayMethod('wrap', function(dim, sc) {
       if (!this._data_cube) toCube(this);
       dim = def(assert.single(dim), 0);  //dim can be -1 so do not use assert.dim
-      ret = def(assert.single(ret), 'full');
-      if (ret !== 'full' && ret !== 'core' && ret !== 'array') {
+      sc = def(assert.single(sc), 'full');
+      if (sc !== 'full' && sc !== 'core' && sc !== 'array') {
         throw Error(`'full', 'core', or 'array' expected`);
       }
       let z;
       if (dim === -1) {
         z = copyArray(this);
-        if (ret !== 'array') toCube(z);
+        if (sc !== 'array') toCube(z);
         z = [z];
         toCube(z);
       }
@@ -1327,9 +1336,9 @@
           const ind_c = indFactory(1),
                 ind_p = indFactory(2);
           for (let p of this.pages()) {
-            let pi = ind_p(p);
+            let pi = ind_p(p) * nc;
             for (let c of this.cols()) {
-              z[ind_c(c) + nc*pi] = this.sc(null, c, p, ret);         
+              z[ind_c(c) + pi] = this.sc(null, c, p, sc);         
             }
           }
         }
@@ -1338,9 +1347,9 @@
           const ind_r = indFactory(0),
                 ind_p = indFactory(2);
           for (let p of this.pages()) {
-            let pi = ind_p(p);
+            let pi = ind_p(p) * nr;
             for (let r of this.rows()) {
-              z[ind_r(r) + nr*pi] = this.sc(r, null, p, ret);         
+              z[ind_r(r) + pi] = this.sc(r, null, p, sc);         
             }
           }
         }
@@ -1349,9 +1358,9 @@
           const ind_r = indFactory(0),
                 ind_c = indFactory(1);
           for (let c of this.cols()) {
-            let ci = ind_c(c);
+            let ci = ind_c(c) * nr;
             for (let r of this.rows()) {
-              z[ind_r(r) + nr*ci] = this.sc(r, c, null, ret);         
+              z[ind_r(r) + ci] = this.sc(r, c, null, sc);         
             }
           }
         }
