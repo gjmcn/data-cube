@@ -889,7 +889,6 @@
       ['or', (a,b) => a || b]
     ];
     
-    
     //*[, *, *, *, ...] -> cube
     for (let [nm,f] of opLike) {
       addArrayMethod(nm, function(a) {
