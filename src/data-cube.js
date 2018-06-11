@@ -1008,10 +1008,10 @@
         if (!valSingle  &&  val.length !== n) throw Error('shape mismatch');
         getName[i] = nameSingle ? () => name : j => name[j];
         if (valSingle) {
-          getVal[i] = (typeof val === function) j => val(x[j],j,x) : () => val;
+          getVal[i] = (typeof val === 'function') ? j => val(x[j],j,x) : () => val;
         }
         else {
-          getVal[i] = (typeof val === function) j => val[j](x[j],j,x) : () => val[j];
+          getVal[i] = j => (typeof val[j] === 'function') ? val[j](x[j],j,x) : val[j];
         }
       }
       for (let i=0; i<nPair; i++) {
