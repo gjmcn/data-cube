@@ -7,38 +7,10 @@ DataCube manipulates JavaScript's native arrays so that an array behaves both as
 [5,6,7,8].$shape(2);   //change shape of array to 2-by-2 ($ indicates a setter)
 ```
 
-Some notes:
+## Install/Load
 
-* Formally, a cube always has 3 dimensions: rows, columns and pages. However, the following names are useful:
-	* matrix: cube with 1 page
-	* vector: cube with 1 column and 1 page
+Install: `npm install --save data-cube`
 
-* The first argument of many cube methods is the dimension to operate on. Dimensions are referred to by number:
-	* `0`: rows/down
-	* `1`: columns/across
-	* `2`: pages/back
+The package uses the Universal Module Definition (UMD) so can be loaded in a  `<script>` tag or imported with JavaScript.
 
-* There many cube methods, for example:
-	* get/set entries and subcubes: `at`, `row`, `cube`, ...
-	* operators: `add`, `and`, `eq`, ...
-	* reduce: `sum`, `mult`, `max`, ...
-	* query: `where`, `count`, `order`, ...
-	* set theory: `union`, `inter`, `diff`, ...
-
-* There are libraries that add additional cube methods:
-	* linear algebra: `det`, `inv`, `svd` ...
-	* html: `attr`, `on`, `append`, ...
-
-* Cube methods behave sensibly when passed arrays/cubes or non-arrays. E.g. `lt` is the less-than method:
-	```js
-	[3,6].lt(5);       //=> [true, false]
-	[3,6].lt([5,9]);   //=> [true, true]
-	```
-
-* A cube behaves like a standard array in many respects:
-	* many native array methods can be used as normal; native methods that would invalidate the cube (e.g. `push`, `pop` and `splice`, see below) will produce an error
-	* other syntax such as `+=`, `++`, `...` and `[]` for getting/setting entries can be used as normal
-
-* Setters return the modified cube which allows chaining, e.g. `x.$shape(y).$key(z)`. 
-
-* The number of entries of a cube **cannot** be changed.
+See the [Wiki](https://github.com/gjmcn/data-cube/wiki) for more information and the documentation.
