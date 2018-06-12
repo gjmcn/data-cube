@@ -13,4 +13,6 @@ Install: `npm install --save data-cube`
 
 The package uses the Universal Module Definition (UMD) so can be loaded in a  `<script>` tag or imported with JavaScript.
 
-See the [Wiki](https://github.com/gjmcn/data-cube/wiki) for more information and the documentation.
+---
+
+**See the [Wiki](https://github.com/gjmcn/data-cube/wiki) for more details and the documentation.**
