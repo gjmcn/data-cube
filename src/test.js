@@ -444,15 +444,16 @@
       () => e.$label(1,['a','b']),
       () => e.$label(''),
       () => e.$label(1,''),
+      () => e.$label(1,[null,null]),
     ]);
   
     assert.each('label-1', [
       [() => assert.cube(e), undefined],
       [() => h.equalArray(e._l, [,'columns',,]), true],
-      [() => e.label(), undefined],
+      [() => e.label(), null],
       [() => e.label(1), 'columns'],
       [() => e.label(1,10,20), 'columns'],
-      [() => e.label(2), undefined]      
+      [() => e.label(2), null]      
     ]);
   
     assert.each('label-2', [
@@ -462,6 +463,20 @@
       [() => m.label(1), 'columns'],
       [() => m.label(2), '' + obj]
     ]);
+    
+    e.$label(1,null);
+    m.$label(1,[null])
+     .$label([2], null);
+    m.$label(2,'columns again');
+    assert.each('label-3', [
+      [() => e.label(0), null],
+      [() => e.label(1), null],
+      [() => e.label(2), null],
+      [() => m.label(), '1'],      
+      [() => m.label(1), null],      
+      [() => m.label(2), 'columns again'],     
+    ]);
+
   }
     
   console.log('--- key, $key')
@@ -492,6 +507,7 @@
       () => b.$key(1,[undefined,6,7]),
       () => b.$key(1,[6,6,7]),
       () => b.$key(1,[5,6,7,6]),
+      () => b.$key(0,[null,null]),
     ]);
 
     assert.each('key-1', [
@@ -504,8 +520,8 @@
     assert.each('key-2', [
       [() => assert.cube(v), undefined],
       [() => h.equalArray(v.key([undefined]), ['a',obj]), true],
-      [() => v.key(1), undefined],
-      [() => v.key(2), undefined]
+      [() => v.key(1), null],
+      [() => v.key(2), null]
     ]);
     
     assert.each('key-3', [
@@ -516,10 +532,29 @@
     ]);
     
     assert.each('key-4', [
-      [() => [].key(), undefined],
-      [() => [].key(1), undefined],
-      [() => [].key(2), undefined]
+      [() => [].key(), null],
+      [() => [].key(1), null],
+      [() => [].key(2), null]
     ]);
+    
+    e.$key(null)
+     .$key(1,[null])
+     .$key([2],null)
+    v.$key(0,null)
+     .$key(1,'col-0');
+    b.$key(1,null)
+    assert.each('key-5', [
+      [() => e.key(), null],
+      [() => e.key(1), null],
+      [() => e.key(2), null],
+      [() => v.key(0), null],
+      [() => h.equalArray(v.key(1), ['col-0']), true],
+      [() => v.key(2), null],
+      [() => h.equalArray(b.key(0), [obj,'' + obj]), true],
+      [() => b.key(1), null],
+      [() => h.equalArray(b.key(2), ['a','b',true,false]), true]
+    ]);
+
   }
 
   console.log('--- n');
