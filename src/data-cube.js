@@ -1381,15 +1381,15 @@
   
   {
     
-    //skeleton, array, num => obj. If sk has keys on dim,
+    //skeleton, array, num => str/bool. If sk has keys on dim,
     //they are extended to include keys of args on dim.
-    //Returns Infinity if all args are non-arrays, true if at
-    //least one arg is a non-array, false if all args are non-arrays.
+    //Returns 'all' if all args are non-arrays, true if at
+    //least one arg is a non-array, false if all args are arrays.
     const prep = (sk, args, dim) => {
       const skKey = sk._k && sk._k[dim],
             nArg = args.length;
-      let naAll = true,
-          naAny = false;
+      let naAll = true,   //all args are non-arrays
+          naAny = false;  //at least one arg is a non-array
       for (let i=0; i<nArg; i++) {
         let a = args[i];
         if (Array.isArray(a)) {
@@ -1409,15 +1409,15 @@
           else {  //a is a standard array
             if (dim === 0) {
               if (sk._s[1] !== 1 || sk._s[2] !== 1) throw Error('shape mismatch');
-              sk._s[dim] += aLen;
+              sk._s[0] += aLen;
             }
             else if (dim === 1) {
               if (sk._s[0] !== aLen || sk._s[2] !== 1) throw Error('shape mismatch');    
-              sk._s[dim]++;
+              sk._s[1]++;
             }
             else {  // dim is 2
               if (sk._s[0] !== aLen || sk._s[1] !== 1) throw Error('shape mismatch');
-              sk._s[dim]++;
+              sk._s[2]++;
             }
             if (skKey) throw Error(helper.dimName[dim] + ' keys expected');
           }
@@ -1435,7 +1435,7 @@
         }
       }
       if (skKey && skKey.size !== sk._s[dim]) throw Error('duplicate key');
-      return naAll ? Infinity : !!naAny;
+      return naAll ? 'all' : naAny;
     };
     
     //[*, *, *, ...] -> cube
@@ -1446,15 +1446,17 @@
               nonAr = prep(sk, args, dim),
               nArg = args.length,
               nThis = this.length,
-              nr = sk._s[0],
+              nr = sk._s[0],  //shape of result since prep modifies sk
               nc = sk._s[1],
               np = sk._s[2];
-        if (nonAr === Infinity) {
-          const nSk = sk.length;
+        if (nonAr === 'all') {  //includes when nArgs is 0
           let i;
           for (i=0; i<nThis; i++) sk[i] = this[i];
           for (let j=0; j<nArg; j++) sk[i++] = args[j];
         }
+        
+        HERE!!!!!!!!!!!!!!!!!!
+        
         else if ( //can concat all entries in order (note: these conditions
                   //include all valid cases where any arg is a standard array)   
                  nonAr ||
