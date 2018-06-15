@@ -975,7 +975,7 @@
     
     const b = h.simpleRange(24).map(x => x+100)
       .$shape([4,3,2])
-      .$key(1,['a','b','c'])
+      .$key(1,['a','bcd','ef'])
       .$key(2,['I', 'II'])
       .$label(0,'the rows')
       .$label(1,'the columns');
@@ -988,11 +988,11 @@
     assert('pages-book-length', () => bPagesArray.length, 2);
             
     assert('rows-book-none', () => h.equalArray( [...b.rows()] , [0,1,2,3]), true);
-    assert('cols-book-none', () => h.equalArray( [...b.cols()] , ['a','b','c']), true);
+    assert('cols-book-none', () => h.equalArray( [...b.cols()] , ['a','bcd','ef']), true);
     assert('pages-book-none',() => h.equalArray( [...b.pages()], ['I','II']), true);
     
     assert('rows-book-core-ind',  () => h.equalArray( ent0(bRowsCore)  , [0,1,2,3]), true);
-    assert('cols-book-full-key',  () => h.equalArray( ent0(bColsFull)  , ['a','b','c']), true);
+    assert('cols-book-full-key',  () => h.equalArray( ent0(bColsFull)  , ['a','bcd','ef']), true);
     assert('pages-book-array-key',() => h.equalArray( ent0(bPagesArray), ['I', 'II']), true);
         
     test('rows-book-core-row-0', bRowsCore[0][1], b.row(0).copy('core'));
@@ -1001,8 +1001,12 @@
     test('rows-book-core-row-3', bRowsCore[3][1], b.row(3).copy('core'));
      
     test('cols-book-full-col-0', bColsFull[0][1], b.col('a'));
-    test('cols-book-full-col-1', bColsFull[1][1], b.col('b'));
-    test('cols-book-full-col-2', bColsFull[2][1], b.col('c'));
+    test('cols-book-full-col-1', bColsFull[1][1], b.col('bcd'));
+    test('cols-book-full-col-2', bColsFull[2][1], b.col('ef'));
+    
+    let tmpKey = [];
+    for (let [ky,cl] of b.cols('full')) tmpKey.push(ky);
+    assert('cols-book-full-for-of',() => h.equalArray(tmpKey, ['a','bcd','ef']), true);
     
     test('pages-book-array-page-0', bPagesArray[0][1], b.page('I').copy('array'));
     test('pages-book-array-page-1', bPagesArray[1][1], b.page('II').copy('array'));
