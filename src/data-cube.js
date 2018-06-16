@@ -1510,6 +1510,49 @@
   }
     
   
+  //--------------- tile, to ---------------//
+  
+  addArrayMethod('tile', function(dim, n) {
+    dim = assert.dim(dim);
+    n = assert.nonNegInt(def(assert.single(n), 0));
+    const nThis = this.n,
+          [nr, nc, np] = this._s;
+    let z;
+    if (dim === 0) {
+      z = [nr * n, nc, np].cube();
+      
+      
+      !!!!!!!!!!!!HERE!!!!!!!!!!!1
+      here and in concat methods, will be looping over this (or the arg)
+      in order can just have eg  k=0 and do    a[k++] - no need for pa and ca in concat loop?
+      
+      
+      
+    }
+    else if (dim === 1) {
+      z = [nr, nc * n, np].cube();
+    }
+    else if (dim === 2 || dim === -1) {  //dim is -1 or 2, can copy repeat entries trivially
+      if (dim === -1) z = [nThis * n.cube]();
+      else z = [nr, nc, np * n].cube();
+      let k = 0;
+      for (let j=0; j<n; j++) {
+        for (let i=0; i<nThis; i++) {
+          z[k++] = this[i];
+        }
+      }
+    }
+    else throw Error('invalid dimension');
+    if (dim !== -1) {
+      copyKey(this,z,dim);
+      copyLabel(this,z,dim);
+    }
+    return z;
+  });
+  
+  
+  
+  
   //--------------- which ---------------//
   
   //[func] -> array
