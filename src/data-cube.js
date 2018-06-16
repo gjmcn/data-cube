@@ -59,8 +59,8 @@
   });
   
   
-  //array ->, x assumed a valid cube except for fixed length
-  //and _data_cube property
+  //array ->, x assumed a valid cube except for length
+  //not being fixed and absence of _data_cube property
   const completeCube = x => {
     Object.defineProperty(x, 'length', { writable: false });
     Object.defineProperty(x, '_data_cube', { value: true });
@@ -1381,15 +1381,14 @@
   
   {
     
-    //skeleton, array, num => str/bool. If sk has keys on dim,
-    //they are extended to include keys of args on dim.
-    //Returns 'all' if all args are non-arrays, true if at
-    //least one arg is a non-array, false if all args are arrays.
-    const prep = (sk, args, dim) => {
-      const skKey = sk._k && sk._k[dim],
+    //cube, array, num => [cube, bool]:
+    //  -cube to be returned by v, h or d except all entries holes
+    //  -true if all args are non-arrays
+    const prep = (x, args, dim) => {
+      const sk = skeleton(x),
+            skKey = sk._k && sk._k[dim],
             nArg = args.length;
-      let naAll = true,   //all args are non-arrays
-          naAny = false;  //at least one arg is a non-array
+      let naAll = true;   //all args are non-arrays
       for (let i=0; i<nArg; i++) {
         let a = args[i];
         if (Array.isArray(a)) {
@@ -1421,7 +1420,6 @@
             }
             if (skKey) throw Error(helper.dimName[dim] + ' keys expected');
           }
-          sk.length += aLen;
           naAll = false;
         }
         else {  //a is a non-array
@@ -1430,85 +1428,82 @@
           }
           if (skKey) throw Error(helper.dimName[dim] + ' keys expected');
           sk._s[dim]++;
-          sk.length++;
-          naAny = true;
         }
       }
       if (skKey && skKey.size !== sk._s[dim]) throw Error('duplicate key');
-      return naAll ? 'all' : naAny;
+      sk.length = sk._s[0] * sk._s[1] * sk._s[2];
+      completeCube(sk);
+      return [sk, naAll];
     };
     
     //[*, *, *, ...] -> cube
     ['v', 'h', 'd'].forEach((nm, dim) => {
       addArrayMethod(nm, function(...args) {
         if (!this._data_cube) toCube(this);
-        const sk = skeleton(this),
-              nonAr = prep(sk, args, dim),
+        const [z, naAll] = prep(this, args, dim),
               nArg = args.length,
               nThis = this.length,
-              nr = sk._s[0],  //shape of result since prep modifies sk
-              nc = sk._s[1],
-              np = sk._s[2];
-        if (nonAr === 'all') {  //includes when nArgs is 0
+              nr = z._s[0],
+              nc = z._s[1],
+              np = z._s[2];
+        if (naAll) {  //includes when nArgs is 0
           let i;
-          for (i=0; i<nThis; i++) sk[i] = this[i];
-          for (let j=0; j<nArg; j++) sk[i++] = args[j];
+          for (i=0; i<nThis; i++) z[i] = this[i];
+          for (let j=0; j<nArg; j++) z[i++] = args[j];
         }
-        
-        HERE!!!!!!!!!!!!!!!!!!
-        
-        else if ( //can concat all entries in order (note: these conditions
-                  //include all valid cases where any arg is a standard array)   
-                 nonAr ||
+        else if ( //can concat all entries in order (note: following conditions
+                  //include all cases where at least one arg is a standard array)
                  (dim === 0 && nc === 1 && np === 1) ||
                  (dim === 1 && np === 1) ||
                  (dim === 2)
                 ) {
           let i;
-          for (i=0; i<nThis; i++) sk[i] = this[i];
+          for (i=0; i<nThis; i++) z[i] = this[i];
           for (let j=0; j<nArg; j++) {
             let a = args[j];
             if (Array.isArray(a)) {
-              for (let k=0; k<a.length; k++) sk[i++] = a[k];
+              for (let k=0; k<a.length; k++) z[i++] = a[k];
             } 
-            else sk[i++] = a;
+            else z[i++] = a;
           }
         }
         else {  //all args are cubes
           let start = 0;
           for (let i=-1; i<nArg; i++) {
             let a = (i === -1) ? this : args[i];
-            let [nra, nca, npa] = a._s;
             if (dim === 0) {
+              let nra = a._s[0];
               for (let p=0; p<np; p++) {          
-                let pa = p * nra * nca,
-                    pSk = p * nr * nc;          
+                let pa = p * nra * nc,
+                    pz = p * nr * nc;          
                 for (let c=0; c<nc; c++) {
                   let ca = c * nra,
-                      cSk = c * nr;
+                      cz = c * nr;
                   for (let r=0; r<nra; r++) {
-                    sk[r + start + cSk + pSk] = a[r + ca + pa];
+                    z[r + start + cz + pz] = a[r + ca + pa];
                   }
                 }
               }
-              start += nra; 
+              start += nra;
             }
-            else {  //dim is 1 since dim 2 handled above 
+            else {  //dim is 1 since handled above if 2
+              let nca = a._s[1];
               for (let p=0; p<np; p++) {          
-                let pa = p * nra * nca,
-                    pSk = p * nr * nc;
-                for (let r=0; r<nra; r++) {
-                  for (let c=0; c<nc; c++) {
-                    sk[r + start + c*nr + pSk] = a[r + c*nra + pa];
+                let pa = p * nr * nca,
+                    pz = p * nr * nc;
+                for (let c=0; c<nca; c++) {
+                  let ca = c * nr,
+                      cz = (c + start) * nr;
+                  for (let r=0; r<nr; r++) {
+                    z[r + cz + pz] = a[r + ca + pa];
                   }
                 }
               }
-              start += nrc; 
+              start += nca; 
             }
           }
         }
-        completeCube(sk);
-        return sk;
+        return z;
       });
     });
   
