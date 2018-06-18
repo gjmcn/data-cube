@@ -1612,8 +1612,9 @@
     dc.normal = (shp,mu,sigma) => toArray(shp).normal(mu,sigma);
     dc.copy = (ar,ret) => toArray(ar).copy(ret);
     
-    dc._helper = helper;
-      
+    //helper is actually an object, but can still use addArrayMethod
+    addArrayMethod('_helper', helper);
+    
     module.exports = dc;
   }
         

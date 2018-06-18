@@ -13,7 +13,7 @@
     dc = require( './data-cube.js');
     testing = './src/data-cube.js\n(dist/data-cube.js does not exist)';
   }
-  const h = dc._helper;
+  const h = Array.prototype._helper;
     
   //test a.compare(b)
   const test = (name, a, b) => {
