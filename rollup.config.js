@@ -5,10 +5,10 @@ import uglify from 'rollup-plugin-uglify';
 export default {
   input: 'src/data-cube.js',
   output: {
-    extend: false,
+    extend: true,
     file: 'dist/data-cube.js',
     format: 'umd',
-    name: '_data_cube'
+    name: 'dc'
   },
   plugins: [
     commonjs({

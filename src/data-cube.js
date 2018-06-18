@@ -4,7 +4,7 @@
   
   //--------------- prep ---------------//
 
-	const helper = require('data-cube-helper');
+	const helper = require('./helper.js');
   
   const { 
     assert, fill, fillEW, addArrayMethod, keyMap,
@@ -1512,6 +1512,7 @@
   
   //--------------- tile, to ---------------//
   
+  /*
   addArrayMethod('tile', function(dim, n) {
     dim = assert.dim(dim);
     n = assert.nonNegInt(def(assert.single(n), 0));
@@ -1549,8 +1550,7 @@
     }
     return z;
   });
-  
-  
+  */
   
   
   //--------------- which ---------------//
@@ -1601,7 +1601,22 @@
     return z; 
   });
   
-
+      
+  //--------------- export ---------------//
+      
+  {
+    const dc = ar => toArray(ar).toCube();
+      
+    dc.cube = (shp,val) => toArray(shp).cube(val);
+    dc.rand = (shp,mx) => toArray(shp).rand(mx);
+    dc.normal = (shp,mu,sigma) => toArray(shp).normal(mu,sigma);
+    dc.copy = (ar,ret) => toArray(ar).copy(ret);
+    
+    dc._helper = helper;
+      
+    module.exports = dc;
+  }
+        
 }
  
 
