@@ -747,23 +747,24 @@
     assert('rand-1', () => Math.min(...a) >= 0, true);
     assert('rand-2', () => Math.max(...a) < 1, true);
     assert('rand-3', () => [10].rand(1).every(v => v === 0 || v === 1), true);
-    assert('rand-4', () => [20].rand([3])
+    assert('rand-4', () => [10].rand(true).every(v => v === 0 || v === 1), true);
+    assert('rand-5', () => [20].rand([3])
+      .every(v => v === 0 || v === 1 || v === 2 || v === 3), true);
+    assert('rand-6', () => [20].rand(['3'])
       .every(v => v === 0 || v === 1 || v === 2 || v === 3), true);
     assert.throw('throw-rand-invalid-max-1', () => [2].rand(0));
     assert.throw('throw-rand-invalid-max-2', () => [2].rand(-1));
-    assert.throw('throw-rand-invalid-max-3', () => [2].rand('2'));
   }
   
   console.log('--- normal');
   {
     //basic tests; most work handled by cube()
     const a = [20].normal();
-    const b = [20].normal(500,10);
+    const b = [20].normal(500,'10');
     assert('normal-1', () => Math.min(...a) > -10, true);
     assert('normal-2', () => Math.max(...a) < 10, true);
     assert('normal-3', () => Math.min(...b) > 400, true);
     assert('normal-4', () => Math.max(...b) < 600, true);
-    assert.throw('throw-normal-invalid-mean', () => [20].normal('5',2));
     assert.throw('throw-normal-invalid-std-dev', () => [20].normal(5,-2));
   }
   

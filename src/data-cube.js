@@ -11,7 +11,10 @@
     isSingle, polarize, def, toArray, copyArray, copyMap,
     ensureKey, ensureLabel, nni, copyKey, copyLabel, skeleton
   } = helper;
-    
+  
+  //helper is an object, but can use addArrayMethod for any property
+  addArrayMethod('_helper', helper);
+      
   //methods use standard accessors for these properties; if an 
   //absent property is on the prototype chain, methods will
   //incorrectly treat it as instance-level 
@@ -141,7 +144,7 @@
     const z = this.cube();
     const n = z.length;
     if (mx !== undefined) {
-      const lim = assert.posInt(mx) + 1;
+      const lim = assert.posInt(+mx) + 1;
       for (let i=0; i<n; i++) z[i] = Math.floor(Math.random()*lim);
     }
     else {
@@ -160,9 +163,9 @@
         s = u*u + v*v;
         if (s > 0 && s < 1) return u * Math.sqrt((-2 * Math.log(s)) / s);
       }
-    };    
-    mu = assert.number(def(assert.single(mu),0));
-    sig = assert.number(def(assert.single(sig),1));
+    }; 
+    mu = +def(assert.single(mu),0);
+    sig = +def(assert.single(sig),1);
     if (sig <= 0) throw Error('positive number expected (standard deviation)');
     const z = this.cube();
     const n = z.length;
@@ -1609,17 +1612,27 @@
       
     dc.cube = (shp,val) => toArray(shp).cube(val);
     dc.rand = (shp,mx) => toArray(shp).rand(mx);
-    dc.normal = (shp,mu,sigma) => toArray(shp).normal(mu,sigma);
+    dc.normal = (shp,mu,sig) => toArray(shp).normal(mu,sig);
     dc.copy = (ar,ret) => toArray(ar).copy(ret);
-    
-    //helper is actually an object, but can still use addArrayMethod
-    addArrayMethod('_helper', helper);
-    
+        
     module.exports = dc;
   }
-        
+    
 }
  
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
