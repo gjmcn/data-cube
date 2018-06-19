@@ -641,6 +641,33 @@
     test('compare-book-book-2', be, b);   
   }
   
+  console.log('--- dc');
+  {
+    const e = [];
+    test('dc-1', dc(e), []);
+    assert.cube('dc-2', e);
+    
+    const s = dc(5);
+    test('dc-3', s, [5]);
+    assert.cube('dc-4', s);
+    
+    const t = [5];
+    test('dc-5', dc(t), [5]);
+    assert.cube('dc-6', t);
+    
+    const obj = {};
+    const a = [5,obj,6];
+    test('dc-7', dc(a), [5,obj,6]);
+    assert.cube('dc-8', a);
+    
+    test('dc-9', dc(), [undefined]);
+    assert.cube('dc-10', dc());
+  
+    const c = dc([2,3,4,5,6,7].$shape([2,3]).$key(['a','b']));
+    test('dc-11', c, [2,3,4,5,6,7].$shape([2,3]).$key(['a','b']));
+    assert.cube('dc-12', c);
+  }
+  
   console.log('--- cube');
   {
     assert.throw('throw-cube-too-many-entries', () => [6,7,8,9].cube());
@@ -654,6 +681,10 @@
     assert.throw('throw-cube-non-int-7', () => [4,[3],2].cube());
     assert.throw('throw-cube-shape-mismatch-1', () => [4].cube([5,6,7]));
     assert.throw('throw-cube-shape-mismatch-2', () => [4,2].cube([5,6,7]));
+    
+    assert.throw('throw-cube-dc-too-many-entries', () => dc.cube([6,7,8,9]));
+    assert.throw('throw-cube-dc-non-int', () => dc.cube([1,{}]));
+    assert.throw('throw-cube-dc-shape-mismatch', () => dc.cube([4,2], [5,6,7]));
     
     const obj = {a:5};
     const a = [5,obj];
@@ -738,6 +769,30 @@
       [() => h.equalArray(b_1._s, [2,3,2]), true]
     ]);
     
+    const noArg_dc = dc.cube(); 
+    assert.each('cube-dc-no-arg', [
+      [() => assert.cube(noArg_dc), undefined],
+      [() => h.equalArray(noArg_dc, [undefined]), true],
+      [() => h.equalArray(noArg_dc._s, [1,1,1]), true]
+    ]);
+    const s_dc = dc.cube([]);
+    assert.each('cube-dc-empty-shape', [
+      [() => assert.cube(s_dc), undefined],
+      [() => h.equalArray(s_dc, [undefined]), true],
+      [() => h.equalArray(s_dc._s, [1,1,1]), true]
+    ]);
+    const a_dc = dc.cube(3,[4,5,6]); 
+    assert.each('cube-dc-non-array', [
+      [() => assert.cube(a_dc), undefined],
+      [() => h.equalArray(a_dc, [4,5,6]), true],
+      [() => h.equalArray(a_dc._s, [3,1,1]), true]
+    ]);
+    const b_1_dc = dc.cube([2,3,2], true);
+    assert.each('cube-dc-book', [
+      [() => assert.cube(b_1_dc), undefined],
+      [() => h.equalArray(b_1_dc, (new Array(12)).fill(true)), true],
+      [() => h.equalArray(b_1_dc._s, [2,3,2]), true]
+    ]);
   }
   
   console.log('--- rand');
@@ -752,8 +807,14 @@
       .every(v => v === 0 || v === 1 || v === 2 || v === 3), true);
     assert('rand-6', () => [20].rand(['3'])
       .every(v => v === 0 || v === 1 || v === 2 || v === 3), true);
+    
     assert.throw('throw-rand-invalid-max-1', () => [2].rand(0));
     assert.throw('throw-rand-invalid-max-2', () => [2].rand(-1));
+  
+    const a_dc = dc.rand(10);
+    assert('rand-dc-1', () => Math.min(...a_dc) >= 0, true);
+    assert('rand-dc-2', () => Math.max(...a_dc) < 1, true);
+    assert('rand-dc-3', () => h.equalArray(a_dc._s, [10,1,1]), true);
   }
   
   console.log('--- normal');
@@ -765,7 +826,13 @@
     assert('normal-2', () => Math.max(...a) < 10, true);
     assert('normal-3', () => Math.min(...b) > 400, true);
     assert('normal-4', () => Math.max(...b) < 600, true);
+    
     assert.throw('throw-normal-invalid-std-dev', () => [20].normal(5,-2));
+    
+    const b_dc = dc.normal([4,5],500,10);
+    assert('normal-dc-1', () => Math.min(...b_dc) > 400, true);
+    assert('normal-dc-2', () => Math.max(...b_dc) < 600, true);
+    assert('normal-dc-3', () => h.equalArray(b_dc._s, [4,5,1]), true);
   }
   
   console.log('--- copy')
