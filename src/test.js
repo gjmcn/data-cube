@@ -847,6 +847,9 @@
     assert.cube('copy-empty-6', e.copy('shell'));
     test('copy-empty-7', e.copy('shell'), []);
     
+    assert.cube('copy-dc-empty-0', dc.copy(e));
+    test('copy-dc-empty-1', dc.copy(e), []);
+    
     const dt = new Date();
     const a = [5,6]
       .$key(['a',dt])
@@ -866,6 +869,12 @@
     test.throw('throw-copy-array', a.copy('shell'),
       [,,].$key(['a', new Date(+dt)]).$label(0,'row').$label(2,'page'));
     
+    assert('copy-dc-array-0', () => dc.copy(a,'array')._data_cube, undefined);
+    test('copy-dc-array-1', dc.copy(a,'array'), [5,6]);
+    assert.cube('copy-dc-array-2', dc.copy(a,'full'));
+    test('copy-dc-array-3', dc.copy(a,'full'),
+      [5,6].$key(['a',dt]).$label(0,'row').$label(2,'page'));
+    
     const obj = {};
     const b = [4,5,6,obj,7,8]
       .$shape([1,2,3])
@@ -884,6 +893,25 @@
     assert.cube('copy-book-6', b.copy('shell'));
     test('copy-book-7', b.copy('shell'),
       (new Array(6)).$shape([1,2,3]).$key(1,['a','b']).$key(2,['A','B','C']));
+    
+    test('copy-dc-book-0', dc.copy(b,'full'),
+      [4,5,6,obj,7,8].$shape([1,2,3]).$key(1,['a','b']).$key(2,['A','B','C']));
+    assert.cube('copy-dc-book-1', dc.copy(b,'full'));
+    test('copy-dc-book-2', dc.copy(b,'core'), [4,5,6,obj,7,8].$shape([1,2,3]));
+    assert.cube('copy-dc-book-3', dc.copy(b,'core'));
+    
+    test('copy-dc-no-args-0', dc.copy(), [undefined]);
+    assert.cube('copy-dc-no-args-1', dc.copy());
+    
+    test('copy-dc-non-array-0', dc.copy(5), [5]),
+    assert.cube('copy-dc-non-array-1', dc.copy(5));
+    test('copy-dc-non-array-2', dc.copy(5,'array'), [5]),
+    assert('copy-dc-non-array-3', () => dc.copy(5,'array')._data_cube, undefined);
+        
+    assert.throw('throw-copy-non-singleton', () => [4,5].copy(['full','core']));
+    assert.throw('throw-copy-invalid-ret-0', () => [4,5].copy([['full']]));
+    assert.throw('throw-copy-invalid-ret-1', () => [4,5].copy('ful'));
+    assert.throw('throw-dc-copy-invalid-ret', () => dc.copy([4,5],'ful'));
   }
   
   console.log('--- shape');
