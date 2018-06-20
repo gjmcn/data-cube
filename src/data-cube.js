@@ -1474,16 +1474,15 @@
           let start = 0;
           for (let i=-1; i<nArg; i++) {
             let a = (i === -1) ? this : args[i];
+            let k = 0;
             if (dim === 0) {
               let nra = a._s[0];
               for (let p=0; p<np; p++) {          
-                let pa = p * nra * nc,
-                    pz = p * nr * nc;          
+                let pz = p * nr * nc;          
                 for (let c=0; c<nc; c++) {
-                  let ca = c * nra,
-                      cz = c * nr;
+                  let cz = c * nr;
                   for (let r=0; r<nra; r++) {
-                    z[r + start + cz + pz] = a[r + ca + pa];
+                    z[r + start + cz + pz] = a[k++];
                   }
                 }
               }
@@ -1492,13 +1491,11 @@
             else {  //dim is 1 since handled above if 2
               let nca = a._s[1];
               for (let p=0; p<np; p++) {          
-                let pa = p * nr * nca,
-                    pz = p * nr * nc;
+                let pz = p * nr * nc;
                 for (let c=0; c<nca; c++) {
-                  let ca = c * nr,
-                      cz = (c + start) * nr;
+                  let cz = (c + start) * nr;
                   for (let r=0; r<nr; r++) {
-                    z[r + cz + pz] = a[r + ca + pa];
+                    z[r + cz + pz] = a[k++];
                   }
                 }
               }
@@ -1509,52 +1506,76 @@
         return z;
       });
     });
-  
   }
     
   
-  //--------------- tile, to ---------------//
+  //--------------- tile, tileTo ---------------//
   
-  /*
-  addArrayMethod('tile', function(dim, n) {
+  addArrayMethod('tile', function(dim, n, ret) {
+    if (!this._data_cube) toCube(this);
     dim = assert.dim(dim);
-    n = assert.nonNegInt(def(assert.single(n), 0));
-    const nThis = this.n,
-          [nr, nc, np] = this._s;
-    let z;
-    if (dim === 0) {
-      z = [nr * n, nc, np].cube();
-      
-      
-      !!!!!!!!!!!!HERE!!!!!!!!!!!1
-      here and in concat methods, will be looping over this (or the arg)
-      in order can just have eg  k=0 and do    a[k++] - no need for pa and ca in concat loop?
-      
-      
-      
-    }
-    else if (dim === 1) {
-      z = [nr, nc * n, np].cube();
-    }
-    else if (dim === 2 || dim === -1) {  //dim is -1 or 2, can copy repeat entries trivially
-      if (dim === -1) z = [nThis * n.cube]();
-      else z = [nr, nc, np * n].cube();
+    n = assert.nonNegInt(def(assert.single(n),2));
+    ret = def(assert.single(ret), 'full');
+    if (ret !== 'full' && ret !== 'core') throw Error(`'full' or 'core' expected`);
+    const zShp = copyArray(this._s);
+    zShp[dim] *= n;
+    const z = zShp.cube();
+    if (dim === 2) {  //dim is 2, order of entries is simple
+      const nThis = this.length;
       let k = 0;
-      for (let j=0; j<n; j++) {
-        for (let i=0; i<nThis; i++) {
-          z[k++] = this[i];
+      for (let i=0; i<n; i++) {
+        for (let j=0; j<nThis; j++) {
+          z[k++] = this[j];
         }
       }
     }
-    else throw Error('invalid dimension');
-    if (dim !== -1) {
+    else {  //dim is 0 or 1
+      const [nr, nc, np] = this._s,
+            [nrz, ncz] = z._s;
+      for (let i=0; i<n; i++) {
+        let start = dim ? i * nrz * nc : i * nr;
+            k = 0;
+        for (let p=0; p<np; p++) {          
+          let pz = p * nrz * ncz;          
+          for (let c=0; c<nc; c++) {
+            let cz = c * nrz;
+            for (let r=0; r<nr; r++) {
+              z[r + start + cz + pz] = this[k++];
+            }
+          }
+        }
+      }
+    }
+    if (ret === 'full') {
       copyKey(this,z,dim);
       copyLabel(this,z,dim);
     }
     return z;
   });
-  */
   
+  addArrayMethod('tileTo', function(y,ret) {
+    if (!this._data_cube) toCube(this);
+    if (Array.isArray(y)) {
+      if (y._data_cube) {
+        let z;
+        for (let d=0; d<3; d++) {
+          const n = assert.posInt(y._s[d] / this._s[d]);
+          z = (z || this).tile(d,n,ret); 
+        }
+        return z;
+      }
+      else {
+        if (this._s[1] !== 1 || this._s[2] !== 1) throw Error('shape mismatch');
+        const n = assert.posInt(y.length / this._s[0]);
+        return this.tile(0,n,ret);
+      }
+    }
+    else {
+      if (this.length !== 1) throw Error('shape mismatch');
+      return this.copy(); 
+    }
+  });
+
   
   //--------------- which ---------------//
   
@@ -1581,6 +1602,47 @@
   });
   
   
+  //--------------- set theory ---------------//
+  
+  {
+  
+    addArrayMethod('unique', function() {
+      if (!this._data_cube) toCube(this);          
+      return [...new Set(this)];
+    });
+
+    addArrayMethod('isUnique', function() {
+      if (!this._data_cube) toCube(this);     
+      return this.length === this.unique().length;
+    });
+    
+    addArrayMethod('union', function(y) {
+      if (!this._data_cube) toCube(this);
+      var [y,ySingle] = polarize(y);
+      if (ySingle) return [...(new Set(this)).add(y)];
+      return [...(new Set([...this, ...y]))];
+    });
+    
+    addArrayMethod('inter', function(y) {
+      if (!this._data_cube) toCube(this);
+      var [y,ySingle] = polarize(y);
+      if (ySingle) {
+        const n = this.length;
+        for (let i=0; i<n; i++) }
+          if (y === this[i]) return [y];
+        }
+        return [];
+      }
+      else {
+        SEE 2ALITY BOOK - NOT NEC USE THIS APPROACH!
+      }                          
+    });
+    
+    
+    
+  }
+    
+    
   //--------------- convert data ---------------//
   
   //!!NOTE: THIS IS MAY GET REMOVED SINCE IS A SPECIAL CASE OF 'unvble'
