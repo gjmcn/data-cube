@@ -1605,40 +1605,55 @@
   //--------------- set theory ---------------//
   
   {
-  
+    //-> array
     addArrayMethod('unique', function() {
-      if (!this._data_cube) toCube(this);          
+      if (!this._data_cube) toCube(this);
       return [...new Set(this)];
     });
 
+    //-> bool
     addArrayMethod('isUnique', function() {
-      if (!this._data_cube) toCube(this);     
+      if (!this._data_cube) toCube(this);
       return this.length === this.unique().length;
     });
-    
-    addArrayMethod('union', function(y) {
+
+    //[*, *, *, ...] -> array
+    addArrayMethod('union', function(...args) {
       if (!this._data_cube) toCube(this);
-      var [y,ySingle] = polarize(y);
-      if (ySingle) return [...(new Set(this)).add(y)];
-      return [...(new Set([...this, ...y]))];
+      return [...(new Set(this.concat(...args)))];
     });
     
-    addArrayMethod('inter', function(y) {
-      if (!this._data_cube) toCube(this);
-      var [y,ySingle] = polarize(y);
-      if (ySingle) {
-        const n = this.length;
-        for (let i=0; i<n; i++) }
-          if (y === this[i]) return [y];
-        }
-        return [];
-      }
-      else {
-        SEE 2ALITY BOOK - NOT NEC USE THIS APPROACH!
-      }                          
+    //array/cube, array, bool -> array
+    const interDiff = (x,args,diff) => {
+      if (!x._data_cube) toCube(x);
+      const s = new Set( (args.length === 1)
+        ? toArray(args[0])
+        : [].concat(...args)
+      );
+      const f = diff ? v => !s.has(v) : v => s.has(v);
+      return [...(new Set(x))].filter(f);
+    }
+        
+    //[*, *, *, ...] -> array
+    addArrayMethod('inter', function(...args) {
+      return interDiff(this,args,false);
+    });
+    addArrayMethod('diff', function(...args) {
+      return interDiff(this,args,true);
     });
     
-    
+    //[*, *, *, ...] -> cube
+    addArrayMethod('isIn', function(...args) {
+      if (!this._data_cube) toCube(this);
+      const s = new Set( (args.length === 1)
+        ? toArray(args[0])
+        : [].concat(...args)
+      );
+      const z = this.copy('core'),
+            n = this.length;
+      for (let i=0; i<n; i++) z[i] = s.has(this[i]);
+      return z;
+    });
     
   }
     
