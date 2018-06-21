@@ -1156,13 +1156,13 @@
   {
     //empty array
     const e = [];
-    test('sc-empty-array-0', e.sc(), []);
-    test('sc-empty-array-1', e.sc(null, 0, 0) , []);
-    test('$sc-empty-array-0', e.$sc([], 5) , []);
-    test('$sc-empty-array-1', e.$sc([], 0, 5) , []);
-    test('$sc-empty-array-2', e.$sc([], 0, 0, 5) , []);
-    test('$sc-empty-array-3', e.$sc(null, null, null, 5) , []);
-    test('$sc-empty-array-4', e.$sc([]) , []);
+    test('subcube-empty-array-0', e.subcube(), []);
+    test('subcube-empty-array-1', e.subcube(null, 0, 0) , []);
+    test('$subcube-empty-array-0', e.$subcube([], 5) , []);
+    test('$subcube-empty-array-1', e.$subcube([], 0, 5) , []);
+    test('$subcube-empty-array-2', e.$subcube([], 0, 0, 5) , []);
+    test('$subcube-empty-array-3', e.$subcube(null, null, null, 5) , []);
+    test('$subcube-empty-array-4', e.$subcube([]) , []);
     
     test('row-empty-array-0', e.row(), []);
     test('row-empty-array-1', e.row(null), []);
@@ -1212,22 +1212,22 @@
     test('head-empty-array-4', e.head(5,5,5), []);
     
     assert.throwEach('throw-subcube-empty-array', [
-      () => e.sc(0),
-      () => e.sc(-1),
-      () => e.sc('a'),
-      () => e.sc(null,1),
-      () => e.sc(null,null,1),
+      () => e.subcube(0),
+      () => e.subcube(-1),
+      () => e.subcube('a'),
+      () => e.subcube(null,1),
+      () => e.subcube(null,null,1),
       () => e.row(0),
       () => e.col(1),
       () => e.page(1),
       () => e.down(0),
       () => e.along(0,1),
       () => e.page(0,1),
-      () => e.$sc(0,5),
-      () => e.$sc(-1,5),
-      () => e.$sc('a',5),
-      () => e.$sc(null,1,5),
-      () => e.$sc(null,null,1,5),
+      () => e.$subcube(0,5),
+      () => e.$subcube(-1,5),
+      () => e.$subcube('a',5),
+      () => e.$subcube(null,1,5),
+      () => e.$subcube(null,null,1,5),
       () => e.$row(0,5),
       () => e.$col(1,5),
       () => e.$page(1,5),
@@ -1238,14 +1238,14 @@
     
     //get vector
     let v = [5,6,7,8,9];
-    test('sc-vector-0', v.sc(), [5,6,7,8,9]);
-    test('sc-vector-1', v.sc(3), [8]);
-    test('sc-vector-2', v.sc(-2), [8]);
-    test('sc-vector-3', v.sc([2,4]), [7,9]);
-    test('sc-vector-4', v.sc([2,4], 0, 0), [7,9]);
-    test('sc-vector-5', v.sc([2,4], null, null), [7,9]);
-    test('sc-vector-6', v.sc([-3,-1], null, null), [7,9]);
-    test('sc-vector-7', v.sc([], null, null), []);
+    test('subcube-vector-0', v.subcube(), [5,6,7,8,9]);
+    test('subcube-vector-1', v.subcube(3), [8]);
+    test('subcube-vector-2', v.subcube(-2), [8]);
+    test('subcube-vector-3', v.subcube([2,4]), [7,9]);
+    test('subcube-vector-4', v.subcube([2,4], 0, 0), [7,9]);
+    test('subcube-vector-5', v.subcube([2,4], null, null), [7,9]);
+    test('subcube-vector-6', v.subcube([-3,-1], null, null), [7,9]);
+    test('subcube-vector-7', v.subcube([], null, null), []);
     
     test('row-vector-0', v.row(), [5,6,7,8,9]);
     test('row-vector-1', v.row(3), [8]);
@@ -1274,18 +1274,18 @@
     const obj = {};
     const wrapObj = [obj];
     v = [5,6,7,8,9];
-    test('$sc-vector-0', v.$sc(11),          [11,11,11,11,11]);
-    test('$sc-vector-1', v.$sc(3,12),        [11,11,11,12,11]);
-    test('$sc-vector-2', v.$sc([2,4],13),    [11,11,13,12,13]);
-    test('$sc-vector-3', v.$sc(0,14),        [14,11,13,12,13]);
-    test('$sc-vector-4', v.$sc([],15),       [14,11,13,12,13]);
-    test('$sc-vector-5', v.$sc(-4,16),       [14,16,13,12,13]);
-    test('$sc-vector-6', v.$sc([2,-1,0], [17,18,19]), [19,16,17,12,18]);
-    test('$sc-vector-7', v.$sc([2,4], [20]), [19,16,20,12,20]);
-    test('$sc-vector-8', v.$sc([2,4], [obj, wrapObj]), [19,16,obj,12,wrapObj]);
-    test('$sc-vector-9', v.$sc(0, obj),        [obj,16,obj,12,wrapObj]);
-    test('$sc-vector-10', v.$sc(0, wrapObj),   [obj,16,obj,12,wrapObj]);
-    test('$sc-vector-11', v.$sc(0, [wrapObj]), [wrapObj,16,obj,12,wrapObj]);
+    test('$subcube-vector-0', v.$subcube(11),          [11,11,11,11,11]);
+    test('$subcube-vector-1', v.$subcube(3,12),        [11,11,11,12,11]);
+    test('$subcube-vector-2', v.$subcube([2,4],13),    [11,11,13,12,13]);
+    test('$subcube-vector-3', v.$subcube(0,14),        [14,11,13,12,13]);
+    test('$subcube-vector-4', v.$subcube([],15),       [14,11,13,12,13]);
+    test('$subcube-vector-5', v.$subcube(-4,16),       [14,16,13,12,13]);
+    test('$subcube-vector-6', v.$subcube([2,-1,0], [17,18,19]), [19,16,17,12,18]);
+    test('$subcube-vector-7', v.$subcube([2,4], [20]), [19,16,20,12,20]);
+    test('$subcube-vector-8', v.$subcube([2,4], [obj, wrapObj]), [19,16,obj,12,wrapObj]);
+    test('$subcube-vector-9', v.$subcube(0, obj),        [obj,16,obj,12,wrapObj]);
+    test('$subcube-vector-10', v.$subcube(0, wrapObj),   [obj,16,obj,12,wrapObj]);
+    test('$subcube-vector-11', v.$subcube(0, [wrapObj]), [wrapObj,16,obj,12,wrapObj]);
     
     v = [5,6,7,8,9];
     test('$row-vector-0', v.$row(11),          [11,11,11,11,11]); 
@@ -1364,18 +1364,18 @@
     let b, bTmp, valTmp;
     
     b = book();
-    test('sc-book-0', b.sc(), book());
-    test('sc-book-1', b.sc(null, null, null, 'full'), book());
-    test('sc-book-2', b.sc(null, null, null, 'core'), marks().$shape([3,4,2]));
-    test('sc-book-3', b.sc('Bob'), bob);
-    test('sc-book-4', b.sc(null, ['biol','chem']), biolChem);
-    test('sc-book-5', b.sc('Alice', ['biol','chem'], 'Spring'), aliceBiolChemSpring);
-    test('sc-book-6', b.sc(null, null, 'Spring'), spring);
-    test('sc-book-7', b.sc(null, [], null), emptyCol);
-    test('sc-book-8', b.sc(null, ['biol','chem'], null, 'full'), biolChem);
-    test('sc-book-9', b.sc(null, ['biol','chem'], null, 'core'), 
+    test('subcube-book-0', b.subcube(), book());
+    test('subcube-book-1', b.subcube(null, null, null, 'full'), book());
+    test('subcube-book-2', b.subcube(null, null, null, 'core'), marks().$shape([3,4,2]));
+    test('subcube-book-3', b.subcube('Bob'), bob);
+    test('subcube-book-4', b.subcube(null, ['biol','chem']), biolChem);
+    test('subcube-book-5', b.subcube('Alice', ['biol','chem'], 'Spring'), aliceBiolChemSpring);
+    test('subcube-book-6', b.subcube(null, null, 'Spring'), spring);
+    test('subcube-book-7', b.subcube(null, [], null), emptyCol);
+    test('subcube-book-8', b.subcube(null, ['biol','chem'], null, 'full'), biolChem);
+    test('subcube-book-9', b.subcube(null, ['biol','chem'], null, 'core'), 
       [14,15,16,17,18,19,26,27,28,29,30,31].$shape([3,2,2]))
-    test('sc-book-10', b.sc(null, ['biol','chem'], null, 'array'), 
+    test('subcube-book-10', b.subcube(null, ['biol','chem'], null, 'array'), 
       [14,15,16,17,18,19,26,27,28,29,30,31])
     
     test('row-book-0', b.row(), book());
@@ -1414,15 +1414,15 @@
         .$key(2,'Autumn')));    
     
     b = book();
-    test('$sc-book-0', b.$sc(50), addLabels(addKeys([3,4,2].cube(50))));
+    test('$subcube-book-0', b.$subcube(50), addLabels(addKeys([3,4,2].cube(50))));
     b = book();
-    test('$sc-book-1', b.$sc([24].cube(51)), addLabels(addKeys([3,4,2].cube(51))));
+    test('$subcube-book-1', b.$subcube([24].cube(51)), addLabels(addKeys([3,4,2].cube(51))));
     
     bTmp = book();
     bTmp[1] = 52;    bTmp[4] = 52;    bTmp[7] = 52;    bTmp[10] = 52; 
     bTmp[13] = 52;   bTmp[16] = 52;   bTmp[19] = 52;   bTmp[22] = 52; 
     b = book();
-    test('$sc-book-2', b.$sc('Bob',52), bTmp);
+    test('$subcube-book-2', b.$subcube('Bob',52), bTmp);
     b = book();
     test('$row-book-0', b.$row('Bob',52), bTmp);
     b = book();
@@ -1435,7 +1435,7 @@
     bTmp[15] = 59;   bTmp[16] = 60;   bTmp[17] = 61;
     bTmp[18] = 62;   bTmp[19] = 63;   bTmp[20] = 64;
     b = book();
-    test('$sc-book-3', b.$sc(null,['biol','chem'],valTmp), bTmp);
+    test('$subcube-book-3', b.$subcube(null,['biol','chem'],valTmp), bTmp);
     b = book();
     test('$col-book-0', b.$col(['biol','chem'],valTmp), bTmp);
     b = book();
@@ -1444,29 +1444,29 @@
     bTmp = book();
     bTmp[15] = 65;    bTmp[18] = 66; 
     b = book();
-    test('$sc-book-4', b.$sc('Alice', ['biol','chem'], 'Spring', [65,66]), bTmp);
+    test('$subcube-book-4', b.$subcube('Alice', ['biol','chem'], 'Spring', [65,66]), bTmp);
     
     b = book();
-    test('$sc-book-5', b.$sc(null, null, [], 67),  book());
+    test('$subcube-book-5', b.$subcube(null, null, [], 67),  book());
     test('$page-book-0', b.$page([], 67),  book());
 
     b = book();
     assert.throwEach('throw-subcube', [
-      () => b.sc('x'),
-      () => b.sc('Bob', 'x'),
-      () => b.sc('Bob', 'biol', 'x'),
-      () => b.$sc('x', 10),
-      () => b.$sc('Bob', 'x', 10),
-      () => b.$sc('Bob', 'biol', 'x', 10),
-      () => b.sc([['Alice']]),
-      () => b.sc(null, null, null, 'x'),
+      () => b.subcube('x'),
+      () => b.subcube('Bob', 'x'),
+      () => b.subcube('Bob', 'biol', 'x'),
+      () => b.$subcube('x', 10),
+      () => b.$subcube('Bob', 'x', 10),
+      () => b.$subcube('Bob', 'biol', 'x', 10),
+      () => b.subcube([['Alice']]),
+      () => b.subcube(null, null, null, 'x'),
       () => b.row('x'),
       () => b.col('x'),
       () => b.page('x'),
       () => b.down('x'),
       () => b.along('x'),
       () => b.back('x'),
-      () => b.$sc(),
+      () => b.$subcube(),
       () => b.$row('Alice',2,3),
       () => b.$col('biol',2,3),
       () => b.$page('Spring',2,3),
@@ -1477,7 +1477,7 @@
       () => b.$along('chem','biol',10),
       () => b.along('biol',[['chem']]),
       () => b.$along('biol',[['chem']],10),
-      () => b.$sc([10,11]),
+      () => b.$subcube([10,11]),
       () => b.$row('Alice',[10,11]),
       () => b.$down('Alice','Bob',[10,11])
     ]);

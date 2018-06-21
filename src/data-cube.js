@@ -20,7 +20,7 @@
   //incorrectly treat it as instance-level 
   ['_data_cube', '_s', '_k', '_l'].forEach(prop => {
     if (prop in Array.prototype) {
-      throw Error(prop + ' is a property of Array.protoype'); 
+      throw Error(prop + ' is a property of Array.prototype'); 
     }
   });
   
@@ -486,7 +486,7 @@
     };
 
     //*, *, *[, str] -> cube
-    addArrayMethod('sc', function(row, col, page, ret) {
+    addArrayMethod('subcube', function(row, col, page, ret) {
       if (!this._data_cube) toCube(this);
       ret = def(assert.single(ret), 'full');
       if (ret !== 'full' && ret !== 'core' && ret !== 'array') {
@@ -527,7 +527,7 @@
     });
     
     //*, *, *, *, * -> cube
-    addArrayMethod('$sc', function(row, col, page, val) {
+    addArrayMethod('$subcube', function(row, col, page, val) {
       if (!this._data_cube) toCube(this);
       const nArg = assert.argRange(arguments,1,4);
       switch (nArg) {
@@ -558,21 +558,21 @@
     
     //row, col, page getters and setters
     {
-      addArrayMethod('row',   function(j, ret) { return this.sc(   j, null, null, ret) });
-      addArrayMethod('col',   function(j, ret) { return this.sc(null,    j, null, ret) });
-      addArrayMethod('page',  function(j, ret) { return this.sc(null, null,    j, ret) });
+      addArrayMethod('row',   function(j, ret) { return this.subcube(   j, null, null, ret) });
+      addArrayMethod('col',   function(j, ret) { return this.subcube(null,    j, null, ret) });
+      addArrayMethod('page',  function(j, ret) { return this.subcube(null, null,    j, ret) });
       
       addArrayMethod('$row',  function(j, val) { 
         const nArg = assert.argRange(arguments,1,2);
-        return nArg === 1 ? this.$sc(j) : this.$sc(   j, null, null, val);
+        return nArg === 1 ? this.$subcube(j) : this.$subcube(   j, null, null, val);
       });
       addArrayMethod('$col',  function(j, val) { 
         const nArg = assert.argRange(arguments,1,2);
-        return nArg === 1 ? this.$sc(j) : this.$sc(null,    j, null, val);
+        return nArg === 1 ? this.$subcube(j) : this.$subcube(null,    j, null, val);
       });
       addArrayMethod('$page', function(j, val) { 
         const nArg = assert.argRange(arguments,1,2);
-        return nArg === 1 ? this.$sc(j) : this.$sc(null, null,    j, val);
+        return nArg === 1 ? this.$subcube(j) : this.$subcube(null, null,    j, val);
       });
     }
       
@@ -587,9 +587,9 @@
           case 5:  [s, e, retVal] = [   s, null, e];  break;  
           case 6:  break;  
         }
-        mthd = '$sc';
+        mthd = '$subcube';
       }
-      else mthd = 'sc'; 
+      else mthd = 'subcube'; 
       s = assert.single(s);
       e = assert.single(e);
       let q;
@@ -629,7 +629,7 @@
         else if (this._k && this._k[d]) ind[d] = helper.firstKey(m, this._k[d]);
         else ind[d] = rangeInd(0,m-1);
       }
-      return this.sc(...ind, ret);
+      return this.subcube(...ind, ret);
     });
   }
   
@@ -964,7 +964,7 @@
   
   
   //--------------- entrywise: prop ---------------//
-  //--------------- (and for now, some html style, attr and class methods) ---------------//
+  //(and for now, some html style, attr and class methods)
   
   {
 
@@ -1343,7 +1343,7 @@
           for (let p of this.pages()) {
             let pi = ind_p(p) * nc;
             for (let c of this.cols()) {
-              z[ind_c(c) + pi] = this.sc(null, c, p, sc);         
+              z[ind_c(c) + pi] = this.subcube(null, c, p, sc);         
             }
           }
         }
@@ -1354,7 +1354,7 @@
           for (let p of this.pages()) {
             let pi = ind_p(p) * nr;
             for (let r of this.rows()) {
-              z[ind_r(r) + pi] = this.sc(r, null, p, sc);         
+              z[ind_r(r) + pi] = this.subcube(r, null, p, sc);         
             }
           }
         }
@@ -1365,7 +1365,7 @@
           for (let c of this.cols()) {
             let ci = ind_c(c) * nr;
             for (let r of this.rows()) {
-              z[ind_r(r) + ci] = this.sc(r, c, null, sc);         
+              z[ind_r(r) + ci] = this.subcube(r, c, null, sc);         
             }
           }
         }
@@ -1440,7 +1440,7 @@
     };
     
     //[*, *, *, ...] -> cube
-    ['v', 'h', 'd'].forEach((nm, dim) => {
+    ['vert', 'horiz', 'depth'].forEach((nm, dim) => {
       addArrayMethod(nm, function(...args) {
         if (!this._data_cube) toCube(this);
         const [z, naAll] = prep(this, args, dim),
@@ -1511,16 +1511,18 @@
   
   //--------------- tile, tileTo ---------------//
   
+  
+  //[num, num, str] -> cube
   addArrayMethod('tile', function(dim, n, ret) {
     if (!this._data_cube) toCube(this);
     dim = assert.dim(dim);
-    n = assert.nonNegInt(def(assert.single(n),2));
+    n = assert.nonNegInt(+def(assert.single(n),2));
     ret = def(assert.single(ret), 'full');
     if (ret !== 'full' && ret !== 'core') throw Error(`'full' or 'core' expected`);
     const zShp = copyArray(this._s);
     zShp[dim] *= n;
     const z = zShp.cube();
-    if (dim === 2) {  //dim is 2, order of entries is simple
+    if (dim === 2) {  //order of entries is simple
       const nThis = this.length;
       let k = 0;
       for (let i=0; i<n; i++) {
@@ -1533,7 +1535,7 @@
       const [nr, nc, np] = this._s,
             [nrz, ncz] = z._s;
       for (let i=0; i<n; i++) {
-        let start = dim ? i * nrz * nc : i * nr;
+        let start = (dim === 0) ? i * nr : i * nr * nc,
             k = 0;
         for (let p=0; p<np; p++) {          
           let pz = p * nrz * ncz;          
@@ -1553,26 +1555,32 @@
     return z;
   });
   
+  //*[, str] -> cube  
   addArrayMethod('tileTo', function(y,ret) {
     if (!this._data_cube) toCube(this);
+    ret = def(assert.single(ret), 'full');
+    if (ret !== 'full' && ret !== 'core') throw Error(`'full' or 'core' expected`);
     if (Array.isArray(y)) {
       if (y._data_cube) {
         let z;
         for (let d=0; d<3; d++) {
-          const n = assert.posInt(y._s[d] / this._s[d]);
-          z = (z || this).tile(d,n,ret); 
+          let nd = this._s[d];
+          if (nd === y._s[d]) continue;
+          if (nd === 0) throw Error('shape mismatch');
+          z = (z || this).tile(d, assert.nonNegInt(y._s[d] / nd), ret); 
         }
-        return z;
+        return z || this.copy(ret);  //if this and y same shape, z is undefined
       }
       else {
         if (this._s[1] !== 1 || this._s[2] !== 1) throw Error('shape mismatch');
-        const n = assert.posInt(y.length / this._s[0]);
-        return this.tile(0,n,ret);
+        if (this.length === y.length) return this.copy(ret);
+        if (this.length === 0) throw Error('shape mismatch');
+        return this.tile(0, assert.nonNegInt(y.length / this.length), ret);
       }
     }
     else {
       if (this.length !== 1) throw Error('shape mismatch');
-      return this.copy(); 
+      return this.copy(ret); 
     }
   });
 
