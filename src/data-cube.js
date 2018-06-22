@@ -1616,7 +1616,7 @@
     //-> array
     addArrayMethod('unique', function() {
       if (!this._data_cube) toCube(this);
-      return [...new Set(this)];
+      return [...(new Set(this))];
     });
 
     //-> bool
@@ -1630,39 +1630,43 @@
       if (!this._data_cube) toCube(this);
       return [...(new Set(this.concat(...args)))];
     });
-    
-    //array/cube, array, bool -> array
-    const interDiff = (x,args,diff) => {
-      if (!x._data_cube) toCube(x);
-      const s = new Set( (args.length === 1)
+
+    //[*, *, *, ...] -> array
+    addArrayMethod('diff', function(...args) {
+      if (!this._data_cube) toCube(this);
+      const s = new Set( args.length === 1
         ? toArray(args[0])
         : [].concat(...args)
       );
-      const f = diff ? v => !s.has(v) : v => s.has(v);
-      return [...(new Set(x))].filter(f);
-    }
-        
-    //[*, *, *, ...] -> array
-    addArrayMethod('inter', function(...args) {
-      return interDiff(this,args,false);
-    });
-    addArrayMethod('diff', function(...args) {
-      return interDiff(this,args,true);
+      return this.unique().filter(v => !s.has(v));
     });
     
+    //[*, *, *, ...] -> array
+    addArrayMethod('inter', function(...args) {
+      if (!this._data_cube) toCube(this);
+      const nArg = args.length;
+      let z = this.unique();
+      for (let i=0; i<nArg; i++) {
+        if (z.length === 0) break;
+        let s = new Set(toArray(args[i]));
+        z = z.filter(v => s.has(v));
+      }
+      return z;
+    });
+
     //[*, *, *, ...] -> cube
     addArrayMethod('isIn', function(...args) {
       if (!this._data_cube) toCube(this);
-      const s = new Set( (args.length === 1)
+      const s = new Set( args.length === 1
         ? toArray(args[0])
         : [].concat(...args)
       );
-      const z = this.copy('core'),
+      const z = this.copy('shell'),
             n = this.length;
       for (let i=0; i<n; i++) z[i] = s.has(this[i]);
       return z;
     });
-    
+
   }
     
     
