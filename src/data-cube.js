@@ -1669,6 +1669,90 @@
 
   }
     
+  //--------------- flip, roll, shuffle, sample ---------------//
+  
+  {
+    //cube, num, str, [,num] -> cube: same shape and extras
+    //(except for different ordered keys on dim) as x. how
+    //is one of:
+    //  -flip
+    //  -roll, arg is shift amount (integer)
+    //  -shuffle, arg is number of 'results' to return
+    //  -sample, arg is number of 'results' to return
+    const arrange = (x, dim, how, arg) => {
+      if (!x._data_cube) toCube(x);
+      dim = assert.dim(dim);
+      if (how !== 'flip') arg = assert.single(arg);
+      const nd = x._s[dim];
+      let n,ind; //will generate inds, even if have dim has keys
+      switch(how) {
+        case 'flip':
+          n = nd;
+          ind = new Array(n);
+          for (let i=0; i<n; i++) ind[i] = n - 1 - i;
+          break;
+        case 'roll':
+          arg = assert.int(+def(arg, 1));
+          n = nd;
+          if (arg < 0) arg = n - (-arg % n);
+          ind = new Array(n);
+          for (let i=0; i<n; i++) ind[i] = (i + arg) % n;
+          break;
+        case 'shuffle':
+          if (arg === null || arg === undefined) n = nd;
+          else n = assert.nonNegInt(+arg);
+          if (n) {
+            if (n > nd) throw Error(`cannot get ${n} shuffled ${helper.dimName[dim]}s from dimension of length ${nd}`);
+            ind = helper.shuffle(nd);
+            if (n < nd) ind = ind.slice(0,nd);
+          }
+          else ind = [];
+          break;
+        case 'sample':
+          n = assert.nonNegInt(+def(arg, 1));
+          if (n) {
+            if (nd === 0) throw Error(`cannot sample ${n} ${helper.dimName[dim]}s from empty dimension`);
+            ind = (nd === 1) ? [n].cube(0) : [n].rand(nd-1);
+          }
+          else ind = [];
+          break;
+      }      
+      const zShp = copyArray(x._s);
+      zShp[dim] = n;
+      const z = zShp.cube(),
+            [nrx, ncx] = x._s,
+            [nrz, ncz, npz] = z._s;
+      let j = 0;
+      for (let p=0; p<npz; p++) {
+        let pp = nrx * ncx * (dim === 2 ? ind[p] : p);
+        for (let c=0; c<ncz; c++) {
+          let cc = nrx * (dim === 1 ? ind[c] : c);
+          for (let r=0; r<nrz; r++) {
+            z[j++] = x[(dim === 0 ? ind[r] : r) + cc + pp];
+          }
+        }
+      }
+      copyKey(x,z,dim);
+      copyLabel(x,z,dim);    
+      if (how !== 'sample') {
+        
+        !!!!!!HERE - throwing an error if keys, also check loop limits etc above
+        
+        
+        if (x._k && x._k[dim]) z.$key(dim, x.key(dim).row(ind));
+        if (x._l && x._l[dim]) z.$label(dim, x._l[dim]);  
+      }
+      return z;
+    };
+    
+    //num[, num] -> cube
+    ['flip', 'roll', 'shuffle', 'sample'].forEach((nm) => {
+      addArrayMethod(nm, function(dim, arg) {
+        return arrange(this, dim, nm, arg);  //arg for flip ignored
+      });
+    });
+      
+  }
     
   //--------------- convert data ---------------//
   

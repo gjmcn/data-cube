@@ -358,6 +358,14 @@
   }
   
   const assert = {
+    
+    //* -> num, s must be an integer, returns s
+    int: s => { 
+      if (!Number.isInteger(s)) {
+        throw Error('integer expected');
+      }
+      return s;
+    },
 	
     //* -> num, s must be a non-neg integer, returns s
     nonNegInt: s => { 

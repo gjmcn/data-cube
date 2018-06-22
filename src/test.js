@@ -46,7 +46,21 @@
   
     //assert functions
     {
-
+      
+      assert.each('assert-int', [
+        [() => h.assert.int(5), 5],
+        [() => h.assert.int(0), 0],
+        [() => h.assert.int(-2), -2],
+      ]);
+      assert.throwEach('invalid-assert-int', [
+        () => h.assert.int(1.2),
+        () => h.assert.int(Infinity),
+        () => h.assert.int(-Infinity),
+        () => h.assert.int(NaN),
+        () => h.assert.int('2'),
+        () => h.assert.int([2])
+      ]);
+      
       assert.each('assert-non-neg-int', [
         [() => h.assert.nonNegInt(5), 5],
         [() => h.assert.nonNegInt(0), 0]
