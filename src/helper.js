@@ -383,6 +383,14 @@
       return s;
     },
     
+    //* -> num, s must be non-neg and finite, returns s
+    nonNegFin: s => {
+      if (!Number.isFinite(s) || s < 0) {
+        throw Error('non-negative finite number expected');
+      }
+      return s;
+    },
+    
     //* -> num, s must be a number, returns s
     number: s => {
       if (typeof s !== 'number') throw Error('number expected');

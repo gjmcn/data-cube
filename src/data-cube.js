@@ -1669,89 +1669,154 @@
 
   }
     
-  //--------------- flip, roll, shuffle, sample ---------------//
+  //--------------- flip, roll, shuffle, sample, rowQ, colQ, pageQ ---------------//
   
   {
-    //cube, num, str, [,num] -> cube: same shape and extras
-    //(except for different ordered keys on dim) as x. how
-    //is one of:
-    //  -flip
-    //  -roll, arg is shift amount (integer)
-    //  -shuffle, arg is number of 'results' to return
-    //  -sample, arg is number of 'results' to return
-    const arrange = (x, dim, how, arg) => {
-      if (!x._data_cube) toCube(x);
-      dim = assert.dim(dim);
-      if (how !== 'flip') arg = assert.single(arg);
-      const nd = x._s[dim];
-      let n,ind; //will generate inds, even if have dim has keys
-      switch(how) {
-        case 'flip':
-          n = nd;
-          ind = new Array(n);
-          for (let i=0; i<n; i++) ind[i] = n - 1 - i;
-          break;
-        case 'roll':
-          arg = assert.int(+def(arg, 1));
-          n = nd;
-          if (arg < 0) arg = n - (-arg % n);
-          ind = new Array(n);
-          for (let i=0; i<n; i++) ind[i] = (i + arg) % n;
-          break;
-        case 'shuffle':
-          if (arg === null || arg === undefined) n = nd;
-          else n = assert.nonNegInt(+arg);
-          if (n) {
-            if (n > nd) throw Error(`cannot get ${n} shuffled ${helper.dimName[dim]}s from dimension of length ${nd}`);
-            ind = helper.shuffle(nd);
-            if (n < nd) ind = ind.slice(0,nd);
-          }
-          else ind = [];
-          break;
-        case 'sample':
-          n = assert.nonNegInt(+def(arg, 1));
-          if (n) {
-            if (nd === 0) throw Error(`cannot sample ${n} ${helper.dimName[dim]}s from empty dimension`);
-            ind = (nd === 1) ? [n].cube(0) : [n].rand(nd-1);
-          }
-          else ind = [];
-          break;
-      }      
+
+    //cube, num, array/cube, bool -> cube. Get rows/cols/pages
+    //with indices in ind (even if dim has keys). ex specifies
+    //whether to keep keys and label on dim (if they exist).
+    const arrange = (x, dim, ind, keyLabel) => {
       const zShp = copyArray(x._s);
-      zShp[dim] = n;
-      const z = zShp.cube(),
-            [nrx, ncx] = x._s,
-            [nrz, ncz, npz] = z._s;
+      zShp[dim] = ind.length;
+      const z = zShp.cube();
+            nrx = x._s[0],
+            ncx = x._s[1],
+            nrz = z._s[0],
+            ncz = z._s[1],
+            npz = z._s[2];
       let j = 0;
-      for (let p=0; p<npz; p++) {
-        let pp = nrx * ncx * (dim === 2 ? ind[p] : p);
-        for (let c=0; c<ncz; c++) {
-          let cc = nrx * (dim === 1 ? ind[c] : c);
-          for (let r=0; r<nrz; r++) {
-            z[j++] = x[(dim === 0 ? ind[r] : r) + cc + pp];
+      if (dim === 0) {
+        for (let p=0; p<npz; p++) {
+          let pp = nrx * ncx * p;
+          for (let c=0; c<ncz; c++) {
+            let cc = nrx * c;
+            for (let r=0; r<nrz; r++) {
+              z[j++] = x[ind[r] + cc + pp];
+            }
+          }
+        }
+      }
+      else if (dim === 1) {
+        for (let p=0; p<npz; p++) {
+          let pp = nrx * ncx * p;
+          for (let c=0; c<ncz; c++) {
+            let cc = nrx * ind[c];
+            for (let r=0; r<nrz; r++) {
+              z[j++] = x[r + cc + pp];
+            }
+          }
+        }
+      }
+      else {  //dim is 2
+        for (let p=0; p<npz; p++) {
+          let pp = nrx * ncx * ind[p];
+          for (let c=0; c<ncz; c++) {
+            let cc = nrx * c;
+            for (let r=0; r<nrz; r++) {
+              z[j++] = x[r + cc + pp];
+            }
           }
         }
       }
       copyKey(x,z,dim);
       copyLabel(x,z,dim);    
-      if (how !== 'sample') {
-        
-        !!!!!!HERE - throwing an error if keys, also check loop limits etc above
-        
-        
+      if (keyLabel) {
         if (x._k && x._k[dim]) z.$key(dim, x.key(dim).row(ind));
         if (x._l && x._l[dim]) z.$label(dim, x._l[dim]);  
       }
       return z;
     };
+        
+    //num -> cube
+    addArrayMethod('flip', function(dim) {
+      if (!this._data_cube) toCube(this);
+      dim = assert.dim(dim);
+      const n = this._s[dim],
+            ind = new Array(n);
+      for (let i=0; i<n; i++) ind[i] = n - 1 - i;
+      return arrange(this, dim, ind, true);
+    });
     
     //num[, num] -> cube
-    ['flip', 'roll', 'shuffle', 'sample'].forEach((nm) => {
-      addArrayMethod(nm, function(dim, arg) {
-        return arrange(this, dim, nm, arg);  //arg for flip ignored
-      });
+    addArrayMethod('roll', function(dim, shift) {
+      if (!this._data_cube) toCube(this);
+      dim = assert.dim(dim);
+      shift = assert.int(+def(assert.single(shift), 1));
+      const n = this._s[dim];
+      if (shift < 0) shift = n - (-shift % n);
+      const ind = new Array(n);
+      for (let i=0; i<n; i++) ind[(i + shift) % n] = i;
+      return arrange(this, dim, ind, true);
     });
-      
+    
+    //num[, num] -> cube
+    addArrayMethod('shuffle', function(dim, n) {
+      if (!this._data_cube) toCube(this);
+      dim = assert.dim(dim);
+      const nd = this._s[dim];
+      if (n === undefined || n === null) n = nd;
+      else n = assert.nonNegInt(+n);
+      if (n) {
+        if (n > nd) throw Error(`cannot get ${n} shuffled ${helper.dimName[dim]}s ` + 
+                                `from dimension of length ${nd}`);
+        ind = helper.shuffle(nd);
+        if (n < nd) ind = ind.slice(0,n);
+      }
+      else ind = [];
+      return arrange(this, dim, ind, true);
+    });
+     
+    //num[, num] -> cube
+    addArrayMethod('sample', function(dim, n, prob) {
+      if (!this._data_cube) toCube(this);
+      dim = assert.dim(dim);
+      n = assert.nonNegInt(+def(assert.single(n), 1));
+      var [prob,probSingle] = polarize(prob);
+      let ind;
+      const nd = this._s[dim];
+      if (probSingle) {
+        if (prob === undefined || prob === null) {  //uniform probs
+          if (n) {
+            if (nd === 0) throw Error(`cannot sample ${n} ${helper.dimName[dim]}s `+
+                                      `from empty dimension`);
+            ind = (nd === 1) ? [n].cube(0) : [n].rand(nd-1);
+          }
+          else ind = [];
+        }
+        else {  //probs for single entry
+          if (nd !== 1) throw Error('shape mismatch');
+          prob = assert.nonNegFin(+prob);
+          if (prob === 0) throw Error('at least one probability must be non-zero');
+          ind = [n].cube(0);
+        }
+      }
+      else {
+        if (prob.length !== nd) throw Error('shape mismatch');
+        if (nd) {
+          for (let i=0; i<nd; i++) assert.nonNegFin(+prob[i]);
+          const cumuProb = prob.number().cumuSum(-1);
+          const total = cumuProb[nd-1];
+          if (total === 0) throw Error('at least one probability must be non-zero');
+          ind = new Array(n);
+          for (let i=0; i<n; i++) {
+            let rnd = Math.random() * total; 
+            for (let j=0; j<nd; j++) {
+              if (rnd <= cumuProb[j]) {
+                ind[i] = j;
+                break;
+              }
+            }
+          }
+        }
+        else {
+          if (n) throw Error(`cannot sample ${n} ${helper.dimName[dim]}s from empty dimension`);
+          ind = [];  
+        }
+      }
+      return arrange(this, dim, ind, false);
+    });
+
   }
     
   //--------------- convert data ---------------//

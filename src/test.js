@@ -73,7 +73,21 @@
         () => h.assert.nonNegInt('2'),
         () => h.assert.nonNegInt([2])
       ]);
-
+      
+      assert.each('assert-non-neg-fin', [
+        [() => h.assert.nonNegFin(5), 5],
+        [() => h.assert.nonNegFin(1.23), 1.23],
+        [() => h.assert.nonNegFin(0), 0],
+      ]);
+      assert.throwEach('invalid-assert-non-neg-fin', [
+        () => h.assert.nonNegFin(-2),
+        () => h.assert.nonNegFin(Infinity),
+        () => h.assert.nonNegFin(-Infinity),
+        () => h.assert.nonNegFin(NaN),
+        () => h.assert.nonNegFin('2'),
+        () => h.assert.nonNegFin([2]),
+      ]);
+      
       assert.each('assert-pos-int', [
         [() => h.assert.posInt(5), 5]
       ]);
