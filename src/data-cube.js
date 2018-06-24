@@ -24,6 +24,15 @@
     }
   });
   
+  //non-empty-cube, num, * -> num: non-neg-index on dimension
+  //dim of x corresponding to singleton value j; j can be a
+  //key or index (possibly negative)
+  const nniFromAny = (x, dim, j) => {
+    if (j === undefined || j === null) return 0;
+    if (x._k && x._k[dim]) return assert.number(x._k[dim].get(j));
+    return nni(j, x._s[dim]);
+  };
+  
     
   //--------------- restrict native mutator methods ---------------//
   
@@ -365,16 +374,7 @@
   //--------------- at, $at ---------------//
   
   {
-  
-    //non-empty-cube, num, * -> num: non-neg-index on dimension
-    //dim of x corresponding to singelton value j; j can be a
-    //key or index (possibly negative)
-    const nniFromAny = (x, dim, j) => {
-      if (j === undefined || j === null) return 0;
-      if (x._k && x._k[dim]) return assert.number(x._k[dim].get(j));
-      return nni(j, x._s[dim]);
-    };
-        
+          
     //[*, * , *] -> *
     addArrayMethod('at', function(r, c, p) {
       if (!this._data_cube) toCube(this);
@@ -1669,7 +1669,7 @@
 
   }
     
-  //--------------- flip, roll, shuffle, sample, rowQ, colQ, pageQ ---------------//
+  //--------------- flip, roll, shuffle, sample ---------------//
   
   {
 
@@ -1818,7 +1818,91 @@
     });
 
   }
+  
+  
+  //--------------- rowQ, colQ, pageQ ---------------//
+  
+  {
     
+    const query(x,dim) {
+       
+      const nDim = x._s[dim],
+            [d0, d1] = [0,1,2].filter(d => d !== dim);
+      
+      let ind = null;  //indices retained rows, null indicates all
+      let fv = null;   //current focal values, entries corrsp to ind
+
+      const focus = (fx0,fx1) => {
+        const fv = new Array(nDim);
+        fx0 = nniFromAny(x, d0, assert.single(fx0));
+        fx1 = nniFromAny(x, d1, assert.single(fx1));
+      
+        if (dim === 0) {
+          let shift =   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          if (ind) { for (let i=0;ind.length; i++)  }
+          else     { for (let i=0;i<nDim;     i++)  }
+      
+          
+          
+          
+        nniFromAny for nonEmpty (or at least dim non-empty?) - how does that affect here?   
+        
+      }
+       
+       
+       
+       
+      }
+      
+      use() {
+        
+      }
+      
+      sift() {
+        
+      }
+      
+      unique() {
+        
+      }
+      order() {
+        
+      }
+      
+      top() {
+        
+      }
+      
+      count() {
+        
+      }
+      
+      posn() {
+        
+      }
+      
+      ret() {
+        
+      }      
+    }
+    
+    
+
+    ['rowQ', 'colQ', 'pageQ'].forEach( (nm, dim) => {
+      addArrayMethod( nm, function(fv0, fv1) {                               
+        if (!this._data_cube) toCube(this);
+        qry = new query(this,dim);
+        qry.focus(fv0, fv1);
+        return qry;
+      });
+    });
+      
+      
+      
+    
+  }
+  
+  
   //--------------- convert data ---------------//
   
   //!!NOTE: THIS IS MAY GET REMOVED SINCE IS A SPECIAL CASE OF 'unvble'
