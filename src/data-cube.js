@@ -24,9 +24,10 @@
     }
   });
   
-  //non-empty-cube, num, * -> num: non-neg-index on dimension
-  //dim of x corresponding to singleton value j; j can be a
-  //key or index (possibly negative)
+  //cube, num, * -> num: non-neg-index for dimension dim of x
+  //corresponding to singleton value j; j can be a key or index
+  //(possibly negative)
+  //  -note: dim must non-empty since 0 returned if j null/undefined
   const nniFromAny = (x, dim, j) => {
     if (j === undefined || j === null) return 0;
     if (x._k && x._k[dim]) return assert.number(x._k[dim].get(j));
@@ -1822,39 +1823,65 @@
   
   //--------------- rowQ, colQ, pageQ ---------------//
   
-  /*
   {
     
+    //cube, num -> query object
     const query(x,dim) {
-       
-      const nDim = x._s[dim],
-            [d0, d1] = [0,1,2].filter(d => d !== dim);
+    
+      //always use shape of x from when query created 
+      const [nr, nc, np] = x._s,
+            nd = x._s[dim],
+            [d0, d1] = [0,1,2].filter(d => d !== dim),  //other dims
+            n0 = x._s[d0],
+            n1 = x._s[d1],
+            mthd = {};
       
-      let ind = null;  //indices retained rows, null indicates all
-      let fv = null;   //current focal values, entries corrsp to ind
-
-      const focus = (fx0,fx1) => {
-        const fv = new Array(nDim);
-        fx0 = nniFromAny(x, d0, assert.single(fx0));
-        fx1 = nniFromAny(x, d1, assert.single(fx1));
+      //dimension dim can be empty, but not other dims    
+      if (n0 === 0) throw Error(`at least one ${helper.dimName[d0]} expected`);
+      if (n1 === 0) throw Error(`at least one ${helper.dimName[d1]} expected`);
       
-        if (dim === 0) {
-          let shift =   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-          if (ind) { for (let i=0;ind.length; i++)  }
-          else     { for (let i=0;i<nDim;     i++)  }
+      //focal values and corresponding indices
+      let fv = null,                //current focal vals
+          fvInd = simpleRange(nd);  //indices that current focal vals corresponds to
       
-          
-          
-          
-        nniFromAny for nonEmpty (or at least dim non-empty?) - how does that affect here?   
+      
+      
+      !!!!!NOW!!!!!!!!!!
+      Scrap use method and only have focus (still called auto by rowQ/colQ/pageQ:
+        x.rowQ()  - use first col and page
+        x.rowQ('col', 'pass')   //2 args specify on 1 dim - use 0 on other
+        x.rowQ('page', 2010)    //
+        x.rowQ('col', 'pass', 'page', 2010)  //4 args , spec both dims
+        x.rowQ([5,3,7,5,6,4])   //1 arg, pass directly
+      Good? - or too verbose?
+      
+      ALSO: when pass explicit focal vals, nust be same length as dim - then relevant vals
+      picked out if have already sifted rows
         
-      }
-       
-       
-       
-       
-      }
       
+      
+      
+      //*, * -> query object
+      mthd.focus = (fx0, fx1) => {
+        fx0 = nniFromAny(x, d0, assert.single(fx0));  //0 if fx0 undefined or null
+        fx1 = nniFromAny(x, d1, assert.single(fx1));
+        const nInd = fvInd.length;
+        if (!fv) fv = new Array(nInd);  //if exists, length is not changing
+        let shift, mult;
+        if      (dim === 0) { shift = (fx0 * nr) + (fx1 * nr * nc),  mult = 1       }
+        else if (dim === 1) { shift = fx0 + (fx1 * nr * nc),         mult = nr      }
+        else                { shift = fx0 + (fx1 * nr),              mult = nr * np }
+        for (let i=0; i<nInd; i++) fv[i] = x[shift + fvInd[i]*mult];
+        return mthd;
+      };
+      
+      // mthd.use = (fvNew) => {
+        // fvNew = toArray(fvNew);
+        // if (fvNew.length !== 
+      
+      // };
+
+
       use() {
         
       }
@@ -1866,6 +1893,7 @@
       unique() {
         
       }
+      
       order() {
         
       }
@@ -1885,6 +1913,9 @@
       ret() {
         
       }      
+      
+      WHAT IF ERROR PART WAY THRU QUERY? - RISK THAT HAVE A REFERENCE TO A INVALID QUERY OBJECT?
+        -NOT IF ALWAYS CHECK INDS ETC BEFORE CHANGE ANY QUERY PROPS SUCH AS FV
     }
     
     
