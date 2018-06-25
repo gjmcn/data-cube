@@ -1673,9 +1673,9 @@
   
   {
 
-    //cube, num, array/cube, bool -> cube. Get rows/cols/pages
-    //with indices in ind (even if dim has keys). ex specifies
-    //whether to keep keys and label on dim (if they exist).
+    //cube, num, array/cube, bool -> cube. Get rows/cols/pages with
+    //indices in ind (even if dim has keys). keyLabel specifies
+    //whether result should have keys and label on dim (if x does).
     const arrange = (x, dim, ind, keyLabel) => {
       const zShp = copyArray(x._s);
       zShp[dim] = ind.length;
@@ -1722,7 +1722,7 @@
       copyKey(x,z,dim);
       copyLabel(x,z,dim);    
       if (keyLabel) {
-        if (x._k && x._k[dim]) z.$key(dim, x.key(dim).row(ind));
+        if (x._k && x._k[dim]) z.$key(dim, x.key(dim).vec(ind));
         if (x._l && x._l[dim]) z.$label(dim, x._l[dim]);  
       }
       return z;
@@ -1822,6 +1822,7 @@
   
   //--------------- rowQ, colQ, pageQ ---------------//
   
+  /*
   {
     
     const query(x,dim) {
@@ -1898,10 +1899,10 @@
     });
       
       
-      
+ 
     
   }
-  
+   */  
   
   //--------------- convert data ---------------//
   
