@@ -335,6 +335,35 @@
       }
       return b;
     },
+        
+    //array/cube, str/func -> array/cube: sort x in place,
+    //return x
+    sortWrap: (x, how) => {
+      if (how === 'unicode') return x.sort();
+      if (how === 'asc')  return x.sort((a,b) => a - b);
+      if (how === 'desc') return x.sort((a,b) => b - a);
+      if (typeof how === 'function') return x.sort(how);
+      throw Error(`'unicode', 'asc', 'desc' or function expected`);
+    },
+        
+    //as sortWrap, but returns indices of sorted entries of
+    //x. Unlike sortWrap, x is not changed
+    sortIndexWrap: (x, how) => {
+      const ind = helper.simpleRange(x.length);
+      if (how === 'unicode') {
+        return ind.sort((a,b) => {
+          if (x[a] > x[b]) return 1;
+          if (x[b] > x[a]) return -1;
+          return 0;
+        });
+      }
+      if (how === 'asc')  return ind.sort((a,b) => x[a] - x[b]);
+      if (how === 'desc') return ind.sort((a,b) => x[b] - x[a]);
+      if (typeof how === 'function') {
+        return ind.sort( (a,b) => how(x[a],x[b]) );
+      }
+      throw Error(`'unicode', 'asc', 'desc' or function expected`);
+    },
     
     //func -> num, time in ms to execute synchronous function f
     //  -uses process so only works in node

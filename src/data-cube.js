@@ -9,7 +9,8 @@
   const { 
     assert, fill, fillEW, addArrayMethod, keyMap,
     isSingle, polarize, def, toArray, copyArray, copyMap,
-    ensureKey, ensureLabel, nni, copyKey, copyLabel, skeleton
+    ensureKey, ensureLabel, nni, copyKey, copyLabel, skeleton,
+    sortWrap, sortIndexWrap
   } = helper;
   
   //helper is an object, but can use addArrayMethod for any property
@@ -1670,7 +1671,8 @@
 
   }
     
-  //--------------- flip, roll, shuffle, sample ---------------//
+  //--------------- flip, roll, shuffle, sample,  ---------------//
+  //--------------- row/col/pageWhere, row/col/pageBy -----------//
   
   {
 
@@ -1818,10 +1820,55 @@
       return arrange(this, dim, ind, false);
     });
 
+    //[*] -> cube
+    ['rowWhere', 'colWhere', 'pageWhere'].forEach((nm, dim) => {
+      addArrayMethod(nm, function(val) {
+        if (!this._data_cube) toCube(this);
+        const nd = this._s[dim];
+        val = (arguments.length < 1) ? this : toArray(val);
+        if (val.length !== nd) throw Error('shape mismatch');
+        const ind = new Array(nd);
+        let j = 0;
+        for (let i=0; i<nd; i++) {
+          if (val[i]) ind[j++] = i;
+        }
+        ind.length = j;
+        return arrange(this, dim, ind, true);
+      });
+    });
+    
+    //*[, str/func] -> cube
+    ['rowBy', 'colBy', 'pageBy'].forEach((nm, dim) => {
+      addArrayMethod(nm, function(val, how) {
+        if (!this._data_cube) toCube(this);
+        val = toArray(val);
+        if (val.length !== this._s[dim]) throw Error('shape mismatch');
+        how = assert.single(how);  //value checked by sortIndexWrap
+        return arrange(this, dim, sortIndexWrap(val, how), true);
+      });
+    });
   }
+    
+
+  //--------------- order, orderKey ---------------//
   
-   
+  //[*, str] -> array
+  addArrayMethod('order', function(how, ret) {
+    if (!this._data_cube) toCube(this);
+    how = assert.single(how);  //value checked by sort-wrap func
+    ret = assert.single(ret);
+    if (ret === 'value') return sortWrap(copyArray(x), how);
+    if (ret === 'index') return sortIndexWrap(x, how);
+    
+    
+    if (ret === 'rank')  return ???????????????????????(x, how);
+    
+    throw Error(`'value', 'index' or 'rank' expected`);
+  });
   
+    
+    
+    
   //--------------- convert data ---------------//
   
   //!!NOTE: THIS IS MAY GET REMOVED SINCE IS A SPECIAL CASE OF 'unvble'
