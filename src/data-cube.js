@@ -1731,7 +1731,7 @@
       return z;
     };
         
-    //num -> cube
+    //[num] -> cube
     addArrayMethod('flip', function(dim) {
       if (!this._data_cube) toCube(this);
       dim = assert.dim(dim);
@@ -1741,7 +1741,7 @@
       return arrange(this, dim, ind, true);
     });
     
-    //num[, num] -> cube
+    //[num, num] -> cube
     addArrayMethod('roll', function(dim, shift) {
       if (!this._data_cube) toCube(this);
       dim = assert.dim(dim);
@@ -1753,14 +1753,16 @@
       return arrange(this, dim, ind, true);
     });
     
-    //num[, num] -> cube
+    //[num, *] -> cube
     addArrayMethod('shuffle', function(dim, n) {
       if (!this._data_cube) toCube(this);
       dim = assert.dim(dim);
       const nd = this._s[dim];
+      n = assert.single(n);
       if (n === undefined || n === null) n = nd;
       else n = assert.nonNegInt(+n);
-      if (n) {
+      let ind;
+      if (n > 0) {
         if (n > nd) throw Error(`cannot get ${n} shuffled ${helper.dimName[dim]}s ` + 
                                 `from dimension of length ${nd}`);
         ind = helper.shuffle(nd);
@@ -1770,7 +1772,7 @@
       return arrange(this, dim, ind, true);
     });
      
-    //num[, num] -> cube
+    //[num, num] -> cube
     addArrayMethod('sample', function(dim, n, prob) {
       if (!this._data_cube) toCube(this);
       dim = assert.dim(dim);
@@ -1780,14 +1782,14 @@
       const nd = this._s[dim];
       if (probSingle) {
         if (prob === undefined || prob === null) {  //uniform probs
-          if (n) {
-            if (nd === 0) throw Error(`cannot sample ${n} ${helper.dimName[dim]}s `+
+          if (n > 0) {
+            if (nd === 0) throw Error(`cannot sample ${n} ${helper.dimName[dim]}s ` +
                                       `from empty dimension`);
             ind = (nd === 1) ? [n].cube(0) : [n].rand(nd-1);
           }
           else ind = [];
         }
-        else {  //probs for single entry
+        else {  //passed a single probability - dim length must be 1
           if (nd !== 1) throw Error('shape mismatch');
           prob = assert.nonNegFin(+prob);
           if (prob === 0) throw Error('at least one probability must be non-zero');
@@ -1805,7 +1807,7 @@
           for (let i=0; i<n; i++) {
             let rnd = Math.random() * total; 
             for (let j=0; j<nd; j++) {
-              if (rnd <= cumuProb[j]) {
+              if (rnd < cumuProb[j]) {
                 ind[i] = j;
                 break;
               }
@@ -1820,51 +1822,50 @@
       return arrange(this, dim, ind, false);
     });
 
-    //[*] -> cube
-    ['rowWhere', 'colWhere', 'pageWhere'].forEach((nm, dim) => {
-      addArrayMethod(nm, function(val) {
-        if (!this._data_cube) toCube(this);
-        const nd = this._s[dim];
-        val = (arguments.length < 1) ? this : toArray(val);
-        if (val.length !== nd) throw Error('shape mismatch');
-        const ind = new Array(nd);
-        let j = 0;
-        for (let i=0; i<nd; i++) {
-          if (val[i]) ind[j++] = i;
-        }
-        ind.length = j;
-        return arrange(this, dim, ind, true);
-      });
+    //[num, *] -> cube        
+    addArrayMethod('where', function(dim, val) {   
+      if (!this._data_cube) toCube(this);
+      dim = assert.dim(dim);        
+      const nd = this._s[dim];
+      val = (arguments.length < 1) ? this : toArray(val);
+      if (val.length !== nd) throw Error('shape mismatch');
+      const ind = new Array(nd);
+      let j = 0;
+      for (let i=0; i<nd; i++) {
+        if (val[i]) ind[j++] = i;
+      }
+      ind.length = j;
+      return arrange(this, dim, ind, true);
     });
-    
-    //*[, str/func] -> cube
-    ['rowBy', 'colBy', 'pageBy'].forEach((nm, dim) => {
-      addArrayMethod(nm, function(val, how) {
-        if (!this._data_cube) toCube(this);
-        val = toArray(val);
-        if (val.length !== this._s[dim]) throw Error('shape mismatch');
-        how = assert.single(how);  //value checked by sortIndexWrap
-        return arrange(this, dim, sortIndexWrap(val, how), true);
-      });
+
+    //[num, *, *] -> cube 
+    addArrayMethod('by', function(dim, val, how) {   
+      if (!this._data_cube) toCube(this);
+      dim = assert.dim(dim); 
+      val = toArray(val);
+      if (val.length !== this._s[dim]) throw Error('shape mismatch');
+      how = assert.single(how);  //value checked by sortIndexWrap
+      return arrange(this, dim, sortIndexWrap(val, how), true);
     });
+
   }
     
 
   //--------------- order, orderKey ---------------//
   
-  //[*, str] -> array
-  addArrayMethod('order', function(how, ret) {
-    if (!this._data_cube) toCube(this);
-    how = assert.single(how);  //value checked by sort-wrap func
-    ret = assert.single(ret);
-    if (ret === 'value') return sortWrap(copyArray(x), how);
-    if (ret === 'index') return sortIndexWrap(x, how);
-    
-    
-    if (ret === 'rank')  return ???????????????????????(x, how);
-    
-    throw Error(`'value', 'index' or 'rank' expected`);
-  });
+//  //[*, str] -> array
+//  addArrayMethod('order', function(how, ret) {
+//    if (!this._data_cube) toCube(this);
+//    how = assert.single(how);  //value checked by sort-wrap func
+//    ret = assert.single(ret);
+//    if (ret === 'value') return sortWrap(copyArray(x), how);
+//    if (ret === 'index') return sortIndexWrap(x, how);
+//    
+//    
+//    if (ret === 'rank')  return ???????????????????????(x, how);
+//    
+//    throw Error(`'value', 'index' or 'rank' expected`);
+//  });
   
     
     

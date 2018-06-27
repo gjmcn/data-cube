@@ -107,19 +107,18 @@
       return a;
     },
     
-    //num -> array, returns array of length s containing 0 to
-    //s-1 shuffled, assert s is a +ve int
-    shuffle: s => {
-      s = assert.posInt(s);
-      var v = new Array(s);
-      var j;
-      v[0] = 0;
-      for (var i=1; i<s; i++) {
-        j = Math.floor(Math.random()*(i + 1));
-        v[i] = v[j];
-        v[j] = i;
+    //num -> array: array of length n containing 0 to
+    //n-1 shuffled (Fisher–Yates), assert n is a +ve int
+    shuffle: n => {
+      n = assert.posInt(n);
+      const a = helper.simpleRange(n);
+      for (let i=n-1; i>0; i--) {
+        let j = Math.floor(Math.random()*(i + 1));
+        let tmp = a[i];
+        a[i] = a[j];
+        a[j] = tmp;
       }
-      return v;
+      return a;
     },     
         
     //array/cube, * -> array/cube, assign val to each entry of x;
