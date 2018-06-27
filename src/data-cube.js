@@ -1827,7 +1827,7 @@
       if (!this._data_cube) toCube(this);
       dim = assert.dim(dim);        
       const nd = this._s[dim];
-      val = (arguments.length < 1) ? this : toArray(val);
+      val = (arguments.length < 2) ? this : toArray(val);
       if (val.length !== nd) throw Error('shape mismatch');
       const ind = new Array(nd);
       let j = 0;
