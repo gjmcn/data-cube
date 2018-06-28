@@ -335,21 +335,25 @@
       return b;
     },
         
-    //array/cube, str/func -> array/cube: sort x in place,
-    //return x
-    sortWrap: (x, how) => {
-      if (how === 'unicode') return x.sort();
-      if (how === 'asc')  return x.sort((a,b) => a - b);
-      if (how === 'desc') return x.sort((a,b) => b - a);
-      if (typeof how === 'function') return x.sort(how);
-      throw Error(`'unicode', 'asc', 'desc' or function expected`);
+    //* -> undefined/func: comprison function for sorting
+    comparison: how => {
+      if (how === undefined || how === null) return undefined;
+      if (how === 'asc')  return (a,b) => a - b;
+      if (how === 'desc') return (a,b) => b - a;
+      if (typeof how === 'function') return how;
+      throw Error('invalid argument'); 
+    },
+            
+    //array, * -> array: sort x in place, return x
+    sortInPlace: (x, how) => {
+      return x.sort(helper.comparison(how));
     },
         
-    //as sortWrap, but returns indices of sorted entries of
-    //x. Unlike sortWrap, x is not changed
-    sortIndexWrap: (x, how) => {
+    //array/cube, * -> array: indices corresponding to
+    //sorted entries of x, x is not changed
+    sortIndex: (x, how) => {
       const ind = helper.simpleRange(x.length);
-      if (how === 'unicode') {
+      if (how === undefined || how === null) {
         return ind.sort((a,b) => {
           if (x[a] > x[b]) return 1;
           if (x[b] > x[a]) return -1;
@@ -361,7 +365,33 @@
       if (typeof how === 'function') {
         return ind.sort( (a,b) => how(x[a],x[b]) );
       }
-      throw Error(`'unicode', 'asc', 'desc' or function expected`);
+      throw Error('invalid argument'); 
+    },
+    
+    //array/cube, * -> array: ranks of entries of x,
+    //x is not changed
+    sortRank: (x, how) => {
+      const srtdInd = helper.sortIndex(x, how),
+            n = x.length;
+      if (n === 0) return [];
+      if (n === 1) return [0];      
+      const rk = new Array(n);
+      let f = helper.comparison(how);
+      if (f === undefined) {
+        f = (a,b) => {
+          if (a > b) return 1;
+          if (b > a) return -1;
+          return 0;
+        };
+      }
+      let j = srtdInd[0];
+      rk[j] = 0;
+      for (let i=1; i<n; i++) {
+        let k = srtdInd[i];
+        rk[k] = f(x[j], x[k]) === 0 ? rk[j] : i;
+        j = k;
+      }
+      return rk;
     },
     
     //func -> num, time in ms to execute synchronous function f

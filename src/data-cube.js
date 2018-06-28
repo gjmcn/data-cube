@@ -10,7 +10,7 @@
     assert, fill, fillEW, addArrayMethod, keyMap,
     isSingle, polarize, def, toArray, copyArray, copyMap,
     ensureKey, ensureLabel, nni, copyKey, copyLabel, skeleton,
-    sortWrap, sortIndexWrap
+    sortInPlace, sortIndex, sortRank
   } = helper;
   
   //helper is an object, but can use addArrayMethod for any property
@@ -1671,8 +1671,8 @@
 
   }
     
-  //--------------- flip, roll, shuffle, sample,  ---------------//
-  //--------------- row/col/pageWhere, row/col/pageBy -----------//
+  //--------------- flip, roll, shuffle, sample ---------------//
+  //--------------- where, arrange, orderKey ------------------//
   
   {
 
@@ -1682,7 +1682,7 @@
     const arrange = (x, dim, ind, keyLabel) => {
       const zShp = copyArray(x._s);
       zShp[dim] = ind.length;
-      const z = zShp.cube();
+      const z = zShp.cube(),
             nrx = x._s[0],
             ncx = x._s[1],
             nrz = z._s[0],
@@ -1839,36 +1839,44 @@
     });
 
     //[num, *, *] -> cube 
-    addArrayMethod('by', function(dim, val, how) {   
+    addArrayMethod('order', function(dim, val, how) {   
       if (!this._data_cube) toCube(this);
       dim = assert.dim(dim); 
       val = toArray(val);
       if (val.length !== this._s[dim]) throw Error('shape mismatch');
-      how = assert.single(how);  //value checked by sortIndexWrap
-      return arrange(this, dim, sortIndexWrap(val, how), true);
+      how = assert.single(how);  //value checked by sortIndex
+      return arrange(this, dim, sortIndex(val, how), true);
     });
+        
+    addArrayMethod('orderKey', function(dim, how) {
+      if (!this._data_cube) toCube(this);
+      dim = assert.dim(dim);
+      how = assert.single(how);  //value checked by sortIndex
+      if (!this._k || !this._k[dim]) throw Error('dimension does not have keys');
+      const ky = this.key(dim),
+            ind = sortIndex(ky, how);
+      const z = arrange(this, dim, ind, false);  //false to avoid arrange getting keys again
+      z.$key(dim, ky.vec(ind));
+      if (this._l && this._l[dim]) z.$label(dim, this._l[dim]);  
+      return z;
+    });  
 
   }
     
 
-  //--------------- order, orderKey ---------------//
+  //--------------- order ---------------//
   
-//  //[*, str] -> array
-//  addArrayMethod('order', function(how, ret) {
-//    if (!this._data_cube) toCube(this);
-//    how = assert.single(how);  //value checked by sort-wrap func
-//    ret = assert.single(ret);
-//    if (ret === 'value') return sortWrap(copyArray(x), how);
-//    if (ret === 'index') return sortIndexWrap(x, how);
-//    
-//    
-//    if (ret === 'rank')  return ???????????????????????(x, how);
-//    
-//    throw Error(`'value', 'index' or 'rank' expected`);
-//  });
-  
-    
-    
+  //[*, str] -> array
+  addArrayMethod('arrange', function(how, ret) {
+    if (!this._data_cube) toCube(this);
+    how = assert.single(how);  //value checked by sort funcs
+    ret = def(assert.single(ret), 'value');
+    if (ret === 'value') return sortInPlace(copyArray(this), how);
+    if (ret === 'index') return sortIndex(this, how);
+    if (ret === 'rank')  return sortRank(this, how);
+    throw Error(`'value', 'index' or 'rank' expected`);
+  });
+      
     
   //--------------- convert data ---------------//
   
