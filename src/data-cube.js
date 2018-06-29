@@ -1672,7 +1672,7 @@
   }
     
   //--------------- flip, roll, shuffle, sample ---------------//
-  //--------------- where, arrange, orderKey ------------------//
+  //--------------- where, order, orderKey ------------------//
   
   {
 
@@ -1848,6 +1848,7 @@
       return arrange(this, dim, sortIndex(val, how), true);
     });
         
+    //[num, *] -> cube
     addArrayMethod('orderKey', function(dim, how) {
       if (!this._data_cube) toCube(this);
       dim = assert.dim(dim);
@@ -1857,14 +1858,14 @@
             ind = sortIndex(ky, how);
       const z = arrange(this, dim, ind, false);  //false to avoid arrange getting keys again
       z.$key(dim, ky.vec(ind));
-      if (this._l && this._l[dim]) z.$label(dim, this._l[dim]);  
+      if (this._l && this._l[dim]) z.$label(dim, this._l[dim]);
       return z;
     });  
 
   }
     
 
-  //--------------- order ---------------//
+  //--------------- arrange ---------------//
   
   //[*, str] -> array
   addArrayMethod('arrange', function(how, ret) {
@@ -1876,7 +1877,7 @@
     if (ret === 'rank')  return sortRank(this, how);
     throw Error(`'value', 'index' or 'rank' expected`);
   });
-      
+        
     
   //--------------- convert data ---------------//
   
