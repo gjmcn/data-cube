@@ -824,7 +824,7 @@
     const useStatic = (obj, name) => {
       name.forEach(nm => {
         addArrayMethod(nm, function() {
-          if (!this._data_cube) toCube(this);
+          if (!this._data_cube) toCube(this);          
           const z = this.copy('shell');
           const n = this.length;
           const f = obj[nm];
@@ -1863,7 +1863,7 @@
     });  
 
   }
-    
+
 
   //--------------- arrange ---------------//
   
