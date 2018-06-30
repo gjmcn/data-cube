@@ -58,15 +58,14 @@
   
   //array ->, x should NOT be a cube
   const toCube = x => {
-//    Object.defineProperty(x, 'length', { writable: false });
-//    Object.defineProperty(x, '_data_cube', { value: true });
-//    Object.defineProperty(x, '_s', {
-//      value: [x.length,1,1],
-//      writable: true
-//    });
+    Object.defineProperty(x, 'length', { writable: false });
+    Object.defineProperty(x, '_data_cube', { value: true });
+    Object.defineProperty(x, '_s', {
+      value: [x.length,1,1],
+      writable: true
+    });
     
-    x._s = [x.length, 1, 1];
-    x._data_cube = true;
+
     
   };
   
