@@ -469,14 +469,8 @@
       if (n < mn) throw Error('too few arguments');
       if (n > mx) throw Error('too many arguments');
       return n;
-    },
-    
-    //cube ->, throw error if not a matrix with at least 1 col
-    dataMatrix: a => {
-      if (a._s[2] !== 1 || a._s[1] === 0) {
-        throw Error('matrix with at least 1 column expected');
-      }
     }
+
     
   };
 
