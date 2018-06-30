@@ -55,40 +55,22 @@
 
   
   //--------------- convert array to cube ---------------//
-  
-  //array ->, x should NOT be a cube
-  const toCube = x => {
-    Object.defineProperty(x, 'length', { writable: false });
-    Object.defineProperty(x, '_data_cube', { value: true });
-    Object.defineProperty(x, '_s', {
-      value: [x.length,1,1],
-      writable: true
-    });
     
-
-    
-  };
-  
   //array/cube -> cube, does nothing if already a cube
   addArrayMethod('toCube', function() {
-    if (!this._data_cube) toCube(this);
+    if (!this._data_cube) {
+      this._data_cube = true;
+      this._s = [this.length, 1, 1];
+    }
     return this;
   });
-  
-  
-  //array ->, x assumed a valid cube except for length
-  //not being fixed and absence of _data_cube property
-  const completeCube = x => {
-    Object.defineProperty(x, 'length', { writable: false });
-    Object.defineProperty(x, '_data_cube', { value: true });
-  };
   
   
   //--------------- compare ---------------//
   
   //array/cube[, bool] -> cu/false
   addArrayMethod('compare', function(b, asrt) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     asrt = def(assert.single(asrt), true);
     if (this === b) return this;
     let done;
@@ -143,7 +125,7 @@
     const c = this[1] === undefined ? 1 : assert.nonNegInt(this[1]);  
     const p = this[2] === undefined ? 1 : assert.nonNegInt(this[2]);  
     const z = new Array(r*c*p);
-    toCube(z);
+    z.toCube();
     z._s[0] = r;
     z._s[1] = c;
     z._s[2] = p;
@@ -192,13 +174,13 @@
   
   //-> 3-entry array
   addArrayMethod('shape', function() {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     return copyArray(this._s);
   });
     
   //[number/array] -> cube
   addArrayMethod('$shape', function(shp) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     assert.argRange(arguments,0,1);
     var [shp,shpSingle] = polarize(shp);
     let r = 1;
@@ -240,7 +222,7 @@
   
   //[num] -> bool
   addArrayMethod('n', function(dim) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     dim = assert.dim(dim);
     return this._s[dim];
   });
@@ -250,7 +232,7 @@
     
   //[num] -> string/undefined
   addArrayMethod('label', function(dim) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     dim = assert.dim(dim);
     if (this._l) return this._l[dim] || null;
     return null;
@@ -258,7 +240,7 @@
     
   //[num], str -> cube
   addArrayMethod('$label', function(dim,val) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     const nArg = assert.argRange(arguments,1,2); 
     if (nArg === 1) [dim,val] = [undefined,dim];
     dim = assert.dim(dim);
@@ -284,7 +266,7 @@
   
   //[num] -> array/undefined
   addArrayMethod('key', function(dim) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     dim = assert.dim(dim);
     if (this._k) {
       const mp = this._k[dim];
@@ -295,7 +277,7 @@
     
   //[num], * -> cube
   addArrayMethod('$key', function(dim,val) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     const nArg = assert.argRange(arguments,1,2);    
     if (nArg === 1) [dim,val] = [undefined,dim];
     dim = assert.dim(dim);
@@ -321,7 +303,7 @@
   
   //-> cube
   addArrayMethod('$strip', function() {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     assert.argRange(arguments,0,0);    
     delete this._k;
     delete this._l;
@@ -338,7 +320,7 @@
     }
     if (ret === 'array') return copyArray(this);
     const z = ret === 'shell' ? new Array(this.length) : copyArray(this);
-    toCube(z);
+    z.toCube();
     if (this._data_cube) {
       z._s[0] = this._s[0];
       z._s[1] = this._s[1];
@@ -367,7 +349,7 @@
   
   //[num, *] -> bool
   addArrayMethod('hasKey', function(dim, k) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     dim = assert.dim(dim);
     k = assert.single(k);
     const _k = this._k;
@@ -382,7 +364,7 @@
           
     //[*, * , *] -> *
     addArrayMethod('at', function(r, c, p) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       if (this.length === 0) throw Error('cube has no entries');
       const nArg = arguments.length;
       if (nArg <= 1) {
@@ -402,7 +384,7 @@
   
     //*[, *, *, *] -> cube
     addArrayMethod('$at', function(r, c, p, val) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       if (this.length === 0) throw Error('cube has no entries');
       const nArg = assert.argRange(arguments,1,4);
       if (nArg === 2) {
@@ -428,7 +410,7 @@
   
   //* -> array
   addArrayMethod('vec', function(i) {
-    if (!this._data_cube) toCube(this);    
+    this.toCube();    
     var [i,iSingle] = polarize(i);
     const n = this.length;
     if (iSingle) {
@@ -443,7 +425,7 @@
   
   //*[, *] -> cube
   addArrayMethod('$vec', function(i, val) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     const nArg = assert.argRange(arguments,1,2);
     if (arguments.length === 1) [i, val] = [null, i];
     const n = this.length;
@@ -492,7 +474,7 @@
 
     //*, *, *[, str] -> cube
     addArrayMethod('subcube', function(row, col, page, ret) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       ret = def(assert.single(ret), 'full');
       if (ret !== 'full' && ret !== 'core' && ret !== 'array') {
         throw Error(`'full', 'core', or 'array' expected`);
@@ -514,7 +496,7 @@
         }
       }
       if (ret === 'array') return z;
-      toCube(z);
+      z.toCube();
       //shape
       z._s[0] = nrz,  z._s[1] = ncz,  z._s[2] = npz;
       if (ret === 'core') return z;
@@ -533,7 +515,7 @@
     
     //*, *, *, *, * -> cube
     addArrayMethod('$subcube', function(row, col, page, val) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       const nArg = assert.argRange(arguments,1,4);
       switch (nArg) {
         case 1:  [row, col, page, val] = [   ,    , ,  row];  break;
@@ -583,7 +565,7 @@
       
     //bool, array/cube, num, *, *, * -> *
     const downAlongBack = function(setter, x, dim, s, e, retVal) {
-      if (!x._data_cube) toCube(x);
+      x.toCube();
       let mthd;
       if (setter) {
         const nArg = assert.argRange(arguments,4,6);  
@@ -620,7 +602,7 @@
 
     //[num, num, num, str] -> cube
     addArrayMethod('head', function(nr, nc, np, ret) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       const ind = new Array(3);
       for (let d=0; d<3; d++) {
         let m = assert.single(arguments[d]);
@@ -668,7 +650,7 @@
         for (let c=0; c<nc; c++)  for (let r=0; r<nr; r++)  z[j++] = x[r + nr*c + epp*m];
       }
       if (ret === 'array') return z;
-      toCube(z);
+      z.toCube();
       //shape
       z._s[0] = nr,  z._s[1] = nc,  z._s[2] = np;
       z._s[dim] = 1;
@@ -687,7 +669,7 @@
 
     //array/cube, num[, str] -> generator
     const dimLoop = (x, dim, ret) => {
-      if (!x._data_cube) toCube(x);
+      x.toCube();
       ret = def(assert.single(ret), 'none');
       const ky = x._k && x._k[dim];
       const n = x._s[dim];
@@ -728,7 +710,7 @@
   
   //[num] -> array
   addArrayMethod('vble', function(dim) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     dim = def(assert.single(dim), 0);  //dim can be -1 so do not use assert.dim
     const prefix = ['r_', 'c_', 'p_'];
     const {_s, _k, _l} = this;
@@ -827,7 +809,7 @@
     const useStatic = (obj, name) => {
       name.forEach(nm => {
         addArrayMethod(nm, function() {
-          if (!this._data_cube) toCube(this);          
+          this.toCube();          
           const z = this.copy('shell');
           const n = this.length;
           const f = obj[nm];
@@ -855,7 +837,7 @@
     //-> cube
     for (let [nm,f] of ewFunc) {
       addArrayMethod(nm, function() {
-        if (!this._data_cube) toCube(this);
+        this.toCube();
         const z = this.copy('shell');
         const n = this.length;
         for (let i=0; i<n; i++) z[i] = f(this[i]);
@@ -900,7 +882,7 @@
     //*[, *, *, *, ...] -> cube
     for (let [nm,f] of opLike) {
       addArrayMethod(nm, function(a) {
-        if (!this._data_cube) toCube(this);
+        this.toCube();
         const nArg = arguments.length;
         if (nArg > 1) {
           let curr = this[nm](a);
@@ -938,7 +920,7 @@
   
   //*[, *, *, *, ...] -> cube
   addArrayMethod('method', function(nm, ...mthdArg) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     const z = this.copy('shell');
     const n = this.length;
     var [nm,nmSingle] = polarize(nm);
@@ -977,7 +959,7 @@
     //cube and returns a cube if mthd is 'prop'; other methods
     //are HTML methods.
     const getInfo = (x, mthd, nm) => {
-      if (mthd === 'prop' && !x._data_cube) toCube(x);
+      if (mthd === 'prop') x.toCube();
       const n = x.length;
       var [nm,nmSingle] = polarize(nm);
       if (!nmSingle && nm.length !== n) throw Error('shape mismatch');
@@ -1002,7 +984,7 @@
     //array/cube, str, array -> array/cube. Only converts x to a
     //cube if mthd is '$prop'; other methods are HTML methods.
     const setInfo = (x, mthd, nameVal) => {
-      if (mthd === '$prop' && !x._data_cube) toCube(x);
+      if (mthd === '$prop') x.toCube();
       const n = x.length;
       const nArg = nameVal.length;
       if (nArg < 2 || nArg % 2 !== 0) throw Error('invalid number of arguments');
@@ -1052,9 +1034,9 @@
   //--------------- entrywise, cmap ---------------//
 
   addArrayMethod('cmap', function(f, asThis) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     const z = this.map(assert.single(f), assert.single(asThis));
-    toCube(z);
+    z.toCube();
     z._s[0] = this._s[0];
     z._s[1] = this._s[1];
     z._s[2] = this._s[2];
@@ -1070,7 +1052,7 @@
 
     //array/cube, num, func[, *], bool -> cube
     const foldCumu = (x, dim, f, init, cu) => {
-      if (!x._data_cube) toCube(x);
+      x.toCube();
       dim = def(assert.single(dim), 0);  //dim can be -1 so do not use assert.dim
       f = assert.func(assert.single(f));
       init = assert.single(init);
@@ -1091,7 +1073,7 @@
         else {
           for (let i=start; i<n; i++) v = f(v, x[i], i, x);
           z = [v];
-          toCube(z);
+          z.toCube();
         }
       }      
       else {
@@ -1274,7 +1256,7 @@
     
     //num[, str] -> cube
     addArrayMethod('sew', function(dim, sep) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       sep = '' + def(assert.single(sep), ',');
       const z = this.fold(
         dim,
@@ -1291,7 +1273,7 @@
     
     //num[, num] -> cube
     addArrayMethod('var', function(dim, delta) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       dim = def(assert.single(dim), 0);
       delta = assert.nonNegInt(def(assert.single(delta), 0));
       const f = (a, newValue) => {
@@ -1324,7 +1306,7 @@
         
     //num[, string] -> cube
     addArrayMethod('wrap', function(dim, sc) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       dim = def(assert.single(dim), 0);  //dim can be -1 so do not use assert.dim
       sc = def(assert.single(sc), 'full');
       if (sc !== 'full' && sc !== 'core' && sc !== 'array') {
@@ -1333,9 +1315,9 @@
       let z;
       if (dim === -1) {
         z = copyArray(this);
-        if (sc !== 'array') toCube(z);
+        if (sc !== 'array') z.toCube();
         z = [z];
-        toCube(z);
+        z.toCube();
       }
       else {
         const [nr, nc, np] = this._s;
@@ -1440,14 +1422,14 @@
       }
       if (skKey && skKey.size !== sk._s[dim]) throw Error('duplicate key');
       sk.length = sk._s[0] * sk._s[1] * sk._s[2];
-      completeCube(sk);
+      sk._data_cube = true;
       return [sk, naAll];
     };
     
     //[*, *, *, ...] -> cube
     ['vert', 'horiz', 'depth'].forEach((nm, dim) => {
       addArrayMethod(nm, function(...args) {
-        if (!this._data_cube) toCube(this);
+        this.toCube();
         const [z, naAll] = prep(this, args, dim),
               nArg = args.length,
               nThis = this.length,
@@ -1519,7 +1501,7 @@
   
   //[num, num, str] -> cube
   addArrayMethod('tile', function(dim, n, ret) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     dim = assert.dim(dim);
     n = assert.nonNegInt(+def(assert.single(n),2));
     ret = def(assert.single(ret), 'full');
@@ -1562,7 +1544,7 @@
   
   //*[, str] -> cube  
   addArrayMethod('tileTo', function(y,ret) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     ret = def(assert.single(ret), 'full');
     if (ret !== 'full' && ret !== 'core') throw Error(`'full' or 'core' expected`);
     if (Array.isArray(y)) {
@@ -1594,7 +1576,7 @@
   
   //[func] -> array
   addArrayMethod('which', function(f) {
-    if (!this._data_cube) toCube(this);             
+    this.toCube();             
     f = assert.single(f);
     const n = this.length;
     const z = new Array(n);
@@ -1620,25 +1602,25 @@
   {
     //-> array
     addArrayMethod('unique', function() {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       return [...(new Set(this))];
     });
 
     //-> bool
     addArrayMethod('isUnique', function() {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       return this.length === this.unique().length;
     });
 
     //[*, *, *, ...] -> array
     addArrayMethod('union', function(...args) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       return [...(new Set(this.concat(...args)))];
     });
 
     //[*, *, *, ...] -> array
     addArrayMethod('diff', function(...args) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       const s = new Set( args.length === 1
         ? toArray(args[0])
         : [].concat(...args)
@@ -1648,7 +1630,7 @@
     
     //[*, *, *, ...] -> array
     addArrayMethod('inter', function(...args) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       const nArg = args.length;
       let z = this.unique();
       for (let i=0; i<nArg; i++) {
@@ -1661,7 +1643,7 @@
 
     //[*, *, *, ...] -> cube
     addArrayMethod('isIn', function(...args) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       const s = new Set( args.length === 1
         ? toArray(args[0])
         : [].concat(...args)
@@ -1736,7 +1718,7 @@
         
     //[num] -> cube
     addArrayMethod('flip', function(dim) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       dim = assert.dim(dim);
       const n = this._s[dim],
             ind = new Array(n);
@@ -1746,7 +1728,7 @@
     
     //[num, num] -> cube
     addArrayMethod('roll', function(dim, shift) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       dim = assert.dim(dim);
       shift = assert.int(+def(assert.single(shift), 1));
       const n = this._s[dim];
@@ -1758,7 +1740,7 @@
     
     //[num, *] -> cube
     addArrayMethod('shuffle', function(dim, n) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       dim = assert.dim(dim);
       const nd = this._s[dim];
       n = assert.single(n);
@@ -1777,7 +1759,7 @@
      
     //[num, num] -> cube
     addArrayMethod('sample', function(dim, n, prob) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       dim = assert.dim(dim);
       n = assert.nonNegInt(+def(assert.single(n), 1));
       var [prob,probSingle] = polarize(prob);
@@ -1827,7 +1809,7 @@
 
     //[num, *] -> cube        
     addArrayMethod('where', function(dim, val) {   
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       dim = assert.dim(dim);        
       const nd = this._s[dim];
       val = (arguments.length < 2) ? this : toArray(val);
@@ -1843,7 +1825,7 @@
 
     //[num, *, *] -> cube 
     addArrayMethod('order', function(dim, val, how) {   
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       dim = assert.dim(dim); 
       val = toArray(val);
       if (val.length !== this._s[dim]) throw Error('shape mismatch');
@@ -1853,7 +1835,7 @@
         
     //[num, *] -> cube
     addArrayMethod('orderKey', function(dim, how) {
-      if (!this._data_cube) toCube(this);
+      this.toCube();
       dim = assert.dim(dim);
       how = assert.single(how);  //value checked by sortIndex
       if (!this._k || !this._k[dim]) throw Error('dimension does not have keys');
@@ -1872,7 +1854,7 @@
   
   //[*, str] -> array
   addArrayMethod('arrange', function(how, ret) {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     how = assert.single(how);  //value checked by sort funcs
     ret = def(assert.single(ret), 'value');
     if (ret === 'value') return sortInPlace(copyArray(this), how);
@@ -1889,7 +1871,7 @@
   //be an object with the same own properties - properties (enumerable own)
   //of first entry used to extract vals from all and as column keys
   addArrayMethod('toMatrix', function() {
-    if (!this._data_cube) toCube(this);
+    this.toCube();
     const nr = this.length;
     if (nr === 0) throw Error('non-empty array/cube expected');
     const ky = Object.keys(this[0]);

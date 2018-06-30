@@ -171,7 +171,7 @@
     //str, * -> undef, add property to Array.prototype
     addArrayMethod: (name,f) => {
       if (name in Array.prototype) {
-        throw Error(name + ' is already a property of Array.protoype');      
+        throw Error(name + ' is already a property of Array.prototype');      
       }
       Object.defineProperty( Array.prototype, name, {
         value: f,
@@ -180,27 +180,13 @@
         writable: true
       });
     },
-      
-    //cube, str ->, used by ensureKey/ensureLabel to add property
-    //_k/_l if does not already exist
-    ensure: (x,s) => {
-      if (!x[s]) {  //is truthy if exists
-        Object.defineProperty(x, s, {
-          value: new Array(3),
-          configurable: true,
-          writable: true
-        });
-      }
-    },
-    
-    //cube ->, add _k property to cube if does not exist
+          
+    //cube ->, add _k/_l property to cube if does not exist
     ensureKey: x => {
-      helper.ensure(x,'_k');
+      if (!x._k) x._k = new Array(3);
     },
-      
-    //cube ->, add _l property to cube if does not exist
     ensureLabel: x => {
-      helper.ensure(x,'_l');
+      if (!x._l) x._l = new Array(3);
     },
     
     //cube, cube[, num] ->, copy keys/labels of a (where
@@ -236,11 +222,8 @@
     //Keys/label not copied on dimension exceptKey/Label - all
     //dims copied if exceptKey/Label omitted or undefined.
     skeleton: (a, exceptKey, exceptLabel) => {
-      const b = [];
-      Object.defineProperty(b, '_s', {
-        value: helper.copyArray(a._s),
-        writable: true
-      });
+      const b = [];      
+      b._s = helper.copyArray(a._s);
       helper.copyKey(a,b,exceptKey);
       helper.copyLabel(a,b,exceptLabel);
       return b;

@@ -556,9 +556,6 @@
   {
     //these tests use cubes made 'from scratch' (i.e. no cube
     //methods) since compare is used to test all other cube methods
-    // -_data_cube, _s, _k and _l properties are added by assignment
-    //  here so will not have same writable, enumerable and configurable
-    //  settings as actual cubes
     const baseArray = [5, 'abc', false, {}, [6]];
     const a0 = [];
     const a1 = [5];
