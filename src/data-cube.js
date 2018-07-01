@@ -10,7 +10,7 @@
     assert, fill, fillEW, addArrayMethod, keyMap,
     isSingle, polarize, def, toArray, copyArray, copyMap,
     ensureKey, ensureLabel, nni, copyKey, copyLabel, skeleton,
-    sortInPlace, sortIndex, sortRank
+    sortInPlace, sortIndex, sortRank, rangeInd, keyInd, indInd
   } = helper;
   
   //helper is an object, but can use addArrayMethod for any property
@@ -457,7 +457,6 @@
   //--------------- subcubes ---------------//
         
   {
-    const {rangeInd, keyInd, indInd} = helper;
     
     //cube, num, * -> array: non-neg inds corresponding to q
     //on dimension dim of x. Assume dim a valid dimension.
@@ -1597,6 +1596,110 @@
   });
   
   
+  //--------------- posn, vecInd, rcp, $rcp ---------------//
+  
+  {
+    
+    //[*, ,* , *] -> array
+    addArrayMethod('vecInd', function(r, c, p) {
+      this.toCube();
+      const _s = this._s,
+            mult = [1, _s[0], _s[0] * _s[1]];
+      let ind;
+      let s = 0;
+      for (let d=0; d<3; d++) {
+        let [a, aSingle] = polarize(arguments[d]),
+            ky = this._k && this._k[d];
+        let j;
+        if (aSingle) {
+          if (_s[d] === 0) throw Error('shape mismatch');  //even default means first row/col/page
+          if (a === undefined || a === null) continue;
+          if (ky) {
+            j = ky.get(a);
+            if (j === undefined) throw Error('key does not exist');
+          }
+          else j = nni(a, _s[d]);
+          s += j * mult[d];
+        }
+        else {
+          j = ky ? keyInd(a, ky) : indInd(a, _s[d]);
+          let n = a.length;
+          if (ind) {
+            if (n !== ind.length) throw Error('shape mismatch');         
+          }
+          else ind = fill(new Array(n), 0);
+          for (let i=0; i<n; i++) ind[i] += j[i] * mult[d];
+        }
+      }
+      if (ind) {
+        if (s) {
+          let n = ind.length;
+          for (let i=0; i<n; i++) ind[i] += s;
+        }
+        return ind;
+      }
+      else return [s]; //all args singletons - poss all defaults
+    });
+
+    //num, * -> array
+    addArrayMethod('posn', function(dim, v) {
+      this.toCube();
+      dim = assert.dim(dim);
+      const n = this.length,
+            [nr,nc] = this._s;
+      let dimInd, lookup;
+      if      (dim === 0) dimInd = i => i % nr; 
+      else if (dim === 1) dimInd = i => Math.floor(i / nr) % nc; 
+      else                dimInd = i => Math.floor(i / (nr*nc));
+      if (this._k && this._k[dim]) {
+        const ky = this.key(dim);
+        lookup = i => ky[dimInd(i)];
+      }
+      else lookup = dimInd;
+      if (Array.isArray(v)) {
+        const nv = v.length,
+              z = new Array(nv);
+        for (let i=0; i<nv; i++) z[i] = lookup(nni(v[i],n));
+        return z;
+      }
+      return [lookup(nni(v,n))];
+    });
+    
+    //[*, * , *] -> array
+    addArrayMethod('rcp', function(r, c, p) {
+      this.toCube();
+      const v = this.vecInd(r, c, p),  //vecInd checks all args
+            n = v.length,
+            z = new Array(n);
+      for (let i=0; i<n; i++) z[i] = this[v[i]];
+      return z;
+    });
+    
+    //*, [* ,* , *] -> array
+    addArrayMethod('$rcp', function(r, c, p, val) {
+      this.toCube();
+      const nArg = assert.argRange(arguments,1,4);
+      switch (nArg) {
+        case 1:  [r, c, p, val] = [ ,  , , r];  break;
+        case 2:  [r, c, p, val] = [r,  , , c];  break;
+        case 3:  [r, c, p, val] = [r, c, , p];  break;
+        case 4:  break;
+      }
+      const v = this.vecInd(r, c, p),  //vecInd checks all args
+            n = v.length;
+      var [val, valSingle] = polarize(val);
+      if (valSingle) {
+        for (let i=0; i<n; i++) this[i] = val;
+      }
+      else {
+        if (val.length !== n) throw Error('shape mismatch');
+        for (let i=0; i<n; i++) this[i] = val[i];
+      }
+      return this;
+    });
+      
+  }
+  
   //--------------- set theory ---------------//
   
   {
@@ -1657,7 +1760,7 @@
   }
     
   //--------------- flip, roll, shuffle, sample ---------------//
-  //--------------- where, order, orderKey ------------------//
+  //--------------- where, order, orderKey --------------------//
   
   {
 
