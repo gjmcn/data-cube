@@ -54,13 +54,24 @@
   }
 
   
-  //--------------- convert array to cube ---------------//
+  //--------------- convert array <-> cube ---------------//
     
-  //array/cube -> cube, does nothing if already a cube
+  //array/cube -> cube
   addArrayMethod('toCube', function() {
     if (!this._data_cube) {
       this._data_cube = true;
       this._s = [this.length, 1, 1];
+    }
+    return this;
+  });
+  
+  //array/cube -> array
+  addArrayMethod('toArray', function() {
+    if (this._data_cube) {
+      delete this._data_cube;
+      delete this._s;
+      if (this._k) delete this._k;
+      if (this._l) delete this._l;
     }
     return this;
   });
@@ -225,6 +236,31 @@
     this.toCube();
     dim = assert.dim(dim);
     return this._s[dim];
+  });
+  
+  //-> cube
+  addArrayMethod('squeeze', function() {
+    this.toCube();
+    const lenOne this._s.map(v => v === `1` ? 'n').join();
+    switch (lenOne){
+      case 'n,1,n':
+        
+          !!!!!!!!!!!!!HERE!!!!!!!!!!!!!!!!!!!!!!                   
+          
+                             
+        break;
+      case '1,n,n':
+        
+        break;
+      case '1,n,1':
+        
+        break;
+      case '1,1,1':
+        
+        break;
+        
+    }
+    return this;
   });
        
   
