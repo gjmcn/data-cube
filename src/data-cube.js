@@ -238,31 +238,73 @@
     return this._s[dim];
   });
   
+  //--------------- $squeeze, tp ---------------//
+  
   //-> cube
-  addArrayMethod('squeeze', function() {
+  addArrayMethod('$squeeze', function() {
     this.toCube();
-    const lenOne this._s.map(v => v === `1` ? 'n').join();
-    switch (lenOne){
-      case 'n,1,n':
-        
-          !!!!!!!!!!!!!HERE!!!!!!!!!!!!!!!!!!!!!!                   
-          
-                             
-        break;
-      case '1,n,n':
-        
-        break;
-      case '1,n,1':
-        
-        break;
-      case '1,1,1':
-        
-        break;
-        
+    const lenOne = this._s.map(v => v === 1 ? '1' : 'n').join('');
+    let perm;
+    const permute = nm => {
+      const p = this[nm];
+      this[nm] = [ p[perm[0]], p[perm[1]], p[perm[2]] ];  
+    };
+    if      (lenOne === 'n1n') perm = [0,2,1];
+    else if (lenOne === '1nn') perm = [1,2,0];
+    else if (lenOne === '1n1') perm = [1,0,2];
+    else if (lenOne === '11n') perm = [2,0,1];
+    if (perm) {
+      permute('_s');
+      if (this._k) permute('_k');
+      if (this._l) permute('_l');
     }
     return this;
   });
-       
+    
+  //[array] -> cube
+  addArrayMethod('tp', function(perm) {
+    this.toCube();
+    var [perm, permSingle] = polarize(perm);
+    if (permSingle) {
+      if (perm === undefined) perm = [1,0,2];
+      else throw Error('invalid permutation');
+    }
+    else {
+      if (perm.length !== 3) throw Error('invalid permutation');
+      perm = perm.map(v => +v);
+    }
+    for (let d=0; d<3; d++) {
+      if (!perm.includes(d)) throw Error('invalid permutation');
+    };
+    const {_s, _k, _l} = this,
+          z_s = [ _s[perm[0]], _s[perm[1]], _s[perm[2]] ],
+          [nrz, ncz, npz] = z_s,
+          z = z_s.cube(),
+          mult = [ 1, this._s[0], this._s[0] * this._s[1] ].vec(perm);
+    let j = 0;
+    for (let p=0; p<npz; p++) {
+      let pp = p * mult[2];
+      for (let c=0; c<ncz; c++) {
+        let cc = c * mult[1];
+        for (let r=0; r<nrz; r++) {
+          z[j++] = this[r * mult[0] + cc + pp];
+        }
+      }
+    }
+    if (_k) {
+      ensureKey(z);
+      for (d=0; d<3; d++) {
+        if (_k[perm[d]]) z._k[d] = copyMap(_k[perm[d]]);  
+      }
+    }
+    if (_l) {
+      ensureLabel(z);
+      for (d=0; d<3; d++) {
+        if (_l[perm[d]]) z._l[d] = _l[perm[d]];  
+      }
+    }
+    return z;
+  });
   
   //--------------- labels ---------------//
     
