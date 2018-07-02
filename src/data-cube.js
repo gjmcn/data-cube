@@ -134,12 +134,10 @@
     if (this.length > 3) throw Error('shape cannot have more than 3 entries');
     const r = this[0] === undefined ? 1 : assert.nonNegInt(this[0]);  
     const c = this[1] === undefined ? 1 : assert.nonNegInt(this[1]);  
-    const p = this[2] === undefined ? 1 : assert.nonNegInt(this[2]);  
+    const p = this[2] === undefined ? 1 : assert.nonNegInt(this[2]); 
     const z = new Array(r*c*p);
-    z.toCube();
-    z._s[0] = r;
-    z._s[1] = c;
-    z._s[2] = p;
+    z._data_cube = true;
+    z._s = [r, c, p];
     var [val,valSingle] = polarize(val);
     if (val !== undefined) (valSingle ? fill : fillEW)(z, val);
     return z;
