@@ -272,14 +272,15 @@
     else {
       if (perm.length !== 3) throw Error('invalid permutation');
       perm = perm.map(v => +v);
+      for (let d=0; d<3; d++) {
+        if (!perm.includes(d)) throw Error('invalid permutation');
+      }
     }
-    for (let d=0; d<3; d++) {
-      if (!perm.includes(d)) throw Error('invalid permutation');
-    };
     const {_s, _k, _l} = this,
-          z_s = [ _s[perm[0]], _s[perm[1]], _s[perm[2]] ],
-          [nrz, ncz, npz] = z_s,
-          z = z_s.cube(),
+          nrz = _s[perm[0]],
+          ncz = _s[perm[1]],
+          npz = _s[perm[2]],
+          z = [nrz, ncz, npz].cube(),
           mult = [ 1, this._s[0], this._s[0] * this._s[1] ].vec(perm);
     let j = 0;
     for (let p=0; p<npz; p++) {
@@ -293,13 +294,13 @@
     }
     if (_k) {
       ensureKey(z);
-      for (d=0; d<3; d++) {
+      for (let d=0; d<3; d++) {
         if (_k[perm[d]]) z._k[d] = copyMap(_k[perm[d]]);  
       }
     }
     if (_l) {
       ensureLabel(z);
-      for (d=0; d<3; d++) {
+      for (let d=0; d<3; d++) {
         if (_l[perm[d]]) z._l[d] = _l[perm[d]];  
       }
     }
