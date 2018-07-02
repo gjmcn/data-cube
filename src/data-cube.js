@@ -2043,6 +2043,124 @@
     throw Error(`'value', 'index' or 'rank' expected`);
   });
         
+  
+  //--------------- step ---------------//
+  
+  //WRITE THIS!!! -> array
+  addArrayMethod('step', function(s, unit) {
+    this.toCube();
+    let start, stop;
+    if (this.length === 1) {
+      stop = this[0];
+      if (typeof stop !== 'number' || !Number.isFinite(stop)) {
+        throw Error(`1-entry array, entry of type 'number' expected`);
+      }
+      start = 0;
+    }
+    else if (this.length === 2) {
+      [start, stop] = this;
+    }
+    else throw Error('1 or 2 entry array expected');
+    s = assert.single(s);
+    if (s === undefined || s === null) s = 1;
+    else {
+      s = +s;
+      if (!isFinite(s) || s === 0) {
+        throw Error('step size: finite, non-zero number expected');
+      }
+    }
+    if (arguments.length > 1) {  //date range
+      unit = assert.single(unit);
+      if (unit === 'week') {
+        s *= 7;
+		    unit = 'day';
+      }
+      const stem = helper.timeUnits.get(unit);
+      if (!stem) throw Error('invalid time unit');
+      const getter = 'get' + stem, 
+            setter = 'set' + stem,
+            first = new Date((typeof start === 'string') ? start : +start),
+            last =  new Date((typeof stop === 'string')  ? stop  : +stop); 
+      if ('' + first === 'Invalid Date') throw Error('invalid start date');
+      if ('' + last  === 'Invalid Date') throw Error('invalid end date');
+      if (+first === +last) return [first];
+      const (first < last) {
+        if (s < 0) throw new Error('increasing sequence but negative step');
+        const z = [first];
+        while (GET NEW DATE AND COMPARE TO LAST!!!!!!!!!!!!)
+        
+        
+        
+      if (inf)
+      
+    }
+      
+      
+      
+      if (
+        
+      
+      
+      )
+      
+      
+      
+      
+    }
+    else if (typeof start === 'string') {
+      check same types
+      
+      
+    }
+    else if (typeof start === 'number') {
+      check same types
+      
+      
+    }
+    else throw Error()
+    
+    
+    
+    
+    const inc = stop >= start;
+
+    
+      
+    
+    
+    } 
+    
+    if (typeof)
+    
+    
+  
+  
+    //should always return 1-entry array when start = stop
+  }
+  
+  
+  
+  
+      //date, number, str -> d: changes d by x units 
+    addToDate: => (d, x, unit) {
+      const stem = L2.aux.timeUnits[u];
+      d.setDate
+    
+    },
+
+  Date.prototype.addDate = function(x,u,utc) {
+	if (typeof x !== 'number') x = +x;
+	if (u === undefined) u = 'day';
+	else if (u === 'week') {
+		x *= 7;
+		u = 'day'; }
+	var stem = L2.aux.timeUnits[u];
+	if (!stem) throw new Error('invalid time unit');
+	if (utc) stem = 'UTC' + stem;
+	return new Date((new Date(this))['set' + stem](x + this['get' + stem]())) };
+
+  ----------------------------
+    
     
   //--------------- convert data ---------------//
   

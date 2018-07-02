@@ -88,6 +88,21 @@
         () => h.assert.nonNegFin([2]),
       ]);
       
+      assert.each('assert-fin', [
+        [() => h.assert.fin(5), 5],
+        [() => h.assert.fin(1.23), 1.23],
+        [() => h.assert.fin(0), 0],
+        [() => h.assert.fin(-2), -2],
+      ]);
+      assert.throwEach('invalid-assert-fin', [
+        () => h.assert.fin(Infinity),
+        () => h.assert.fin(-Infinity),
+        () => h.assert.fin(NaN),
+        () => h.assert.fin('2'),
+        () => h.assert.fin([2]),
+        () => h.assert.fin(null),
+      ]);
+      
       assert.each('assert-pos-int', [
         [() => h.assert.posInt(5), 5]
       ]);

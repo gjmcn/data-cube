@@ -12,6 +12,16 @@
       'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'
     ],
     
+    timeUnits: new Map([
+      ['year'  , 'FullYear'], 
+      ['month' , 'Month'],
+      ['day'   , 'Date'],
+      ['hour'  , 'Hours'],
+      ['minute', 'Minutes']
+      ['second', 'Seconds']
+      ['milli' , 'Milliseconds']
+    ]),
+    
     //array/cube -> array, shallow copy array
     copyArray: a => {
       const n = a.length;
@@ -376,7 +386,7 @@
       }
       return rk;
     },
-    
+        
     //func -> num, time in ms to execute synchronous function f
     //  -uses process so only works in node
     timer: f => {
@@ -428,6 +438,14 @@
     nonNegFin: s => {
       if (!Number.isFinite(s) || s < 0) {
         throw Error('non-negative finite number expected');
+      }
+      return s;
+    },
+    
+    //* -> num, s must be finite, returns s
+    fin: s => {
+      if (!Number.isFinite(s)) {
+        throw Error('finite number expected');
       }
       return s;
     },
