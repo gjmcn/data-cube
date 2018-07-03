@@ -2046,30 +2046,27 @@
   
   //--------------- step ---------------//
   
-  //WRITE THIS!!! -> array
+  //[num, str] -> array
   addArrayMethod('step', function(s, unit) {
     this.toCube();
-    let start, stop;
-    if (this.length === 1) {
-      stop = this[0];
-      if (typeof stop !== 'number' || !Number.isFinite(stop)) {
-        throw Error(`1-entry array, entry of type 'number' expected`);
-      }
-      start = 0;
-    }
-    else if (this.length === 2) {
-      [start, stop] = this;
-    }
-    else throw Error('1 or 2 entry array expected');
+    if (this.length !== 2) throw Error('2-entry array expected');
+    const [start, stop] = this;
     s = assert.single(s);
     if (s === undefined || s === null) s = 1;
     else {
       s = +s;
-      if (!isFinite(s) || s === 0) {
+      if (!Number.isFinite(s) || s === 0) {
         throw Error('step size: finite, non-zero number expected');
       }
     }
+    const checkDirection = (a,b) => {
+      if (a < b && s < 0 || a > b && s > 0) {
+        throw new Error('stepping in wrong direction');
+      }
+    };
+    let z;
     if (arguments.length > 1) {  //date range
+      if (!Number.isInteger(s)) throw Error('integer step expected');
       unit = assert.single(unit);
       if (unit === 'week') {
         s *= 7;
@@ -2083,84 +2080,45 @@
             last =  new Date((typeof stop === 'string')  ? stop  : +stop); 
       if ('' + first === 'Invalid Date') throw Error('invalid start date');
       if ('' + last  === 'Invalid Date') throw Error('invalid end date');
-      if (+first === +last) return [first];
-      const (first < last) {
-        if (s < 0) throw new Error('increasing sequence but negative step');
-        const z = [first];
-        while (GET NEW DATE AND COMPARE TO LAST!!!!!!!!!!!!)
-        
-        
-        
-      if (inf)
-      
-    }
-      
-      
-      
-      if (
-        
-      
-      
-      )
-      
-      
-      
-      
-    }
-    else if (typeof start === 'string') {
-      check same types
-      
-      
+      let j = 1,
+          d = first,
+          test = first < last ? () => d <= last : () => d >= last;
+      checkDirection(first, last);
+      while (test()) {
+        z[j++] = d;
+        d = new Date(+d)[setter](d[getter]() + s);
+      }
     }
     else if (typeof start === 'number') {
-      check same types
-      
-      
+      if (typeof stop !== 'number') throw Error('number expected');
+      assert.fin(start);
+      assert.fin(stop);
+      const first = +start.toFixed(14),
+            last = +stop.toFixed(14);
+		  checkDirection(first, last);
+      const n = Math.floor(Math.abs((first-last)/s)) + 1;
+      z = new Array(n);
+      for (let i=0; i<n; i++) z[i] = first + i*s;
     }
-    else throw Error()
-    
-    
-    
-    
-    const inc = stop >= start;
-
-    
+    else if (typeof start === 'string') {
+      if (!Number.isInteger(s)) throw Error('integer step expected');
+      if (typeof stop !== 'string') throw Error('string expected');
+      const lettersMap = helper.lettersMap;
+      const startInd = lettersMap.get(start);
+      const stopInd = lettersMap.get(stop);
+      if (startInd === undefined || stopInd === undefined) {
+        throw Error('start or end invalid');
+      }
+      checkDirection(startInd, stopInd);
+      s = +s.toFixed(14);
+      const n = Math.floor(Math.abs((startInd-stopInd)/s)) + 1;
+			z = new Array(n);
+			for (let i=0; i<n; i++) z[i] = lettersMap.get(startInd + i*s);
+    }
+    else throw Error('unclear if number, string or date range');
+    return z;
+  });
       
-    
-    
-    } 
-    
-    if (typeof)
-    
-    
-  
-  
-    //should always return 1-entry array when start = stop
-  }
-  
-  
-  
-  
-      //date, number, str -> d: changes d by x units 
-    addToDate: => (d, x, unit) {
-      const stem = L2.aux.timeUnits[u];
-      d.setDate
-    
-    },
-
-  Date.prototype.addDate = function(x,u,utc) {
-	if (typeof x !== 'number') x = +x;
-	if (u === undefined) u = 'day';
-	else if (u === 'week') {
-		x *= 7;
-		u = 'day'; }
-	var stem = L2.aux.timeUnits[u];
-	if (!stem) throw new Error('invalid time unit');
-	if (utc) stem = 'UTC' + stem;
-	return new Date((new Date(this))['set' + stem](x + this['get' + stem]())) };
-
-  ----------------------------
-    
     
   //--------------- convert data ---------------//
   

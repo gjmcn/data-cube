@@ -17,8 +17,8 @@
       ['month' , 'Month'],
       ['day'   , 'Date'],
       ['hour'  , 'Hours'],
-      ['minute', 'Minutes']
-      ['second', 'Seconds']
+      ['minute', 'Minutes'],
+      ['second', 'Seconds'],
       ['milli' , 'Milliseconds']
     ]),
     
