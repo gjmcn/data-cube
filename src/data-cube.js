@@ -2074,19 +2074,27 @@
       }
       const stem = helper.timeUnits.get(unit);
       if (!stem) throw Error('invalid time unit');
+      const asDate = a => {
+        const t = typeof a;
+        if (t === 'string' || t === 'number') return new Date(a);
+        if (typeof a.getTime === 'function') return new Date(a.getTime());
+        throw Error('cannot convert to date');
+      };
       const getter = 'get' + stem, 
             setter = 'set' + stem,
-            first = new Date((typeof start === 'string') ? start : +start),
-            last =  new Date((typeof stop === 'string')  ? stop  : +stop); 
-      if ('' + first === 'Invalid Date') throw Error('invalid start date');
-      if ('' + last  === 'Invalid Date') throw Error('invalid end date');
-      let j = 1,
+            first = asDate(start),
+            last =  asDate(stop); 
+      if (!Number.isFinite(first.getTime())) throw Error('invalid start date');
+      if (!Number.isFinite(last.getTime())) throw Error('invalid end date');
+      let j = 0,
           d = first,
           test = first < last ? () => d <= last : () => d >= last;
       checkDirection(first, last);
+      z = [];
       while (test()) {
         z[j++] = d;
-        d = new Date(+d)[setter](d[getter]() + s);
+        d = new Date(d.getTime());
+        d[setter](d[getter]() + s);
       }
     }
     else if (typeof start === 'number') {
@@ -2095,25 +2103,25 @@
       assert.fin(stop);
       const first = +start.toFixed(14),
             last = +stop.toFixed(14);
+      s = +s.toFixed(14);
 		  checkDirection(first, last);
-      const n = Math.floor(Math.abs((first-last)/s)) + 1;
+      const n = Math.floor(Math.abs((first-last)/s).toFixed(14)) + 1;
       z = new Array(n);
       for (let i=0; i<n; i++) z[i] = first + i*s;
     }
     else if (typeof start === 'string') {
       if (!Number.isInteger(s)) throw Error('integer step expected');
       if (typeof stop !== 'string') throw Error('string expected');
-      const lettersMap = helper.lettersMap;
-      const startInd = lettersMap.get(start);
-      const stopInd = lettersMap.get(stop);
+      const startInd = helper.lettersMap.get(start);
+      const stopInd = helper.lettersMap.get(stop);
       if (startInd === undefined || stopInd === undefined) {
         throw Error('start or end invalid');
       }
       checkDirection(startInd, stopInd);
-      s = +s.toFixed(14);
-      const n = Math.floor(Math.abs((startInd-stopInd)/s)) + 1;
+      const lettersArray = helper.lettersArray,
+            n = Math.floor(Math.abs((startInd-stopInd)/s)) + 1;
 			z = new Array(n);
-			for (let i=0; i<n; i++) z[i] = lettersMap.get(startInd + i*s);
+			for (let i=0; i<n; i++) z[i] = lettersArray[startInd + i*s];
     }
     else throw Error('unclear if number, string or date range');
     return z;
