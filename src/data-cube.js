@@ -127,7 +127,7 @@
   });
 
   
-  //--------------- create cube ---------------//
+  //--------------- create cube/array ---------------//
   
   //[*] -> cube, new cube from shape array
   addArrayMethod('cube', function(val) {
@@ -242,7 +242,7 @@
       if (start === stop) z = [start];
       else {
         checkDirection(start, stop, s);
-        const n = Math.floor(((stop - start) / s) + 1e-15) + 1;
+        const n = Math.floor(Math.abs((Math.abs(stop - start) + 1e-15) / s)) + 1;
         z = new Array(n);
         for (let i=0; i<n; i++) z[i] = start + i*s;
       }
@@ -343,6 +343,7 @@
     dim = assert.dim(dim);
     return this._s[dim];
   });
+  
   
   //--------------- $squeeze, tp ---------------//
   
