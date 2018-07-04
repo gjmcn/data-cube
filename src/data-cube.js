@@ -177,6 +177,94 @@
     for (let i=0; i<n; i++) z[i] = sampleNormal() * sig + mu;
     return z;
   });
+  
+  //[num, str] -> array
+  addArrayMethod('step', function(s, unit) {
+    if (this.length !== 2) throw Error('2-entry array expected');
+    const [start, stop] = this;
+    s = assert.single(s);
+    if (s === undefined) s = 1;
+    else {
+      s = +s;
+      if (!Number.isFinite(s) || s === 0) {
+        throw Error('finite, non-zero jump expected');
+      }
+    }
+    unit = assert.single(unit);
+    const checkDirection = (a, b, c) => {
+      if ((a < b && c < 0) || (a > b && c > 0)) {
+        throw new Error('stepping in wrong direction');
+      }
+    };
+    let z;
+    if (unit !== undefined) {  //date range
+      if (!Number.isInteger(s)) throw Error('date range: integer jump expected');
+      if (unit === 'week') {
+        s *= 7;
+		    unit = 'day';
+      }
+      const stem = helper.timeUnits.get(unit);
+      if (!stem) throw Error('invalid time unit');
+      const asDate = a => {
+        const t = typeof a;
+        let dt;
+        if (t === 'string' || t === 'number') dt = new Date(a);
+        else if (a instanceof Date) dt = new Date(a.getTime());
+        else throw Error('date, string or number expected');
+        if (!Number.isFinite(dt.getTime())) throw Error('invalid start or end date');
+        return dt;
+      };
+      const getter = 'get' + stem, 
+            setter = 'set' + stem,
+            first = asDate(start),
+            last  = asDate(stop),
+            first_ms = first.getTime(),
+            last_ms  = last.getTime();
+      if (first_ms === last_ms) z = [first];
+      else {
+        checkDirection(first_ms, last_ms, s);
+        z = [];
+        let j = 0,
+            d = first,
+            test = first_ms < last_ms
+              ? () => d.getTime() <= last_ms
+              : () => d.getTime() >= last_ms;
+        while (test()) {
+          z[j++] = d;
+          d = new Date(d.getTime());
+          d[setter](d[getter]() + s);
+        }
+      }
+    }
+    else if (typeof start === 'number') {
+      assert.fin(start);
+      assert.fin(stop);
+      if (start === stop) return [start];
+      checkDirection(start, stop, s);
+      const n = Math.floor(((stop - start) / s) + 1e-15) + 1;
+      z = new Array(n);
+      for (let i=0; i<n; i++) z[i] = start + i*s;
+    }
+    else if (typeof start === 'string') {
+      if (!Number.isInteger(s)) throw Error('string range: integer jump expected');
+      if (typeof stop !== 'string') throw Error('string expected');
+      const startInd = helper.lettersMap.get(start);
+      const stopInd  = helper.lettersMap.get(stop);
+      if (startInd === undefined || stopInd === undefined) {
+        throw Error('string range: start or end invalid');
+      }
+      if (startInd === stopInd) z = [start];
+      else {
+        checkDirection(startInd, stopInd, s);
+        const lettersArray = helper.lettersArray,
+              n = Math.floor((stopInd - startInd) / s) + 1;
+        z = new Array(n);
+        for (let i=0; i<n; i++) z[i] = lettersArray[startInd + i*s];        
+      }
+    }
+    else throw Error('arguments not consistent with number, string or date range');
+    return z;
+  });
     
   
   //--------------- shape ---------------//
@@ -2044,90 +2132,6 @@
   });
         
   
-  //--------------- step ---------------//
-  
-  //[num, str] -> array
-  addArrayMethod('step', function(s, unit) {
-    this.toCube();
-    if (this.length !== 2) throw Error('2-entry array expected');
-    const [start, stop] = this;
-    s = assert.single(s);
-    if (s === undefined || s === null) s = 1;
-    else {
-      s = +s;
-      if (!Number.isFinite(s) || s === 0) {
-        throw Error('step size: finite, non-zero number expected');
-      }
-    }
-    const checkDirection = (a,b) => {
-      if (a < b && s < 0 || a > b && s > 0) {
-        throw new Error('stepping in wrong direction');
-      }
-    };
-    let z;
-    if (arguments.length > 1) {  //date range
-      if (!Number.isInteger(s)) throw Error('integer step expected');
-      unit = assert.single(unit);
-      if (unit === 'week') {
-        s *= 7;
-		    unit = 'day';
-      }
-      const stem = helper.timeUnits.get(unit);
-      if (!stem) throw Error('invalid time unit');
-      const asDate = a => {
-        const t = typeof a;
-        if (t === 'string' || t === 'number') return new Date(a);
-        if (typeof a.getTime === 'function') return new Date(a.getTime());
-        throw Error('cannot convert to date');
-      };
-      const getter = 'get' + stem, 
-            setter = 'set' + stem,
-            first = asDate(start),
-            last =  asDate(stop); 
-      if (!Number.isFinite(first.getTime())) throw Error('invalid start date');
-      if (!Number.isFinite(last.getTime())) throw Error('invalid end date');
-      let j = 0,
-          d = first,
-          test = first < last ? () => d <= last : () => d >= last;
-      checkDirection(first, last);
-      z = [];
-      while (test()) {
-        z[j++] = d;
-        d = new Date(d.getTime());
-        d[setter](d[getter]() + s);
-      }
-    }
-    else if (typeof start === 'number') {
-      if (typeof stop !== 'number') throw Error('number expected');
-      assert.fin(start);
-      assert.fin(stop);
-      const first = +start.toFixed(14),
-            last = +stop.toFixed(14);
-      s = +s.toFixed(14);
-		  checkDirection(first, last);
-      const n = Math.floor(Math.abs((first-last)/s).toFixed(14)) + 1;
-      z = new Array(n);
-      for (let i=0; i<n; i++) z[i] = first + i*s;
-    }
-    else if (typeof start === 'string') {
-      if (!Number.isInteger(s)) throw Error('integer step expected');
-      if (typeof stop !== 'string') throw Error('string expected');
-      const startInd = helper.lettersMap.get(start);
-      const stopInd = helper.lettersMap.get(stop);
-      if (startInd === undefined || stopInd === undefined) {
-        throw Error('start or end invalid');
-      }
-      checkDirection(startInd, stopInd);
-      const lettersArray = helper.lettersArray,
-            n = Math.floor(Math.abs((startInd-stopInd)/s)) + 1;
-			z = new Array(n);
-			for (let i=0; i<n; i++) z[i] = lettersArray[startInd + i*s];
-    }
-    else throw Error('unclear if number, string or date range');
-    return z;
-  });
-      
-    
   //--------------- convert data ---------------//
   
   //!!NOTE: THIS IS MAY GET REMOVED SINCE IS A SPECIAL CASE OF 'unvble'
@@ -2157,10 +2161,11 @@
   {
     const dc = ar => toArray(ar).toCube();
       
-    dc.cube = (shp,val) => toArray(shp).cube(val);
-    dc.rand = (shp,mx) => toArray(shp).rand(mx);
-    dc.normal = (shp,mu,sig) => toArray(shp).normal(mu,sig);
-    dc.copy = (ar,ret) => toArray(ar).copy(ret);
+    dc.cube = (shp, val) => toArray(shp).cube(val);
+    dc.rand = (shp, mx) => toArray(shp).rand(mx);
+    dc.normal = (shp, mu, sig) => toArray(shp).normal(mu,sig);
+    dc.step = (startStop, s, unit) => toArray(startStop).step(s,unit);
+    dc.copy = (ar, ret) => toArray(ar).copy(ret);
         
     module.exports = dc;
   }
