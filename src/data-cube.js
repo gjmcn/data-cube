@@ -239,11 +239,13 @@
     else if (typeof start === 'number') {
       assert.fin(start);
       assert.fin(stop);
-      if (start === stop) return [start];
-      checkDirection(start, stop, s);
-      const n = Math.floor(((stop - start) / s) + 1e-15) + 1;
-      z = new Array(n);
-      for (let i=0; i<n; i++) z[i] = start + i*s;
+      if (start === stop) z = [start];
+      else {
+        checkDirection(start, stop, s);
+        const n = Math.floor(((stop - start) / s) + 1e-15) + 1;
+        z = new Array(n);
+        for (let i=0; i<n; i++) z[i] = start + i*s;
+      }
     }
     else if (typeof start === 'string') {
       if (!Number.isInteger(s)) throw Error('string range: integer jump expected');
@@ -266,6 +268,24 @@
     return z;
   });
     
+  //[num, num] -> array
+  addArrayMethod('space', function(n) {
+    if (this.length !== 2) throw Error('2-entry array expected');
+    const start = assert.fin(+this[0]),
+          stop  = assert.fin(+this[1]);
+    n = assert.posInt(+def(assert.single(n), 10));
+    if (n < 2) throw Error('number of points must be at least 2');
+    if (start === stop) return fill(new Array(n), start);
+    const z = new Array(n);
+    z[0] = start;
+    z[n-1] = stop;
+    if (n > 2) {
+      const j = (stop - start) / (n - 1);
+      for (let i=1; i<n-1; i++) z[i] = start + i*j;
+    }
+    return z;
+  });
+  
   
   //--------------- shape ---------------//
   
@@ -2165,6 +2185,7 @@
     dc.rand = (shp, mx) => toArray(shp).rand(mx);
     dc.normal = (shp, mu, sig) => toArray(shp).normal(mu,sig);
     dc.step = (startStop, s, unit) => toArray(startStop).step(s,unit);
+    dc.space = (startStop, n) => toArray(startStop).space(n);
     dc.copy = (ar, ret) => toArray(ar).copy(ret);
         
     module.exports = dc;
