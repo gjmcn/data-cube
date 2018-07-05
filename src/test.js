@@ -1604,7 +1604,7 @@
     
     const e = [0,1,2].cube();
     assert('vble-empty-dim-0', () => _isEqual(e.vble(0),
-      [ { col: 'c_0', page: 'p_0' }, { col: 'c_0', page: 'p_1' } ]), true);
+      [ { col: 0, page: 0 }, { col: 0, page: 1 } ]), true);
     assert('vble-empty-dim-1', () => _isEqual(e.vble(1), []), true);
     assert('vble-empty-dim-2', () => _isEqual(e.vble(2), []), true);
     assert('vble-empty-dim-neg-1', () => _isEqual(e.vble(-1), []), true);
@@ -1719,32 +1719,32 @@
       .$label(1,'COLS');
     
     assert('vble-matrix-dim-0', () => _isEqual( m.vble(0),
-      [ { COLS: '55', page: 'p_0', r_0: 'a', r_1: 'b' },
-        { COLS: true, page: 'p_0', r_0: 'c', r_1: 'd' },
-        { COLS: 55, page: 'p_0', r_0: 'e', r_1: 'f' }
+      [ { COLS: '55', page: 0, 0: 'a', 1: 'b' },
+        { COLS: true, page: 0, 0: 'c', 1: 'd' },
+        { COLS: 55, page: 0, 0: 'e', 1: 'f' }
       ]), true);
   
     assert('vble-matrix-dim-1', () => _isEqual( m.vble(1),
-      [ { '55': 'e', row: 'r_0', page: 'p_0', true: 'c' },
-        { '55': 'f', row: 'r_1', page: 'p_0', true: 'd' }
+      [ { '55': 'e', row: 0, page: 0, true: 'c' },
+        { '55': 'f', row: 1, page: 0, true: 'd' }
       ]), true);
         
     assert('vble-matrix-dim-2', () => _isEqual( m.vble(2),
-      [ { row: 'r_0', COLS: '55', p_0: 'a' },
-        { row: 'r_1', COLS: '55', p_0: 'b' },
-        { row: 'r_0', COLS: true, p_0: 'c' },
-        { row: 'r_1', COLS: true, p_0: 'd' },
-        { row: 'r_0', COLS: 55, p_0: 'e' },
-        { row: 'r_1', COLS: 55, p_0: 'f' } 
+      [ { row: 0, COLS: '55', 0: 'a' },
+        { row: 1, COLS: '55', 0: 'b' },
+        { row: 0, COLS: true, 0: 'c' },
+        { row: 1, COLS: true, 0: 'd' },
+        { row: 0, COLS: 55, 0: 'e' },
+        { row: 1, COLS: 55, 0: 'f' } 
       ]), true);
     
     assert('vble-matrix-dim-neg-1', () => _isEqual( m.vble([-1]),
-      [ { row: 'r_0', COLS: '55', page: 'p_0', entry: 'a' },
-        { row: 'r_1', COLS: '55', page: 'p_0', entry: 'b' },
-        { row: 'r_0', COLS: true, page: 'p_0', entry: 'c' },
-        { row: 'r_1', COLS: true, page: 'p_0', entry: 'd' },
-        { row: 'r_0', COLS: 55, page: 'p_0', entry: 'e' },
-        { row: 'r_1', COLS: 55, page: 'p_0', entry: 'f' }
+      [ { row: 0, COLS: '55', page: 0, entry: 'a' },
+        { row: 1, COLS: '55', page: 0, entry: 'b' },
+        { row: 0, COLS: true, page: 0, entry: 'c' },
+        { row: 1, COLS: true, page: 0, entry: 'd' },
+        { row: 0, COLS: 55, page: 0, entry: 'e' },
+        { row: 1, COLS: 55, page: 0, entry: 'f' }
       ]), true);
   
     assert.throwEach('throw-vble', [
