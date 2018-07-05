@@ -179,7 +179,7 @@
   });
   
   //[num, str] -> array
-  addArrayMethod('step', function(s, unit) {
+  addArrayMethod('seq', function(s, unit) {
     if (this.length !== 2) throw Error('2-entry array expected');
     const [start, stop] = this;
     s = assert.single(s);
@@ -296,7 +296,6 @@
     }
     return (ret === 'step') ? [z,j] : z;
   });
-  
   
   //--------------- shape ---------------//
   
@@ -908,13 +907,12 @@
   addArrayMethod('vble', function(dim) {
     this.toCube();
     dim = def(assert.single(dim), 0);  //dim can be -1 so do not use assert.dim
-    const prefix = ['r_', 'c_', 'p_'];
     const {_s, _k, _l} = this;
     const [nr, nc, np] = _s;
     const [rk, ck, pk] = [0,1,2].map(d => {
       return _k && _k[d]
         ? [..._k[d].keys()]
-        : helper.simpleRange(_s[d]).map(ind => prefix[d] + ind);
+        : helper.simpleRange(_s[d]);
     });
     const [rl, cl, pl] = 
       [0,1,2].map(d => (_l && _l[d]) || helper.shortDimName[d]);
@@ -2196,7 +2194,7 @@
     dc.cube = (shp, val) => toArray(shp).cube(val);
     dc.rand = (shp, mx) => toArray(shp).rand(mx);
     dc.normal = (shp, mu, sig) => toArray(shp).normal(mu,sig);
-    dc.step = (startStop, s, unit) => toArray(startStop).step(s,unit);
+    dc.seq = (startStop, s, unit) => toArray(startStop).seq(s,unit);
     dc.lin = (startStop, n, ret) => toArray(startStop).lin(n, ret);
     dc.copy = (ar, ret) => toArray(ar).copy(ret);
         
