@@ -1768,6 +1768,42 @@
   });
 
   
+  //--------------- grid ---------------//
+  
+  //array/cube[, ret] -> cube
+  addArrayMethod('grid', function(y, ret) {
+    this.toCube();
+    y = toArray(y);
+    ret = def(assert.single(ret), 'value');
+    if (ret !== 'value' && ret !== 'index' && ret !== 'both') {
+      throw Error(`'value', 'index' or 'all' expected`);
+    }
+    const nThis = this.length;
+    const ny = y.length;
+    const n = nThis * ny;
+    let z;
+    if (ret === 'value' || ret === 'index') {
+      z = [n,2].cube();
+      let i;
+      if (ret === 'value') { for (i=0; i<n; i++) z[i] = this[i % nThis] }
+      else                 { for (i=0; i<n; i++) z[i] = i % nThis }
+      for (let j=0; j<ny; j++) {
+        if (ret === 'value')  { for (let k=0; k<nThis; k++) z[i++] = y[j] }
+        else                  { for (let k=0; k<nThis; k++) z[i++] = j }
+      }
+    }
+    else {
+      z = [n,4].cube(); 
+      let i;
+      for (i=0; i<n; i++) z[i] = i % nThis;
+      for (let j=0; j<n; j++, i++) z[i] = this[i % nThis];
+      for (let j=0; j<ny; j++) for (let k=0; k<nThis; k++) z[i++] = j;
+      for (let j=0; j<ny; j++) for (let k=0; k<nThis; k++) z[i++] = this[j];
+    }
+    return z;
+  });
+  
+  
   //--------------- which ---------------//
   
   //[func] -> array
