@@ -242,7 +242,7 @@
       if (start === stop) z = [start];
       else {
         checkDirection(start, stop, s);
-        const n = Math.floor(Math.abs((Math.abs(stop - start) + 1e-15) / s)) + 1;
+        const n = Math.floor((Math.abs(stop - start) + 1e-15) / Math.abs(s)) + 1;
         z = new Array(n);
         for (let i=0; i<n; i++) z[i] = start + i*s;
       }
@@ -268,22 +268,33 @@
     return z;
   });
     
-  //[num, num] -> array
-  addArrayMethod('space', function(n) {
+  //[num, str] -> array
+  addArrayMethod('lin', function(n, ret) {
     if (this.length !== 2) throw Error('2-entry array expected');
     const start = assert.fin(+this[0]),
           stop  = assert.fin(+this[1]);
-    n = assert.posInt(+def(assert.single(n), 10));
+    n = +def(assert.single(n), 10);
+    if (!Number.isInteger(n)) throw Error('number of points: integer expected');
     if (n < 2) throw Error('number of points must be at least 2');
-    if (start === stop) return fill(new Array(n), start);
-    const z = new Array(n);
-    z[0] = start;
-    z[n-1] = stop;
-    if (n > 2) {
-      const j = (stop - start) / (n - 1);
-      for (let i=1; i<n-1; i++) z[i] = start + i*j;
+    ret = def(assert.single(ret), 'point');
+    if (ret !== 'point' && ret !== 'step') {
+      throw Error(`'point' or 'step' expected`);
     }
-    return z;
+    let j, z;
+    if (start === stop) {
+      j = 0;
+      z = fill(new Array(n), start);
+    }
+    else {
+      j = (stop - start) / (n - 1);
+      z = new Array(n);
+      z[0] = start;
+      z[n-1] = stop;
+      if (n > 2) {
+        for (let i=1; i<n-1; i++) z[i] = start + i*j;
+      }
+    }
+    return (ret === 'step') ? [z,j] : z;
   });
   
   
@@ -2186,7 +2197,7 @@
     dc.rand = (shp, mx) => toArray(shp).rand(mx);
     dc.normal = (shp, mu, sig) => toArray(shp).normal(mu,sig);
     dc.step = (startStop, s, unit) => toArray(startStop).step(s,unit);
-    dc.space = (startStop, n) => toArray(startStop).space(n);
+    dc.lin = (startStop, n, ret) => toArray(startStop).lin(n, ret);
     dc.copy = (ar, ret) => toArray(ar).copy(ret);
         
     module.exports = dc;
