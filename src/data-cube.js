@@ -922,13 +922,15 @@
       let i = 0;
       for (let p=0; p<np; p++) {
         let pp = nr * nc * p;
+        let ppk = pk[p];
         for (let c=0; c<nc; c++) {
           let cc = nr * c;
+          let cck = ck[c];
           for (let r=0; r<nr; r++) {
             z[i++] = {
               [rl]: rk[r], 
-              [cl]: ck[c],
-              [pl]: pk[p],
+              [cl]: cck,
+              [pl]: ppk,
               entry: this[r + cc + pp]
             };
           }
