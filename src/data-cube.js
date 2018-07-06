@@ -1930,6 +1930,7 @@
       
   }
   
+  
   //--------------- set theory ---------------//
   
   {
@@ -1988,6 +1989,54 @@
     });
 
   }
+  
+  
+  //--------------- freq ---------------//
+  
+  addArrayMethod('freq', function(ret) {
+    this.toCube();
+    ret = assert.single(ret);
+    if (ret === undefined) ret = 'matrix';
+    else if (ret !== 'vector') throw Error(`'vector' or 'matrix' expected`);
+    const n = this.length;
+    let z;
+    if (ret === 'vector') {
+      const countMap = new Map(),
+            keyMap = new Map();
+      let j = 0;
+      for (let i=0; i<n; i++) {
+        let v = this[i],
+            count = countMap.get(v);
+        if (count) countMap.set(v, count + 1);
+        else {
+          countMap.set(v, 1);
+          keyMap.set(v, j++);
+        }
+      }
+      z = [...countMap.values()].toCube();
+      ensureKey(z);
+      z._k[0] = keyMap;
+    }
+    else {
+      z = new Array(n);
+      const countMap = new Map();
+      let j = 0;
+      for (let i=0; i<n; i++) {
+        let v = this[i],
+            count = countMap.get(v);
+        if (count) countMap.set(v, count + 1);
+        else {
+          countMap.set(v, 1);
+          z[j++] = v;
+        }
+      }
+      z.length = 2 * j;
+      z.$shape(j).$key(1, ['value','count']);
+      for (let v of countMap.values()) z[j++] = v;
+    }
+    return z;
+  });
+  
     
   //--------------- flip, roll, shuffle, sample ---------------//
   //--------------- where, order, orderKey --------------------//
@@ -2196,6 +2245,50 @@
     throw Error(`'value', 'index' or 'rank' expected`);
   });
         
+  
+  //--------------- bin ---------------//
+  addArrayMethod('bin', function(lim, how, ret) {
+    this.toCube();
+    lim = toArray(lim);
+    const nLim = lim.length;
+    if (nLim < 2) throw Error('at least 2 limits expected');
+    ret = def(assert.single(ret), 'upper');
+    how = assert.single(how);
+    let test;
+    if (how === undefined || how === null) test = a <= b ? -1 : 1;
+    else if (typeof how === 'function') test = (a,b) => how(a,b) <= 0;
+    else throw Error('null, undefined or function expected');
+    let describe;
+    if      (ret === 'lower') describe = lwr => lwr;
+    else if (ret === 'upper') describe = (lwr,upr) => upr;
+    else if (ret === 'index') describe = (lwr,upr,ind) => ind;
+    else if (typeof ret === 'function') describe = ret;
+    else throw Error(`'lower', 'upper', 'index' or function expected`);
+    const n = this.length,
+          z = new Array(n);
+    outer: for (let i=0; i<n; i++) {
+      let v = this[i];
+      let lowerLim = lim[0];
+      let upperLim;
+      if (test(v, lowerLim)) throw Error('entry less than first limit');
+      for (let j=1; j<nLim; j++) {
+        lowerLim = upperLim;
+        upperLim = lim[j],
+        if test(v, upperLim) z[i] = describe(lowerLim, upperLim, j);
+        continue outer; 
+      }
+      throw Error('entry greater than last limit');  
+    }
+    
+    !!!!!!!!!!!!!!!!!!HERE!!!!!!!!!!!!!!!!!!!!!!!
+    
+    
+    //MORE DETAILS NEEDED IN DOCS TO EXPLAIN COMPARISON - THAT <= 0 TO BE IN BIN?
+    
+    return z;
+  });
+  
+  
   
   //--------------- convert data ---------------//
   
