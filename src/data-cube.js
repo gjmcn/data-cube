@@ -297,6 +297,39 @@
     return (ret === 'step') ? [z,j] : z;
   });
   
+  //array/cube[, ret] -> cube
+  addArrayMethod('pair', function(y, ret) {
+    y = toArray(y);
+    ret = def(assert.single(ret), 'value');
+    if (ret !== 'value' && ret !== 'index' && ret !== 'both') {
+      throw Error(`'value', 'index' or 'both' expected`);
+    }
+    const nThis = this.length;
+    const ny = y.length;
+    const n = nThis * ny;
+    let z;
+    if (ret === 'value' || ret === 'index') {
+      z = [n,2].cube();
+      let i;
+      if (ret === 'value') { for (i=0; i<n; i++) z[i] = this[i % nThis] }
+      else                 { for (i=0; i<n; i++) z[i] = i % nThis }
+      for (let j=0; j<ny; j++) {
+        if (ret === 'value')  { for (let k=0; k<nThis; k++) z[i++] = y[j] }
+        else                  { for (let k=0; k<nThis; k++) z[i++] = j }
+      }
+    }
+    else {
+      z = [n,4].cube(); 
+      let i;
+      for (i=0; i<n; i++) z[i] = i % nThis;
+      for (let j=0; j<n; j++, i++) z[i] = this[i % nThis];
+      for (let j=0; j<ny; j++) for (let k=0; k<nThis; k++) z[i++] = j;
+      for (let j=0; j<ny; j++) for (let k=0; k<nThis; k++) z[i++] = y[j];
+    }
+    return z;
+  });
+  
+  
   //--------------- shape ---------------//
   
   //-> 3-entry array
@@ -1767,43 +1800,7 @@
     }
   });
 
-  
-  //--------------- grid ---------------//
-  
-  //array/cube[, ret] -> cube
-  addArrayMethod('grid', function(y, ret) {
-    this.toCube();
-    y = toArray(y);
-    ret = def(assert.single(ret), 'value');
-    if (ret !== 'value' && ret !== 'index' && ret !== 'both') {
-      throw Error(`'value', 'index' or 'all' expected`);
-    }
-    const nThis = this.length;
-    const ny = y.length;
-    const n = nThis * ny;
-    let z;
-    if (ret === 'value' || ret === 'index') {
-      z = [n,2].cube();
-      let i;
-      if (ret === 'value') { for (i=0; i<n; i++) z[i] = this[i % nThis] }
-      else                 { for (i=0; i<n; i++) z[i] = i % nThis }
-      for (let j=0; j<ny; j++) {
-        if (ret === 'value')  { for (let k=0; k<nThis; k++) z[i++] = y[j] }
-        else                  { for (let k=0; k<nThis; k++) z[i++] = j }
-      }
-    }
-    else {
-      z = [n,4].cube(); 
-      let i;
-      for (i=0; i<n; i++) z[i] = i % nThis;
-      for (let j=0; j<n; j++, i++) z[i] = this[i % nThis];
-      for (let j=0; j<ny; j++) for (let k=0; k<nThis; k++) z[i++] = j;
-      for (let j=0; j<ny; j++) for (let k=0; k<nThis; k++) z[i++] = this[j];
-    }
-    return z;
-  });
-  
-  
+    
   //--------------- which ---------------//
   
   //[func] -> array
@@ -2223,22 +2220,20 @@
     return z; 
   });
   
-      
-  //--------------- export ---------------//
+  
+    
+  //--------------- export dc function ---------------//
       
   {
     const dc = ar => toArray(ar).toCube();
       
-    dc.cube = (shp, val) => toArray(shp).cube(val);
-    dc.rand = (shp, mx) => toArray(shp).rand(mx);
-    dc.normal = (shp, mu, sig) => toArray(shp).normal(mu,sig);
-    dc.seq = (startStop, s, unit) => toArray(startStop).seq(s,unit);
-    dc.lin = (startStop, n, ret) => toArray(startStop).lin(n, ret);
-    dc.copy = (ar, ret) => toArray(ar).copy(ret);
-        
+    ['cube','rand','normal','seq','lin','pair','copy'].forEach( nm => {
+      dc[nm] = (x,...args) => toArray(x)[nm](...args);
+    });
+                                         
     module.exports = dc;
   }
-    
+          
 }
  
 
