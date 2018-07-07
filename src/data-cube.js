@@ -2229,6 +2229,80 @@
       return z;
     });  
 
+    
+    //[num, *, str, func]
+    addArrayMethod('group', function(dim, val, f) {
+      this.toCube();
+      dim = assert.dim(dim);
+      const nd = this._s[dim];
+      val = toArray(val);
+      const nv = val.length;
+      let zDim = nv / nd;
+      if (![0,1,2].includes(zDim)) {
+        if (nv === 0 && nd === 0) zDim = 1;
+        else throw Error('shape mismatch');
+      }
+      f = def(assert.single(f), 'subcube');
+      if (f !== 'subcube' && f !== 'count' && typeof f !== 'function') {
+        throw Error(`'subcube', 'count' or function expected`);
+      }
+      if (nd === 0) return [0].cube();
+      // construct map for each 'grouping dimensions', value is a vector of inds
+      const ky = [];
+      let j = 0;
+      for (let d=0; d<zDim; d++) {
+        let mp = new Map();
+        for (let i=0; i<nd; i++) {
+          v = val[j++];
+          mp = ky.get(v);
+          if (m) m[m.length] = i;
+          else ky.set(v,[i]);
+        }
+        ky[d] = mp;
+      }
+      //compute vector ind of z where each ind of dim going
+      let size = ky.map(mp => mp.size);
+      let zInd = fill(new Array(nd), 0);
+      const increment_zInd = d => {
+        let mult = size.slice(0,d).prod();  JUST CHANGED THIS!!!!!!!!!!!!!!!!!!!
+        let mp = ky[d],
+            j = 0;
+        for (let k of mp.keys()) {
+          let ind = mp.get(k);
+          for (let i=0; i<ind.length; i++) zInd[ind[i]] += j * mult;
+          mp.set(k,j++);   //mp will be used as the keys map for dimension d of z
+        }
+      };
+      for (let d=0; d<zDim; d++) increment_zInd(d);
+      //collect inds of dim going to same vector index of z
+      const z = size.cube(),
+            nz = z.length;
+      for (let i=0; i<nz; i++) z[i] = [];
+      for (let i=0; i<nd; i++) {
+        dest = z[zInd[i]];
+        dest[dest.length] = i;
+      }
+      //get entries of z
+      for (let i=0; i<nz; i++) {
+        let ind = z[i];
+        if (f === 'count') z[i] = ind.length;
+        else {
+          let sc = arrange(this, dim, ind, true);
+          z[i] = (f === 'subcube') ? sc : f(sc);
+        }
+      }
+      //set keys and return z
+      ensureKey(z);
+      ky.map((mp,d) => z._k[d] = mp);
+      return z;
+    });
+    
+    DONE????!!!
+
+    //update docs - no ret, do allow val
+    
+    
+    
   }
 
 
@@ -2247,49 +2321,49 @@
         
   
   //--------------- bin ---------------//
-  addArrayMethod('bin', function(lim, how, ret) {
-    this.toCube();
-    lim = toArray(lim);
+  
+  //array/cube[, func, str/func] -> array
+  addArrayMethod('bin', function(lim, how, name) {
+    this.toCube();    
+    lim = copyArray(toArray(lim));  //copy so can sort or use cube methods
     const nLim = lim.length;
-    if (nLim < 2) throw Error('at least 2 limits expected');
-    ret = def(assert.single(ret), 'upper');
+    if (nLim < 2) throw Error('at least 2 bin limits expected');
     how = assert.single(how);
-    let test;
-    if (how === undefined || how === null) test = a <= b ? -1 : 1;
-    else if (typeof how === 'function') test = (a,b) => how(a,b) <= 0;
-    else throw Error('null, undefined or function expected');
-    let describe;
-    if      (ret === 'lower') describe = lwr => lwr;
-    else if (ret === 'upper') describe = (lwr,upr) => upr;
-    else if (ret === 'index') describe = (lwr,upr,ind) => ind;
-    else if (typeof ret === 'function') describe = ret;
-    else throw Error(`'lower', 'upper', 'index' or function expected`);
+    let test = helper.comparison(how);  //undefined if how undefined or null
+    var [name, nameSingle] = polarize(name);
+    if (nameSingle) {
+      if (name === undefined) {
+        lim.sort(test);
+        name = lim;
+      }
+      else throw Error('invalid bin names');
+    }
+    else {
+      if (name.length !== nLim) {
+        throw Error('number of bin names not equal to number of bins');
+      }
+      const sortedIndex = sortIndex(lim,how);
+      lim  = sortedIndex.map(i =>  lim[i]);
+      name = sortedIndex.map(i => name[i]);
+    }
+    if (!name.isUnique()) throw Error('bin names not unique');
+    if (!test) test = (a,b) => a <= b ? -1 : 1;
     const n = this.length,
-          z = new Array(n);
+          z = this.copy('shell');
     outer: for (let i=0; i<n; i++) {
       let v = this[i];
-      let lowerLim = lim[0];
-      let upperLim;
-      if (test(v, lowerLim)) throw Error('entry less than first limit');
-      for (let j=1; j<nLim; j++) {
-        lowerLim = upperLim;
-        upperLim = lim[j],
-        if test(v, upperLim) z[i] = describe(lowerLim, upperLim, j);
-        continue outer; 
+      for (let j=0; j<nLim; j++) {
+        if (test(v, lim[j]) <= 0) {
+          z[i] = name[j];
+          continue outer;
+        }
       }
-      throw Error('entry greater than last limit');  
+      throw Error('entry not assigned to any bin');  
     }
-    
-    !!!!!!!!!!!!!!!!!!HERE!!!!!!!!!!!!!!!!!!!!!!!
-    
-    
-    //MORE DETAILS NEEDED IN DOCS TO EXPLAIN COMPARISON - THAT <= 0 TO BE IN BIN?
-    
     return z;
   });
   
-  
-  
+    
   //--------------- convert data ---------------//
   
   //!!NOTE: THIS IS MAY GET REMOVED SINCE IS A SPECIAL CASE OF 'unvble'
