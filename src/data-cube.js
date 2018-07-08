@@ -1640,12 +1640,12 @@
       }
     }
     prep = def(assert.single(prep), true);
-    const nProp = probs.length;
+    const nProb = prob.length;
     const quant = y => {  //y is an array of obs
       const ny = y.length;
-      if (ny === 0) return fill(new Array(nProp), NaN);
-      if (prep) y = y.number().sort(helper.comparison('asc'));
-      const sc = probs.mul(y.length-1),
+      if (ny === 0) return fill(new Array(nProb), NaN);
+      if (prep) y = y.map(v => +v).sort(helper.comparison('asc'));
+      const sc = prob.mul(y.length-1),
             scFloor = sc.floor(),
             wt = sc.sub(scFloor);
       return y.vec(scFloor).mul([1].sub(wt)).add( y.vec(sc.ceil()).mul(wt) );
@@ -1655,7 +1655,7 @@
     else {
       const [nr, nc, np] = this._s;
       if (dim === 0) {
-        z = [nProp, nc, np].cube();
+        z = [nProb, nc, np].cube();
         for (let p=0; p<np; p++) {
           for (let c=0; c<nc; c++) {
             z.$subcube(null, c, p, quant(this.subcube(null, c, p, 'array')));  
@@ -1663,7 +1663,7 @@
         }
       }
       else if (dim === 1) {
-        z = [nr, nProp, np].cube();  
+        z = [nr, nProb, np].cube();  
         for (let p=0; p<np; p++) {
           for (let r=0; r<nr; r++) {
             z.$subcube(r, null, p, quant(this.subcube(r, null, p, 'array')));  
@@ -1671,7 +1671,7 @@
         }
       }
       else if (dim === 2) {
-        z = [nr, nc, nProp].cube();
+        z = [nr, nc, nProb].cube();
         for (let c=0; c<nc; c++) {
           for (let r=0; r<nr; r++) {
             z.$subcube(r, c, null, quant(this.subcube(r, c, 'array')));  
@@ -1687,10 +1687,10 @@
     return z;
   });
     
-  DONE?????
-      
-    
-    
+//  DONE?????
+//      
+//    
+//    
     
 //    NaN - throw? ignore? - gives NaNs in results? - just leave them and say not handled specially
 //      -do say use linear interpolation
