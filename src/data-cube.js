@@ -2230,7 +2230,7 @@
     });  
     
     //[num, *, str/func]
-    addArrayMethod('group', function(dim, val, ret) {
+    addArrayMethod('group', function(dim, val, ent) {
       this.toCube();
       dim = assert.dim(dim);
       const nd = this._s[dim];
@@ -2241,12 +2241,12 @@
         if (nv === 0 && nd === 0) zDim = 1;
         else throw Error('shape mismatch');
       }
-      ret = def(assert.single(ret), 'subcube');
-      if (ret !== 'subcube' && ret !== 'count' && typeof ret !== 'function') {
+      ent = def(assert.single(ent), 'subcube');
+      if (ent !== 'subcube' && ent !== 'count' && typeof ent !== 'function') {
         throw Error(`'subcube', 'count' or function expected`);
       }
-      if (nd === 0) return [0].cube();
-      // construct map for each 'grouping dimensions', value is a vector of inds
+      if (nd === 0) return [0].cube().$key([]);
+      //map for each 'grouping vector'
       const ky = [];
       let j = 0;
       for (let d=0; d<zDim; d++) {
@@ -2259,10 +2259,10 @@
         }
         ky[d] = mp;
       }
-      //compute vector ind of z where each ind of dim going
+      //vector index of z where each index of dim will go
       let size = ky.map(mp => mp.size);
       let zInd = fill(new Array(nd), 0);
-      const increment_zInd = d => {
+      for (let d=0; d<zDim; d++) {
         let mult = size.slice(0,d).prod();
         let mp = ky[d],
             j = 0;
@@ -2272,8 +2272,7 @@
           j++;
         }
       };
-      for (let d=0; d<zDim; d++) increment_zInd(d);
-      //collect inds of dim going to same vector index of z
+      //collect indices of dim going to same vector index of z
       const z = size.cube(),
             nz = z.length;
       for (let i=0; i<nz; i++) z[i] = [];
@@ -2284,10 +2283,10 @@
       //get entries of z
       for (let i=0; i<nz; i++) {
         let ind = z[i];
-        if (ret === 'count') z[i] = ind.length;
+        if (ent === 'count') z[i] = ind.length;
         else {
           let sc = arrange(this, dim, ind, true);
-          z[i] = (ret === 'subcube') ? sc : ret(sc);
+          z[i] = (ent === 'subcube') ? sc : ent(sc);
         }
       }
       //set keys and return z
@@ -2306,7 +2305,6 @@
     });
     
   }
-
 
   //--------------- arrange ---------------//
   
