@@ -1145,6 +1145,30 @@
   }
   
   
+  //--------------- entrywise: conditional ---------------//
+      
+  //*, * -> cube
+  addArrayMethod('cond', function(a, b) {
+    this.toCube();
+    n = this.length;
+    var [a, aSingle] = polarize(a);
+    if (!aSingle && a.length !== n) throw Error('shape mismatch');    
+    var [b, bSingle] = polarize(b);
+    if (!bSingle && b.length !== n) throw Error('shape mismatch');
+    const z = this.copy('shell');
+    if (aSingle) {
+      if (bSingle) { for (let i=0; i<n; i++) z[i] = this[i] ? a    : b }
+      else         { for (let i=0; i<n; i++) z[i] = this[i] ? a    : b[i] }
+    }
+    else {
+      if (bSingle) { for (let i=0; i<n; i++) z[i] = this[i] ? a[i] : b }
+      else         { for (let i=0; i<n; i++) z[i] = this[i] ? a[i] : b[i] }
+    }
+    return z;
+  });
+  
+  
+  
   //--------------- entrywise: method ---------------//
   
   //*[, *, *, *, ...] -> cube
@@ -2408,16 +2432,4 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-      
+  
