@@ -2228,10 +2228,9 @@
       if (this._l && this._l[dim]) z.$label(dim, this._l[dim]);
       return z;
     });  
-
     
-    //[num, *, str, func]
-    addArrayMethod('group', function(dim, val, f) {
+    //[num, *, str/func]
+    addArrayMethod('group', function(dim, val, ret) {
       this.toCube();
       dim = assert.dim(dim);
       const nd = this._s[dim];
@@ -2242,8 +2241,8 @@
         if (nv === 0 && nd === 0) zDim = 1;
         else throw Error('shape mismatch');
       }
-      f = def(assert.single(f), 'subcube');
-      if (f !== 'subcube' && f !== 'count' && typeof f !== 'function') {
+      ret = def(assert.single(ret), 'subcube');
+      if (ret !== 'subcube' && ret !== 'count' && typeof ret !== 'function') {
         throw Error(`'subcube', 'count' or function expected`);
       }
       if (nd === 0) return [0].cube();
@@ -2254,9 +2253,9 @@
         let mp = new Map();
         for (let i=0; i<nd; i++) {
           v = val[j++];
-          mp = ky.get(v);
+          m = mp.get(v);
           if (m) m[m.length] = i;
-          else ky.set(v,[i]);
+          else mp.set(v,[i]);
         }
         ky[d] = mp;
       }
@@ -2264,13 +2263,13 @@
       let size = ky.map(mp => mp.size);
       let zInd = fill(new Array(nd), 0);
       const increment_zInd = d => {
-        let mult = size.slice(0,d).prod();  JUST CHANGED THIS!!!!!!!!!!!!!!!!!!!
+        let mult = size.slice(0,d).prod();
         let mp = ky[d],
             j = 0;
         for (let k of mp.keys()) {
           let ind = mp.get(k);
           for (let i=0; i<ind.length; i++) zInd[ind[i]] += j * mult;
-          mp.set(k,j++);   //mp will be used as the keys map for dimension d of z
+          j++;
         }
       };
       for (let d=0; d<zDim; d++) increment_zInd(d);
@@ -2285,23 +2284,26 @@
       //get entries of z
       for (let i=0; i<nz; i++) {
         let ind = z[i];
-        if (f === 'count') z[i] = ind.length;
+        if (ret === 'count') z[i] = ind.length;
         else {
           let sc = arrange(this, dim, ind, true);
-          z[i] = (f === 'subcube') ? sc : f(sc);
+          z[i] = (ret === 'subcube') ? sc : ret(sc);
         }
       }
       //set keys and return z
       ensureKey(z);
-      ky.map((mp,d) => z._k[d] = mp);
+      ky.map((mp,d) => {  //new maps for dim keys since maps in ky may use null/undefined
+        let newMp = new Map(),
+            j = 0;
+        for (let k of mp.keys()) {
+          if      (k === undefined) k = '_undefined_';
+          else if (k === null)      k = '_null_';
+          newMp.set(k,j++);
+        }
+        z._k[d] = newMp;
+      });
       return z;
     });
-    
-    DONE????!!!
-
-    //update docs - no ret, do allow val
-    
-    
     
   }
 
