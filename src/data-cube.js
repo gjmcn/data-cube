@@ -297,8 +297,8 @@
     return (ret === 'step') ? [z,j] : z;
   });
   
-  //array/cube[, ret] -> cube
-  addArrayMethod('pair', function(y, ret) {
+  //array/cube[, str] -> cube
+  addArrayMethod('grid', function(y, ret) {
     y = toArray(y);
     ret = def(assert.single(ret), 'value');
     if (ret !== 'value' && ret !== 'index' && ret !== 'both') {
@@ -319,7 +319,7 @@
       }
     }
     else {
-      z = [n,4].cube(); 
+      z = [n,4].cube();
       let i;
       for (i=0; i<n; i++) z[i] = i % nThis;
       for (let j=0; j<n; j++, i++) z[i] = this[i % nThis];
@@ -2135,7 +2135,7 @@
   
     
   //--------------- flip, roll, shuffle, sample ---------------//
-  //--------------- where, order, orderKey --------------------//
+  //--------------- where, order, orderKey, group -------------//
   
   {
 
@@ -2490,7 +2490,7 @@
   {
     const dc = ar => toArray(ar).toCube();
       
-    ['cube','rand','normal','seq','lin','pair','copy'].forEach( nm => {
+    ['cube','rand','normal','seq','lin','grid','copy'].forEach( nm => {
       dc[nm] = (x,...args) => toArray(x)[nm](...args);
     });
                                          
