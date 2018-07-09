@@ -1620,7 +1620,9 @@
   
   //--------------- quantile ---------------//
   
-  addArrayMethod('quantile', function(dim, prob, prep) {
+  //[num, *] -> cube
+  addArrayMethod('quantile', function(dim, prob) {
+    this.toCube();
     dim = def(assert.single(dim), 0);  //dim can be -1 so do not use assert.dim
     var [prob, probSingle] = polarize(prob);
     let probChecked;
@@ -1632,72 +1634,63 @@
       else prob = [prob];
     }
     if (!probChecked) {
-      prob = prob.number();
-      if ( prob.isNaN.any()
-            .or(prob.lt(0).any())
-            .or(prob.gt(1).any())[0] ) {
-        throw Error('entries must be between 0 and 1 (inclusive)');
+      prob = prob.number().toArray();
+      if ( prob.isNaN().any()[0] ||
+           prob.lt(0).any()[0] ||
+           prob.gt(1).any()[0] ) {
+        throw Error('probabilities must be between 0 and 1 (inclusive)');
       }
     }
-    prep = def(assert.single(prep), true);
     const nProb = prob.length;
-    const quant = y => {  //y is an array of obs
+    const quant = y => {  //quantiles of array y; mutates y
       const ny = y.length;
       if (ny === 0) return fill(new Array(nProb), NaN);
-      if (prep) y = y.map(v => +v).sort(helper.comparison('asc'));
-      const sc = prob.mul(y.length-1),
+      for (let i=0; i<ny; i++) {
+        v = +y[i];
+        if (!Number.isFinite(v)) return fill(new Array(nProb), NaN);
+        y[i] = v;
+      }
+      y.sort(helper.comparison('asc'));
+      const sc = prob.mul(ny - 1),
             scFloor = sc.floor(),
             wt = sc.sub(scFloor);
       return y.vec(scFloor).mul([1].sub(wt)).add( y.vec(sc.ceil()).mul(wt) );
     };
     let z;
-    if (dim === -1) z = quant(this);
+    if (dim === -1) z = quant(copyArray(this)).$key(prob);
     else {
-      const [nr, nc, np] = this._s;
+      if (![0,1,2].includes(dim)) throw Error('invalid dimension');
+      const z_s = copyArray(this._s);
+      z_s[dim] = nProb;
+      z = z_s.cube();
+      copyKey(this, z, dim);
+      copyLabel(this, z, dim);
+      z.$key(dim, prob);
       if (dim === 0) {
-        z = [nProb, nc, np].cube();
-        for (let p=0; p<np; p++) {
-          for (let c=0; c<nc; c++) {
+        for (let p of this.pages()) {
+          for (let c of this.cols()) {
             z.$subcube(null, c, p, quant(this.subcube(null, c, p, 'array')));  
           }
         }
       }
       else if (dim === 1) {
-        z = [nr, nProb, np].cube();  
-        for (let p=0; p<np; p++) {
-          for (let r=0; r<nr; r++) {
+        for (let p of this.pages()) {
+          for (let r of this.rows()) {
             z.$subcube(r, null, p, quant(this.subcube(r, null, p, 'array')));  
           }
         }
       }
-      else if (dim === 2) {
-        z = [nr, nc, nProb].cube();
-        for (let c=0; c<nc; c++) {
-          for (let r=0; r<nr; r++) {
-            z.$subcube(r, c, null, quant(this.subcube(r, c, 'array')));  
+      else {  //dim is 2
+        for (let c of this.cols()) {
+          for (let r of this.rows()) {
+            z.$subcube(r, c, null, quant(this.subcube(r, c, null, 'array')));  
           }
         }
       }
-      else throw Error('invalid dimension');
-      copyKey(this, z, dim);
-      copyLabel(this, z, dim);
-      ensureKey(z);
-      z.$key(dim,prob);
     }
     return z;
   });
     
-//  DONE?????
-//      
-//    
-//    
-    
-//    NaN - throw? ignore? - gives NaNs in results? - just leave them and say not handled specially
-//      -do say use linear interpolation
-//      -do say check prob vals
-      
-      //prep converts to numbers and sorts
-
   
   //--------------- concatenate ---------------//
   
