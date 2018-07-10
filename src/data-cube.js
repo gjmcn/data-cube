@@ -297,7 +297,7 @@
     return (ret === 'step') ? [z,j] : z;
   });
   
-  //array/cube[, str] -> cube
+  //* [, str] -> cube
   addArrayMethod('grid', function(y, ret) {
     y = toArray(y);
     ret = def(assert.single(ret), 'value');
@@ -2333,25 +2333,30 @@
       val = toArray(val);
       const nv = val.length;
       let zDim = nv / nd;
-      if (![0,1,2].includes(zDim)) {
-        if (nv === 0 && nd === 0) zDim = 1;
+      if (![1,2,3].includes(zDim)) {
+        if (nd === 0 && nv === 0) zDim = 1;
         else throw Error('shape mismatch');
       }
       ent = def(assert.single(ent), 'subcube');
       if (ent !== 'subcube' && ent !== 'count' && typeof ent !== 'function') {
         throw Error(`'subcube', 'count' or function expected`);
       }
-      if (nd === 0) return [0].cube().$key([]);
+      if (nd === 0) return [].$key([]);
       //map for each 'grouping vector'
-      const ky = [];
+      const ky = new Array(zDim);
       let j = 0;
       for (let d=0; d<zDim; d++) {
         let mp = new Map();
         for (let i=0; i<nd; i++) {
-          v = val[j++];
-          m = mp.get(v);
+          let v = val[j++],
+              m = mp.get(v);
           if (m) m[m.length] = i;
-          else mp.set(v,[i]);
+          else {
+            if (v === '_undefined_' || v === '_null_') {
+              throw Error(`entry has value '_undefined_' or '_null_'`);          
+            }
+            mp.set(v,[i]);
+          }
         }
         ky[d] = mp;
       }
@@ -2359,26 +2364,27 @@
       let size = ky.map(mp => mp.size);
       let zInd = fill(new Array(nd), 0);
       for (let d=0; d<zDim; d++) {
-        let mult = size.slice(0,d).prod();
+        let mult = d === 0 ? 1 : (d === 1 ? size[0] : size[0] * size[1]);
         let mp = ky[d],
             j = 0;
-        for (let k of mp.keys()) {
-          let ind = mp.get(k);
-          for (let i=0; i<ind.length; i++) zInd[ind[i]] += j * mult;
+        for (let ind of mp.values()) {
+          const nInd = ind.length;
+          for (let i=0; i<nInd; i++) zInd[ind[i]] += j * mult;
           j++;
         }
       };
       //collect indices of dim going to same vector index of z
-      const z = size.cube(),
-            nz = z.length;
-      for (let i=0; i<nz; i++) z[i] = [];
+      const z = size.cube();
       for (let i=0; i<nd; i++) {
-        dest = z[zInd[i]];
-        dest[dest.length] = i;
+        let destInd = zInd[i],
+            destVal = z[destInd];
+        if (destVal) destVal[destVal.length] = i;
+        else z[destInd] = [i];
       }
       //get entries of z
+      const nz = z.length;
       for (let i=0; i<nz; i++) {
-        let ind = z[i];
+        let ind = z[i] || [];
         if (ent === 'count') z[i] = ind.length;
         else {
           let sc = arrange(this, dim, ind, true);
@@ -2387,13 +2393,13 @@
       }
       //set keys and return z
       ensureKey(z);
-      ky.map((mp,d) => {  //new maps for dim keys since maps in ky may use null/undefined
+      ky.map((mp, d) => {  //new maps for keys of z since maps in ky may use null/undefined
         let newMp = new Map(),
             j = 0;
         for (let k of mp.keys()) {
           if      (k === undefined) k = '_undefined_';
           else if (k === null)      k = '_null_';
-          newMp.set(k,j++);
+          newMp.set(k, j++);
         }
         z._k[d] = newMp;
       });
