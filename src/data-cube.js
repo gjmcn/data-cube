@@ -2291,7 +2291,10 @@
       dim = assert.dim(dim);
       var [val, valSingle] = polarize(val);
       if (valSingle) {
-        if (typeof val === 'function') val = val(this);
+        if (typeof val === 'function') {
+          val = val(this);
+          this.toCube(); 
+        }
         val = toArray(val);
       }
       const nd = this._s[dim];
@@ -2311,7 +2314,10 @@
       dim = assert.dim(dim);
       var [val, valSingle] = polarize(val);
       if (valSingle) {
-        if (typeof val === 'function') val = val(this);
+        if (typeof val === 'function') {
+          val = val(this);
+          this.toCube(); 
+        }
         val = toArray(val);
       }
       if (val.length !== this._s[dim]) throw Error('shape mismatch');
@@ -2339,7 +2345,10 @@
       dim = assert.dim(dim);
       var [val, valSingle] = polarize(val);
       if (valSingle) {
-        if (typeof val === 'function') val = val(this);
+        if (typeof val === 'function') {
+          val = val(this);
+          this.toCube(); 
+        }
         val = toArray(val);
       }
       const nd = this._s[dim],
