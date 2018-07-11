@@ -1150,7 +1150,7 @@
   //*, * -> cube
   addArrayMethod('cond', function(a, b) {
     this.toCube();
-    n = this.length;
+    const n = this.length;
     var [a, aSingle] = polarize(a);
     if (!aSingle && a.length !== n) throw Error('shape mismatch');    
     var [b, bSingle] = polarize(b);
@@ -1646,7 +1646,7 @@
       const ny = y.length;
       if (ny === 0) return fill(new Array(nProb), NaN);
       for (let i=0; i<ny; i++) {
-        v = +y[i];
+        let v = +y[i];
         if (!Number.isFinite(v)) return fill(new Array(nProb), NaN);
         y[i] = v;
       }
@@ -2288,9 +2288,13 @@
     //[num, *] -> cube        
     addArrayMethod('where', function(dim, val) {   
       this.toCube();
-      dim = assert.dim(dim);        
+      dim = assert.dim(dim);
+      var [val, valSingle] = polarize(val);
+      if (valSingle) {
+        if (typeof val === 'function') val = val(this);
+        val = toArray(val);
+      }
       const nd = this._s[dim];
-      val = (arguments.length < 2) ? this : toArray(val);
       if (val.length !== nd) throw Error('shape mismatch');
       const ind = new Array(nd);
       let j = 0;
@@ -2304,8 +2308,12 @@
     //[num, *, *] -> cube 
     addArrayMethod('order', function(dim, val, how) {   
       this.toCube();
-      dim = assert.dim(dim); 
-      val = toArray(val);
+      dim = assert.dim(dim);
+      var [val, valSingle] = polarize(val);
+      if (valSingle) {
+        if (typeof val === 'function') val = val(this);
+        val = toArray(val);
+      }
       if (val.length !== this._s[dim]) throw Error('shape mismatch');
       how = assert.single(how);  //value checked by sortIndex
       return arrange(this, dim, sortIndex(val, how), true);
@@ -2329,9 +2337,13 @@
     addArrayMethod('group', function(dim, val, ent) {
       this.toCube();
       dim = assert.dim(dim);
-      const nd = this._s[dim];
-      val = toArray(val);
-      const nv = val.length;
+      var [val, valSingle] = polarize(val);
+      if (valSingle) {
+        if (typeof val === 'function') val = val(this);
+        val = toArray(val);
+      }
+      const nd = this._s[dim],
+            nv = val.length;
       let zDim = nv / nd;
       if (![1,2,3].includes(zDim)) {
         if (nd === 0 && nv === 0) zDim = 1;
