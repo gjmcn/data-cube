@@ -2517,7 +2517,8 @@
   {
     const dc = ar => toArray(ar).toCube();
       
-    ['cube','rand','normal','seq','lin','grid','copy'].forEach( nm => {
+    ['cube','rand','normal',
+     'seq','lin','grid','copy','toArray'].forEach( nm => {
       dc[nm] = (x,...args) => toArray(x)[nm](...args);
     });
                                          
