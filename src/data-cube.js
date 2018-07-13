@@ -2089,11 +2089,10 @@
   
   //--------------- freq ---------------//
   
+  //[str] -> cube
   addArrayMethod('freq', function(ret) {
     this.toCube();
-    ret = assert.single(ret);
-    if (ret === undefined) ret = 'matrix';
-    else if (ret !== 'vector') throw Error(`'vector' or 'matrix' expected`);
+    ret = def(assert.single(ret), 'matrix');
     const n = this.length;
     let z;
     if (ret === 'vector') {
@@ -2106,14 +2105,17 @@
         if (count) countMap.set(v, count + 1);
         else {
           countMap.set(v, 1);
-          keyMap.set(v, j++);
+          keyMap.set(
+            v === undefined ? '_undefined_' : (v === null ? '_null_' : v),
+            j++
+          );
         }
       }
       z = [...countMap.values()].toCube();
       ensureKey(z);
       z._k[0] = keyMap;
     }
-    else {
+    else if (ret === 'matrix') {
       z = new Array(n);
       const countMap = new Map();
       let j = 0;
@@ -2127,9 +2129,10 @@
         }
       }
       z.length = 2 * j;
-      z.$shape(j).$key(1, ['value','count']);
+      z.$shape([j,2]).$key(1, ['value','count']);  //use [j,2] (not just j) in case j is 0
       for (let v of countMap.values()) z[j++] = v;
     }
+    else throw Error(`'vector' or 'matrix' expected`);
     return z;
   });
   
