@@ -2405,17 +2405,7 @@
         if (destVal) destVal[destVal.length] = i;
         else z[destInd] = [i];
       }
-      //get entries of z
-      const nz = z.length;
-      for (let i=0; i<nz; i++) {
-        let ind = z[i] || [];
-        if (ent === 'count') z[i] = ind.length;
-        else {
-          let sc = arrange(this, dim, ind, true);
-          z[i] = (ent === 'subcube') ? sc : ent(sc);
-        }
-      }
-      //set keys and return z
+      //set keys of z
       ensureKey(z);
       ky.map((mp, d) => {  //new maps for keys of z since maps in ky may use null/undefined
         let newMp = new Map(),
@@ -2427,6 +2417,33 @@
         }
         z._k[d] = newMp;
       });
+      //set entries of z
+      if (typeof ent === 'function') {
+        let r, c, p,
+            j = 0,
+            sc = () => {
+              z[j] = ent(arrange(this, dim, z[j] || [], true), r, c, p);
+              j++;
+            };
+        if (zDim === 1) {
+          for (r of z.rows()) sc();
+        }
+        else if (zDim === 2) {
+          for (c of z.cols()) for (r of z.rows()) sc();
+        }
+        else {  //zDim is 3
+          for (p of z.pages()) for (c of z.cols()) for (r of z.rows()) sc();
+        }
+      }
+      else {  //ent is 'count' or 'subcube'
+        const nz = z.length;
+        for (let i=0; i<nz; i++) {
+          let ind = z[i] || [];
+          z[i] = (ent === 'count') 
+            ? ind.length
+            : arrange(this, dim, ind, true);
+        }
+      }
       return z;
     });
     
