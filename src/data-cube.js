@@ -2464,9 +2464,9 @@
   
   //--------------- bin ---------------//
   
-  //array/cube[, func, str/func] -> array
+  //array/cube[, *, array/cube] -> cube
   addArrayMethod('bin', function(lim, how, name) {
-    this.toCube();    
+    this.toCube();
     lim = copyArray(toArray(lim));  //copy so can sort or use cube methods
     const nLim = lim.length;
     if (nLim < 2) throw Error('at least 2 bin limits expected');
