@@ -348,8 +348,8 @@
       const ind = helper.simpleRange(x.length);
       if (how === undefined || how === null) {
         return ind.sort((a,b) => {
-          if (x[a] > x[b]) return 1;
-          if (x[b] > x[a]) return -1;
+          if ('' + x[a] > '' + x[b]) return 1;
+          if ('' + x[b] > '' + x[a]) return -1;
           return 0;
         });
       }
@@ -372,8 +372,8 @@
       let f = helper.comparison(how);
       if (f === undefined) {
         f = (a,b) => {
-          if (a > b) return 1;
-          if (b > a) return -1;
+          if ('' + a > '' + b) return 1;
+          if ('' + b > '' + a) return -1;
           return 0;
         };
       }
