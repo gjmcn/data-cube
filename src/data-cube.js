@@ -2419,20 +2419,19 @@
       });
       //set entries of z
       if (typeof ent === 'function') {
-        let r, c, p,
-            j = 0,
-            sc = () => {
-              z[j] = ent(arrange(this, dim, z[j] || [], true), r, c, p);
+        let j = 0,
+            sc = (...arg) => {
+              z[j] = ent(arrange(this, dim, z[j] || [], true), ...arg);
               j++;
             };
         if (zDim === 1) {
-          for (r of z.rows()) sc();
+          for (let r of z.rows()) sc(r);
         }
         else if (zDim === 2) {
-          for (c of z.cols()) for (r of z.rows()) sc();
+          for (let c of z.cols()) for (let r of z.rows()) sc(r, c);
         }
         else {  //zDim is 3
-          for (p of z.pages()) for (c of z.cols()) for (r of z.rows()) sc();
+          for (let p of z.pages()) for (let c of z.cols()) for (let r of z.rows()) sc(r, c, p);
         }
       }
       else {  //ent is 'count' or 'subcube'
