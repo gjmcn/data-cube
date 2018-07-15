@@ -1926,7 +1926,7 @@
   
   {
     
-    //[*, ,* , *] -> array
+    //[*, *, *] -> array
     addArrayMethod('vecInd', function(r, c, p) {
       this.toCube();
       const _s = this._s,
@@ -1938,7 +1938,7 @@
             ky = this._k && this._k[d];
         let j;
         if (aSingle) {
-          if (_s[d] === 0) throw Error('shape mismatch');  //even default means first row/col/page
+          if (_s[d] === 0) throw Error(`${ky ? 'key' : 'index'} does not exist`);
           if (a === undefined || a === null) continue;
           if (ky) {
             j = ky.get(a);
@@ -1949,12 +1949,15 @@
         }
         else {
           j = ky ? keyInd(a, ky) : indInd(a, _s[d]);
-          let n = a.length;
+          let n = a.length;          
           if (ind) {
-            if (n !== ind.length) throw Error('shape mismatch');         
+            if (n !== ind.length) throw Error('shape mismatch');
+            for (let i=0; i<n; i++) ind[i] += j[i] * mult[d];
           }
-          else ind = fill(new Array(n), 0);
-          for (let i=0; i<n; i++) ind[i] += j[i] * mult[d];
+          else {
+            ind = new Array(n);
+            for (let i=0; i<n; i++) ind[i] = j[i] * mult[d];
+          }
         }
       }
       if (ind) {
@@ -1973,15 +1976,12 @@
       dim = assert.dim(dim);
       const n = this.length,
             [nr,nc] = this._s;
-      let dimInd, lookup;
+      let dimInd;
       if      (dim === 0) dimInd = i => i % nr; 
       else if (dim === 1) dimInd = i => Math.floor(i / nr) % nc; 
       else                dimInd = i => Math.floor(i / (nr*nc));
-      if (this._k && this._k[dim]) {
-        const ky = this.key(dim);
-        lookup = i => ky[dimInd(i)];
-      }
-      else lookup = dimInd;
+      const ky = this.key(dim),
+            lookup = ky ? i => ky[dimInd(i)] : dimInd;
       if (Array.isArray(v)) {
         const nv = v.length,
               z = new Array(nv);
