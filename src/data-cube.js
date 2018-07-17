@@ -45,10 +45,7 @@
       orig[nm] = Array.prototype[nm];
       delete Array.prototype[nm];
       addArrayMethod(nm, function() {
-        if (this._data_cube) {
-          throw Error(`native array method ${nm} cannot be used with cubes`);
-        }
-        return orig[nm].apply(this, arguments);
+        return orig[nm].apply(this.toArray(), arguments);
       });
     }); 
   }

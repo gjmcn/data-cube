@@ -489,7 +489,6 @@
       return n;
     }
 
-    
   };
 
   helper.assert = assert;
