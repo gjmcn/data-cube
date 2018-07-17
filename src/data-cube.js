@@ -584,6 +584,22 @@
   });
   
   
+  //--------------- ent, $ent ---------------//
+  
+  //num -> *
+  addArrayMethod('ent', function(ind) {
+    this.toCube();
+    ind = assert.single(ind);
+    return this[ nni(ind, this.length) ];
+  });
+  
+  //num, * -> cube
+  addArrayMethod('$ent', function(ind, val) {
+    this.toCube();
+    this[ nni(assert.single(ind), this.length) ] = assert.single(val);
+    return this;
+  });
+  
   //--------------- at, $at ---------------//
   
   {
