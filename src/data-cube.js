@@ -603,46 +603,27 @@
   //--------------- at, $at ---------------//
   
   {
-          
+    
+    //cube, *. *, * -> num
+    const rcpToVec = (x, r, c, p) => {
+      const _s = x._s;
+      return nniFromAny(x, 0, assert.single(r)) + 
+             nniFromAny(x, 1, assert.single(c)) * _s[0] + 
+             nniFromAny(x, 2, assert.single(p)) * _s[0] * _s[1];
+    };
+    
     //[*, * , *] -> *
     addArrayMethod('at', function(r, c, p) {
       this.toCube();
       if (this.length === 0) throw Error('cube has no entries');
-      const nArg = arguments.length;
-      if (nArg <= 1) {
-        return this[ nniFromAny(this, 0, assert.single(r)) ];
-      }
-      else if (nArg === 2) {
-        return this[ nniFromAny(this, 0, assert.single(r)) + 
-                     nniFromAny(this, 1, assert.single(c)) * this._s[0] ];
-      }
-      else {
-        const _s = this._s;
-        return this[ nniFromAny(this, 0, assert.single(r)) + 
-                     nniFromAny(this, 1, assert.single(c)) * _s[0] + 
-                     nniFromAny(this, 2, assert.single(p)) * _s[0] * _s[1] ];
-      }
+      return this[ rcpToVec(this, r, c, p) ];
     });
   
-    //*[, *, *, *] -> cube
+    //*, *, *, * -> cube
     addArrayMethod('$at', function(r, c, p, val) {
       this.toCube();
       if (this.length === 0) throw Error('cube has no entries');
-      const nArg = assert.argRange(arguments,1,4);
-      if (nArg === 2) {
-        this[ nniFromAny(this, 0, assert.single(r)) ] = assert.single(c);
-      }
-      else if (nArg === 3) {
-        this[ nniFromAny(this, 0, assert.single(r)) + 
-              nniFromAny(this, 1, assert.single(c)) * this._s[0] ] = assert.single(p);
-      }
-      else if (nArg === 4) {
-        const _s = this._s;
-        this[ nniFromAny(this, 0, assert.single(r)) + 
-              nniFromAny(this, 1, assert.single(c)) * _s[0] + 
-              nniFromAny(this, 2, assert.single(p)) * _s[0] * _s[1] ] = assert.single(val);
-      }
-      else this[0] = assert.single(r);
+      this[ rcpToVec(this, r, c, p) ] = assert.single(val);
       return this;
     });
 
