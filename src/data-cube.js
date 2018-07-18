@@ -589,8 +589,7 @@
   //num -> *
   addArrayMethod('ent', function(ind) {
     this.toCube();
-    ind = assert.single(ind);
-    return this[ nni(ind, this.length) ];
+    return this[ nni(assert.single(ind), this.length) ];
   });
   
   //num, * -> cube
@@ -599,6 +598,7 @@
     this[ nni(assert.single(ind), this.length) ] = assert.single(val);
     return this;
   });
+  
   
   //--------------- at, $at ---------------//
   

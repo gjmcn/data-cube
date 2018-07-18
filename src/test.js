@@ -552,7 +552,7 @@
     a.unshift(10);
     assert('native-unshift-0', () => h.equalArray(a, [10,9]), true);
     
-    c = [5,6,7].toCube();
+    const c = [5,6,7].toCube();
     c.copyWithin(0,1);
     assert('native-copyWithin-1', () => h.equalArray(c, [6,7,7]), true);
     assert('native-copyWithin-2', () => c._data_cube, undefined);
@@ -1781,6 +1781,77 @@
     
   }
 
+  console.log('--- ent, $ent');
+  {
+    
+    const e = [];
+    assert.throwEach('throw-ent-empty', [
+      () => e.ent(),
+      () => e.ent(0),
+      () => e.ent(-1),
+      () => e.ent(null),
+    ]);
+    assert.throwEach('throw-$ent-empty', [
+      () => e.$ent(55),
+      () => e.$ent(0,55),
+      () => e.$ent(-1,55),
+      () => e.$ent(null,55),
+    ]);
+    
+    const s = [5];
+    assert.each('ent-singleton', [
+      [() => s.ent(0), 5],
+      [() => s.ent(-1), 5],
+    ]);
+    assert.throwEach('throw-ent-singleton', [
+      () => s.ent(3),
+      () => s.ent(1),
+      () => s.ent(-2),
+      () => s.ent(),
+      () => s.ent(null),
+    ]);
+    s.$ent(0,6);
+    test('$ent-singleton', s, [6]);
+    assert.throwEach('throw-$ent-singleton', [
+      () => s.$ent(3,55),
+      () => s.$ent(1,55),
+      () => s.$ent(-2,55),
+      () => s.$ent(55),
+      () => s.$ent(null,55),
+    ]);
+    
+   const m = [6,7,8,9,10,11]
+    .$shape([2,3])
+    .$key(0, ['a','b']);
+    assert.each('ent-matrix', [
+      [() => m.ent(0), 6],
+      [() => m.ent(5), 11],
+      [() => m.ent(3), 9],
+      [() => m.ent(-1), 11],
+      [() => m.ent(-6), 6],
+    ]);
+    assert.throwEach('throw-ent-matrix', [
+      () => m.ent(6),
+      () => m.ent(-7),
+      () => m.ent(),
+      () => m.ent(null),
+    ]);
+    m.$ent(0,20);
+    m.$ent(1,21);
+    m.$ent(5,22);
+    m.$ent(-2,23);
+    test('$ent-matrix', m, [20,21,8,9,23,22].$shape([2,3]).$key(0, ['a','b']));
+    assert.throwEach('throw-$ent-matrix', [
+      () => m.$ent(6,55),
+      () => m.$ent(-7,55),
+      () => m.$ent(55),
+      () => m.$ent(null,55),
+    ]);
+
+  }
+  
+  
+  
   console.log('--- at, $at');
   {
     
