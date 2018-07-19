@@ -24,17 +24,7 @@
       throw Error(prop + ' is a property of Array.prototype'); 
     }
   });
-  
-  //cube, num, * -> num: non-neg-index for dimension dim of x
-  //corresponding to singleton value j; j can be a key or index
-  //(possibly negative)
-  //  -note: dim must non-empty since 0 returned if j null/undefined
-  const nniFromAny = (x, dim, j) => {
-    if (j === undefined || j === null) return 0;
-    if (x._k && x._k[dim]) return assert.number(x._k[dim].get(j));
-    return nni(j, x._s[dim]);
-  };
-  
+    
     
   //--------------- restrict native mutator methods ---------------//
   
@@ -604,15 +594,25 @@
   
   {
     
-    //cube, *. *, * -> num
-    const rcpToVec = (x, r, c, p) => {
-      const _s = x._s;
-      return nniFromAny(x, 0, assert.single(r)) + 
-             nniFromAny(x, 1, assert.single(c)) * _s[0] + 
-             nniFromAny(x, 2, assert.single(p)) * _s[0] * _s[1];
+    //cube, num, * -> num: non-neg-index for dimension dim of x
+    //corresponding to singleton value j; j can be a key or index
+    //(possibly negative)
+    // -note: dim must be non-empty since 0 returned if j
+    //  null/undefined
+    const nniFromAny = (x, dim, j) => {
+      if (j === undefined || j === null) return 0;
+      if (x._k && x._k[dim]) return assert.number(x._k[dim].get(j));
+      return nni(j, x._s[dim]);
     };
     
-    //[*, * , *] -> *
+    //cube, *, *, * -> num
+    const rcpToVec = (x, r, c, p) => {
+      return nniFromAny(x, 0, assert.single(r)) + 
+             nniFromAny(x, 1, assert.single(c)) * x._s[0] + 
+             nniFromAny(x, 2, assert.single(p)) * x._s[0] * x._s[1];
+    };
+    
+    //[*, *, *] -> *
     addArrayMethod('at', function(r, c, p) {
       this.toCube();
       if (this.length === 0) throw Error('cube has no entries');

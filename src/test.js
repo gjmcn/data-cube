@@ -1866,27 +1866,23 @@
       [() => s.at(-1,-1,-1), 5]
     ]);
     assert.each('$at-singleton-0', [
-      [() => {s.$at(6); return s[0]}, 6],
-      [() => {s.$at(0,7); return s[0]}, 7],
-      [() => {s.$at(-1,8); return s[0]}, 8],
-      [() => {s.$at(null,9); return s[0]}, 9],
-      [() => {s.$at(undefined,10); return s[0]}, 10],
-      [() => {s.$at(undefined,0,11); return s[0]}, 11],
+      [() => {s.$at(0,0,0,6); return s[0]}, 6],
+      [() => {s.$at(null, null, null, 7); return s[0]}, 7],
+      [() => {s.$at(-1, undefined, 0, 8); return s[0]}, 8],
     ]);
-    s.$key('a');
+    s.$key(0,'a');
     assert.each('at-singleton-1', [
-      [() => s.at(), 11],
-      [() => s.at(null), 11],
-      [() => s.at('a'), 11],
-      [() => s.at('a',0), 11]
+      [() => s.at(), 8],
+      [() => s.at(null), 8],
+      [() => s.at('a'), 8],
+      [() => s.at('a',0), 8]
     ]);
     assert.each('$at-singleton-1', [
-      [() => {s.$at(6); return s[0]}, 6],
-      [() => {s.$at('a',7); return s[0]}, 7],
-      [() => {s.$at(null,8); return s[0]}, 8],
-      [() => {s.$at('a',-0,-1,9); return s[0]}, 9],
+      [() => {s.$at('a', 0, 0, 9); return s[0]}, 9],
+      [() => {s.$at(null, null, null, 10); return s[0]}, 10],
+      [() => {s.$at('a',-1,-0,11); return s[0]}, 11],
     ]);
-    test('$at-singleton-2', s, [9].$key('a'));
+    test('$at-singleton-2', s, [11].$key(0,'a'));
     
     const v = [6,7,8];
     assert.each('at-vector-0', [
@@ -1895,25 +1891,25 @@
       [() => v.at(-2), 7]
     ]);
     assert.each('$at-vector-0', [
-      [() => {v.$at([9]); return v[0]}, 9],
-      [() => {v.$at(1,10); return v[1]}, 10],
-      [() => {v.$at(-1,11); return v[2]}, 11],
+      [() => {v.$at(0,0,0,[9]); return v[0]}, 9],
+      [() => {v.$at(1,0,0,10); return v[1]}, 10],
+      [() => {v.$at(-1,null,undefined,11); return v[2]}, 11],
       [() => h.equalArray(v,[9,10,11]), true],
     ]);
     const obj = {};
-    v.$key(['a',obj,'c']).$key(1,'q').$key(2,'w');
+    v.$key(0,['a',obj,'c']).$key(1,'q').$key(2,'w');
     assert.each('at-vector-1', [
       [() => v.at(obj), 10],
       [() => v.at(obj,'q','w'), 10],
       [() => v.at(obj,null,'w'), 10]
     ]);
     assert.each('$at-vector-1', [
-      [() => {v.$at(13); return v[0]}, 13],
-      [() => {v.$at(obj,14); return v[1]}, 14],
-      [() => {v.$at('c','q','w',15); return v[2]}, 15],
+      [() => {v.$at('a', null, null, 13); return v[0]}, 13],
+      [() => {v.$at(obj, 'q', 'w', 14); return v[1]}, 14],
+      [() => {v.$at('c', undefined, undefined, 15); return v[2]}, 15],
     ]);
     test('$at-vector-2', v, [13,14,15]
-         .$key(['a',obj,'c']).$key(1,'q').$key(2,'w'));
+         .$key(0,['a',obj,'c']).$key(1,'q').$key(2,'w'));
     
     const m = [6,7,8,9,10,11].$shape([2,3]);
     assert.each('at-matrix', [
@@ -1923,10 +1919,10 @@
       [() => m.at(null,1), 8]
     ]);
     assert.each('$at-matrix-0', [
-      [() => {m.$at(13); return m[0]}, 13],
-      [() => {m.$at(1,0,14); return m[1]}, 14],
-      [() => {m.$at(0,2,15); return m[4]}, 15],
-      [() => {m.$at(1,1,16); return m[3]}, 16],
+      [() => {m.$at(0,0,0,13); return m[0]}, 13],
+      [() => {m.$at(1,0,null,14); return m[1]}, 14],
+      [() => {m.$at(0,2,0,15); return m[4]}, 15],
+      [() => {m.$at(1,1,null,16); return m[3]}, 16],
       [() => {m.$at(-1,-1,-1,17); return m[5]}, 17],
     ]);
     test('$at-matrix-1', m, [13,14,8,16,15,17].$shape([2,3]));
@@ -1935,7 +1931,7 @@
                21,22,23,24,25,26,27,28,29,30,
                31,32,33,34]
       .$shape([3,4,2])
-      .$key(['Alice','Bob','Cath'])
+      .$key(0, ['Alice','Bob','Cath'])
       .$key(2,['Autumn','Spring'])
       .$label(0,'Student')
       .$label(1,'Subject')
@@ -1950,8 +1946,8 @@
       [() => b.at(undefined,undefined,'Spring'), 23]
     ]);
     assert.each('$at-book-0', [
-      [() => {b.$at(50); return b[0]}, 50],
-      [() => {b.$at('Bob',-1,51); return b[10]}, 51],
+      [() => {b.$at(null, null, null, 50); return b[0]}, 50],
+      [() => {b.$at('Bob', -1, 'Autumn', 51); return b[10]}, 51],
       [() => {b.$at('Alice',2,'Spring',52); return b[18]}, 52],
       [() => {b.$at(null,1,'Spring',53); return b[15]}, 53],
     ]);
@@ -1960,12 +1956,17 @@
        51,22,23,24,25,53,27,28,52,30,
        31,32,33,34]
         .$shape([3,4,2])
-        .$key(['Alice','Bob','Cath'])
+        .$key(0, ['Alice','Bob','Cath'])
         .$key(2,['Autumn','Spring'])
         .$label(0,'Student')
         .$label(1,'Subject')
         .$label(2,'Term'));
-     
+    
+    assert('$at-omit-new-val-0', 
+      () => h.equalArray([5,6,7].$at(0), [undefined,6,7]), true);
+    m.$at(0,2);
+    test('$at-omit-new-val-1', m, [13,14,8,16,undefined,17].$shape([2,3]));
+    
     assert.throwEach('throw-at', [
       () => [].at(),
       () => [].at(0),
@@ -1983,11 +1984,11 @@
       () => [].$at(0,5),
       () => [].$at(null,5),
       () => [].$at(undefined,5),
-      () => $v.at(1,5),
-      () => $v.at(-1,5),
-      () => $v.at('c',[5,6]),
-      () => m.at(1,3,5),
-      () => m.at(1,-4,5),
+      () => v.$at(1,5),
+      () => v.$at(-1,5),
+      () => v.$at('c',[5,6]),
+      () => m.$at(1,3,0,5),
+      () => m.$at(1,-4,0,5),
     ]);
     
   }
