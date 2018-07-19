@@ -646,14 +646,12 @@
     return z;
   });
   
-  //*[, *] -> cube
+  //*, * -> cube
   addArrayMethod('$vec', function(i, val) {
     this.toCube();
-    const nArg = assert.argRange(arguments,1,2);
-    if (arguments.length === 1) [i, val] = [null, i];
     const n = this.length;
-    var [i,iSingle] = polarize(i);
-    var [val,valSingle] = polarize(val);
+    var [i, iSingle] = polarize(i);
+    var [val, valSingle] = polarize(val);
     if (iSingle) {
       if (i === undefined || i === null) (valSingle ? fill : fillEW)(this,val);
       else {

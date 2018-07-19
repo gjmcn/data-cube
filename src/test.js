@@ -2001,8 +2001,8 @@
     test('vec-empty-2', [1,0].cube().vec([]), []);
     test('vec-empty-3', [].vec([1,0].cube()), []);
     
-    test('$vec-empty-0', [].$vec(5), []);
-    test('$vec-empty-1', [].$vec([],5), []);
+    test('$vec-empty-0', [].$vec(null, 5), []);
+    test('$vec-empty-1', [].$vec([] ,5), []);
     test('$vec-empty-2', [1,0].cube().$vec([],5), [1,0].cube());
     test('$vec-empty-3', [].$vec([1,0].cube(),5), []);
     test('$vec-empty-4', [].$vec([], []), []);
@@ -2014,12 +2014,12 @@
     test('vec-singleton-3', s.vec(0), [4]);
     test('vec-singleton-4', s.vec(-1), [4]);
     
-    test('$vec-singleton-0', s.$vec([],5), [4]);
-    test('$vec-singleton-1', s.$vec(5), [5]);
-    test('$vec-singleton-2', s.$vec(null,6), [6]);
-    test('$vec-singleton-3', s.$vec(undefined,7), [7]);
-    test('$vec-singleton-4', s.$vec(0,[8]), [8]);
-    test('$vec-singleton-5', s.$vec(-1,9), [9]);
+    test('$vec-singleton-0', s.$vec([], 5), [4]);
+    test('$vec-singleton-1', s.$vec(0, 5), [5]);
+    test('$vec-singleton-2', s.$vec(null, 6), [6]);
+    test('$vec-singleton-3', s.$vec(undefined, 7), [7]);
+    test('$vec-singleton-4', s.$vec(0, [8]), [8]);
+    test('$vec-singleton-5', s.$vec(-1, 9), [9]);
     
     const v = [5,6,7];
     test('vec-vector-0', v.vec(), [5,6,7]);
@@ -2029,18 +2029,18 @@
     test('vec-vector-4', v.vec([0,-1]), [5,7]);
     test('vec-vector-5', v.vec([]), []);
     
-    test('$vec-vector-0', v.$vec(8), [8,8,8]);
+    test('$vec-vector-0', v.$vec(null, 8), [8,8,8]);
     test('$vec-vector-1', v.$vec(0,9), [9,8,8]);
     test('$vec-vector-2', v.$vec([1],[10]), [9,10,8]);
     test('$vec-vector-3', v.$vec([0,-1],[11,12]), [11,10,12]);
     test('$vec-vector-4', v.$vec([],13), [11,10,12]);
-    test('$vec-vector-5', v.$vec([14,15,16]), [14,15,16]);
+    test('$vec-vector-5', v.$vec(undefined, [14,15,16]), [14,15,16]);
 
     const b = [11,12,13,14,15,16,17,18,19,20,
                21,22,23,24,25,26,27,28,29,30,
                31,32,33,34]
       .$shape([3,4,2])
-      .$key(['Alice','Bob','Cath'])
+      .$key(0,['Alice','Bob','Cath'])
       .$key(2,['Autumn','Spring'])
       .$label(0,'Student')
       .$label(1,'Subject')
@@ -2058,7 +2058,7 @@
     test('vec-book-6', b.vec([]), []);
     
     b1 = b.copy();
-    b1.$vec(50);
+    b1.$vec(null,50);
     b1.$vec(0,51);
     b1.$vec(-1,52);
     b1.$vec([2,10,-2],53);
@@ -2068,11 +2068,19 @@
         53,50,50,50,50,50,50,50,50,50,
         50,50,53,52]
       .$shape([3,4,2])
-      .$key(['Alice','Bob','Cath'])
+      .$key(0,['Alice','Bob','Cath'])
       .$key(2,['Autumn','Spring'])
       .$label(0,'Student')
       .$label(1,'Subject')
-      .$label(2,'Term')); 
+      .$label(2,'Term'));
+    
+    test('$vec-omit-new-val-0',
+         [5,6,7].$vec(), [undefined, undefined, undefined]);
+    const m = [6,7,8,9,10,11].$shape([2,3]);
+    test('$vec-omit-new-val-1',
+         m.$vec([-3,1]), [6,undefined,8,undefined,10,11].$shape([2,3]));
+    test('$vec-omit-new-val-2',
+         m.$vec(2), [6,undefined,undefined,undefined,10,11].$shape([2,3]));
         
     assert.throwEach('throw-vec-0', [
       () => [].vec(0),
@@ -2090,17 +2098,15 @@
       () => [].$vec([0,1],5),
       () => [].$vec([],[5,6]),
       () => v.$vec('0',5),
-      () => v.$vec([5,6]),
+      () => v.$vec(null,[5,6]),
       () => v.$vec(2,[5,6]),
       () => v.$vec([0,1],[5,6,7]),
       () => v.$vec(3,5),
       () => v.$vec([2,3],5),
       () => v.$vec(-4,5),
-      () => v.$vec(),
-      () => v.$vec(0,1,2),
     ]);
     
-    v.$key(['a','b','c']);
+    v.$key(0,['a','b','c']);
     assert.throwEach('throw-vec-1', [
       () => v.vec('a'),
       () => v.vec(['b','c']),
