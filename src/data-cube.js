@@ -822,7 +822,9 @@
         ensureKey(z); 
         for (let d=0; d<3; d++) {
           if (this._k[d]) {
-            z._k[d] = ind[d][1] ? copyMap(this._k[d]) : keyMap(toArray(arguments[d]));
+            z._k[d] = ind[d][1]
+              ? copyMap(this._k[d])
+              : keyMap(toArray( d === 0 ? row : (d === 1 ? col : page) ));
           }
         }
       }
@@ -833,13 +835,6 @@
     //*, *, *, *, * -> cube
     addArrayMethod('$subcube', function(row, col, page, val) {
       this.toCube();
-      const nArg = assert.argRange(arguments,1,4);
-      switch (nArg) {
-        case 1:  [row, col, page, val] = [   ,    , ,  row];  break;
-        case 2:  [row, col, page, val] = [row,    , ,  col];  break;
-        case 3:  [row, col, page, val] = [row, col, , page];  break;
-        case 4:  break;
-      }
       const [nr, nc] = this._s;
       const rInd = getInd(this,0,row)[0],
             cInd = getInd(this,1,col)[0],
@@ -862,38 +857,19 @@
     
     //row, col, page getters and setters
     {
-      addArrayMethod('row',   function(j, ret) { return this.subcube(   j, null, null, ret) });
-      addArrayMethod('col',   function(j, ret) { return this.subcube(null,    j, null, ret) });
-      addArrayMethod('page',  function(j, ret) { return this.subcube(null, null,    j, ret) });
+      addArrayMethod('row',    function(j, ret) { return this.subcube(   j, null, null, ret) });
+      addArrayMethod('col',    function(j, ret) { return this.subcube(null,    j, null, ret) });
+      addArrayMethod('page',   function(j, ret) { return this.subcube(null, null,    j, ret) });
       
-      addArrayMethod('$row',  function(j, val) { 
-        const nArg = assert.argRange(arguments,1,2);
-        return nArg === 1 ? this.$subcube(j) : this.$subcube(   j, null, null, val);
-      });
-      addArrayMethod('$col',  function(j, val) { 
-        const nArg = assert.argRange(arguments,1,2);
-        return nArg === 1 ? this.$subcube(j) : this.$subcube(null,    j, null, val);
-      });
-      addArrayMethod('$page', function(j, val) { 
-        const nArg = assert.argRange(arguments,1,2);
-        return nArg === 1 ? this.$subcube(j) : this.$subcube(null, null,    j, val);
-      });
+      addArrayMethod('$row',  function(j, val) { return this.$subcube(   j, null, null, val) });
+      addArrayMethod('$col',  function(j, val) { return this.$subcube(null,    j, null, val) });
+      addArrayMethod('$page', function(j, val) { return this.$subcube(null, null,    j, val) });
     }
       
     //bool, array/cube, num, *, *, * -> *
     const downAlongBack = function(setter, x, dim, s, e, retVal) {
       x.toCube();
-      let mthd;
-      if (setter) {
-        const nArg = assert.argRange(arguments,4,6);  
-        switch (nArg) {
-          case 4:  [s, e, retVal] = [null, null, s];  break;  
-          case 5:  [s, e, retVal] = [   s, null, e];  break;  
-          case 6:  break;  
-        }
-        mthd = '$subcube';
-      }
-      else mthd = 'subcube'; 
+      const mthd = setter ? '$subcube' : 'subcube';
       s = assert.single(s);
       e = assert.single(e);
       let q;
@@ -911,9 +887,10 @@
       }
     };
     
-    ['down', 'along', 'back', '$down', '$along', '$back'].forEach( (name, i) => {
+    [ 'rowSlice',  'colSlice',  'pageSlice',
+     '$rowSlice', '$colSlice', '$pageSlice'].forEach( (name, i) => {
       addArrayMethod( name, function(s, e, retVal) {
-        return downAlongBack(i > 2, this, i % 3, ...arguments);
+        return downAlongBack(i > 2, this, i % 3, s, e, retVal);
       });
     });
 
@@ -922,7 +899,7 @@
       this.toCube();
       const ind = new Array(3);
       for (let d=0; d<3; d++) {
-        let m = assert.single(arguments[d]);
+        let m = assert.single( d === 0 ? nr : (d === 1 ? nc : np) );
         const nd = this._s[d];
         if (m === null || m === undefined) m = nd;
         else {
