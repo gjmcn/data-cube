@@ -685,7 +685,7 @@
     let ind;
     let s = 0;
     for (let d=0; d<3; d++) {
-      let [a, aSingle] = polarize(arguments[d]),
+      let [a, aSingle] = polarize(d === 0 ? r : (d === 1 ? c : p)),
           ky = this._k && this._k[d];
       let j;
       if (aSingle) {
