@@ -734,13 +734,6 @@
   //*, [*, *, *] -> cube
   addArrayMethod('$rcp', function(r, c, p, val) {
     this.toCube();
-    const nArg = assert.argRange(arguments,1,4);
-    switch (nArg) {
-      case 1:  [r, c, p, val] = [ ,  , , r];  break;
-      case 2:  [r, c, p, val] = [r,  , , c];  break;
-      case 3:  [r, c, p, val] = [r, c, , p];  break;
-      case 4:  break;
-    }
     const v = this.vecInd(r, c, p),  //vecInd checks r, c and p
           n = v.length;
     var [val, valSingle] = polarize(val);
