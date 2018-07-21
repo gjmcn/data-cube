@@ -328,7 +328,6 @@
   //[number/array] -> cube
   addArrayMethod('$shape', function(shp) {
     this.toCube();
-    assert.argRange(arguments,0,1);
     var [shp,shpSingle] = polarize(shp);
     let r = 1;
     let c = 1;

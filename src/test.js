@@ -1010,7 +1010,6 @@
     assert.throw('throw-$shape-diff-number-entries-4', () => x.$shape([2,6,3]));
     assert.throw('throw-$shape-diff-number-entries-5', () => y.$shape([1,1,1]));
     assert.throw('throw-$shape-diff-number-entries-6', () => y.$shape([2,3,1]));
-    assert.throw('throw-$shape-too-many-args', () => y.$shape(0,1));
     
     test('$shape-1', x.$shape([2,3,2]), [2,3,2].cube());
     test('$shape-2', x.$shape(), [12].cube());
@@ -1019,14 +1018,16 @@
     test('$shape-5', x.$shape([3,2]), [3,2,2].cube());
     test('$shape-6', x.$shape(6), [6,2,1].cube());
     test('$shape-7', x.$shape([6]), [6,2,1].cube());
-    test('$shape-8', y.$shape(50), [50,0,1].cube());
-    test('$shape-9', y.$shape([2]), [2,0,1].cube());
-    test('$shape-10', y.$shape([4,5]), [4,5,0].cube());
-    test('$shape-11', y.$shape([undefined]), [0,1,1].cube());
-    test('$shape-12', y.$shape(undefined), [0,1,1].cube());
-    test('$shape-13', y.$shape(0), [0,1,1].cube());
+    test('$shape-8', x.$shape(), [12].cube());
+    test('$shape-9', y.$shape(50), [50,0,1].cube());
+    test('$shape-10', y.$shape([2]), [2,0,1].cube());
+    test('$shape-11', y.$shape([4,5]), [4,5,0].cube());
+    test('$shape-12', y.$shape([undefined]), [0,1,1].cube());
+    test('$shape-13', y.$shape(undefined), [0,1,1].cube());
     test('$shape-14', y.$shape(), [0,1,1].cube());
-    test('$shape-15', y.$shape([2,0,3]), [2,0,3].cube());
+    test('$shape-15', y.$shape(0), [0,1,1].cube());
+    test('$shape-16', y.$shape(), [0,1,1].cube());
+    test('$shape-17', y.$shape([2,0,3]), [2,0,3].cube());
     assert('$shape-same-length-1', () => x.length, 12);
     assert('$shape-same-length-2', () => y.length, 0);
   }
@@ -1227,7 +1228,6 @@
     test('$subcube-empty-array-1', e.$subcube([], 0, 0, 5) , []);
     test('$subcube-empty-array-2', e.$subcube(null, null, null, 5) , []);
     test('$subcube-empty-array-3', e.$subcube(), []);
-
     
     test('row-empty-array-0', e.row(), []);
     test('row-empty-array-1', e.row(null), []);
