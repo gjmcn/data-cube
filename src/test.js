@@ -1223,21 +1223,23 @@
     const e = [];
     test('subcube-empty-array-0', e.subcube(), []);
     test('subcube-empty-array-1', e.subcube(null, 0, 0) , []);
-    test('$subcube-empty-array-0', e.$subcube([], 5) , []);
-    test('$subcube-empty-array-1', e.$subcube([], 0, 5) , []);
-    test('$subcube-empty-array-2', e.$subcube([], 0, 0, 5) , []);
-    test('$subcube-empty-array-3', e.$subcube(null, null, null, 5) , []);
-    test('$subcube-empty-array-4', e.$subcube([]) , []);
+    test('$subcube-empty-array-0', e.$subcube([], null, null, 5) , []);
+    test('$subcube-empty-array-1', e.$subcube([], 0, 0, 5) , []);
+    test('$subcube-empty-array-2', e.$subcube(null, null, null, 5) , []);
+    test('$subcube-empty-array-3', e.$subcube(), []);
+
     
     test('row-empty-array-0', e.row(), []);
     test('row-empty-array-1', e.row(null), []);
-    test('$row-empty-array-0', e.$row(5), []);
+    test('$row-empty-array-0', e.$row(null, 5), []);
     test('$row-empty-array-1', e.$row([],[]), []);
+    test('$row-empty-array-2', e.$row(), []);
     
     test('col-empty-array-0', e.col(), []);
     test('col-empty-array-1', e.col(0), []);
-    test('$col-empty-array-0', e.$col(5), []);
+    test('$col-empty-array-0', e.$col(null, 5), []);
     test('$col-empty-array-1', e.$col(0, []), []);
+    test('$col-empty-array-2', e.$col(), []);
     
     test('page-empty-array-0', e.page(null), []);
     test('page-empty-array-1', e.page(0), []);
@@ -1245,30 +1247,33 @@
     test('page-empty-array-3', e.page(undefined), []);
     test('page-empty-array-4', e.page([undefined]), []);
     test('page-empty-array-5', e.page([null]), []);
-    test('$page-empty-array-0', e.$page(5), []);
-    test('$page-empty-array-1', e.$page([5]), []);
+    test('$page-empty-array-0', e.$page(null, 5), []);
+    test('$page-empty-array-1', e.$page(null, [5]), []);
     test('$page-empty-array-2', e.$page(0, []), []);
+    test('$page-empty-array-3', e.$page(), []);
     
-    test('down-empty-array-0', e.down(), []);
-    test('down-empty-array-1', e.down(null, null), []);
-    test('$down-empty-array-0', e.$down(5), []);
-    test('$down-empty-array-1', e.$down(null, []), []);
-    test('$down-empty-array-2', e.$down(null, null, []), []);
+    test('rowSlice-empty-array-0', e.rowSlice(), []);
+    test('rowSlice-empty-array-1', e.rowSlice(null, null), []);
+    test('$rowSlice-empty-array-0', e.$rowSlice(null, null, 5), []);
+    test('$rowSlice-empty-array-1', e.$rowSlice(null, null, []), []);
+    test('$rowSlice-empty-array-2', e.$rowSlice(), []);
     
-    test('along-empty-array-0', e.along(), []);
-    test('along-empty-array-1', e.along(0, 0), []);
-    test('along-empty-array-2', e.along(0), []);
-    test('along-empty-array-3', e.along(null, 0), []);
-    test('along-empty-array-4', e.along(null), []);
-    test('along-empty-array-5', e.along(null, null), []);
-    test('along-empty-array-6', e.along(-1, -1), []);
-    test('$along-empty-array-0', e.$along(null, []), []);
-    test('$along-empty-array-1', e.$along(0, 0, []), []);
+    test('colSlice-empty-array-0', e.colSlice(), []);
+    test('colSlice-empty-array-1', e.colSlice(0, 0), []);
+    test('colSlice-empty-array-2', e.colSlice(0), []);
+    test('colSlice-empty-array-3', e.colSlice(null, 0), []);
+    test('colSlice-empty-array-4', e.colSlice(null), []);
+    test('colSlice-empty-array-5', e.colSlice(null, null), []);
+    test('colSlice-empty-array-6', e.colSlice(-1, -1), []);
+    test('$colSlice-empty-array-0', e.$colSlice(null, null, []), []);
+    test('$colSlice-empty-array-1', e.$colSlice(0, 0, []), []);
+    test('$colSlice-empty-array-2', e.$colSlice(), []);
     
-    test('back-empty-array-0', e.back(), []);
-    test('back-empty-array-1', e.back(0, 0), []);
-    test('$back-empty-array-1', e.$back(null, []), []);
-    test('$back-empty-array-2', e.$back(0, 0, []), []);
+    test('pageSlice-empty-array-0', e.pageSlice(), []);
+    test('pageSlice-empty-array-1', e.pageSlice(0, 0), []);
+    test('$pageSlice-empty-array-1', e.$pageSlice(null, null, []), []);
+    test('$pageSlice-empty-array-2', e.$pageSlice(0, 0, []), []);
+    test('$pageSlice-empty-array-3', e.$pageSlice(), []);
     
     test('head-empty-array-0', e.head(), []);
     test('head-empty-array-1', e.head(0), []);
@@ -1285,20 +1290,20 @@
       () => e.row(0),
       () => e.col(1),
       () => e.page(1),
-      () => e.down(0),
-      () => e.along(0,1),
+      () => e.rowSlice(0),
+      () => e.colSlice(0,1),
       () => e.page(0,1),
-      () => e.$subcube(0,5),
-      () => e.$subcube(-1,5),
-      () => e.$subcube('a',5),
-      () => e.$subcube(null,1,5),
+      () => e.$subcube(0,null,null,5),
+      () => e.$subcube(-1,null,null,5),
+      () => e.$subcube('a',null,null,5),
+      () => e.$subcube(null,1,null,5),
       () => e.$subcube(null,null,1,5),
       () => e.$row(0,5),
       () => e.$col(1,5),
       () => e.$page(1,5),
-      () => e.$down(0,5),
-      () => e.$along(0,1,5),
-      () => e.$page(0,1,5)
+      () => e.$rowSlice(0,null,5),
+      () => e.$colSlice(0,1,5),
+      () => e.$pageSlice(0,1,5)
     ]);  
     
     //get vector
@@ -1319,16 +1324,16 @@
     test('row-vector-4', v.row([-3,-1]), [7,9]);
     test('row-vector-5', v.row([]), []);
     
-    test('down-vector-0', v.down(), [5,6,7,8,9]);
-    test('down-vector-1', v.down(0), [5,6,7,8,9]);
-    test('down-vector-2', v.down(null), [5,6,7,8,9]);
-    test('down-vector-3', v.down(null,null), [5,6,7,8,9]);
-    test('down-vector-4', v.down(1,3), [6,7,8]);
-    test('down-vector-5', v.down(1,-2), [6,7,8]);
-    test('down-vector-6', v.down(-4,-2), [6,7,8]);
-    test('down-vector-7', v.down(1), [6,7,8,9]);
-    test('down-vector-8', v.down(null,3), [5,6,7,8]);
-    test('down-vector-9', v.down(1), [6,7,8,9]);
+    test('rowSlice-vector-0', v.rowSlice(), [5,6,7,8,9]);
+    test('rowSlice-vector-1', v.rowSlice(0), [5,6,7,8,9]);
+    test('rowSlice-vector-2', v.rowSlice(null), [5,6,7,8,9]);
+    test('rowSlice-vector-3', v.rowSlice(null,null), [5,6,7,8,9]);
+    test('rowSlice-vector-4', v.rowSlice(1,3), [6,7,8]);
+    test('rowSlice-vector-5', v.rowSlice(1,-2), [6,7,8]);
+    test('rowSlice-vector-6', v.rowSlice(-4,-2), [6,7,8]);
+    test('rowSlice-vector-7', v.rowSlice(1), [6,7,8,9]);
+    test('rowSlice-vector-8', v.rowSlice(null,3), [5,6,7,8]);
+    test('rowSlice-vector-9', v.rowSlice(1), [6,7,8,9]);
     
     test('head-vector-0', v.head(), [5,6,7,8,9]);
     test('head-vector-1', v.head(3), [5,6,7]);
@@ -1339,40 +1344,54 @@
     const obj = {};
     const wrapObj = [obj];
     v = [5,6,7,8,9];
-    test('$subcube-vector-0', v.$subcube(11),          [11,11,11,11,11]);
-    test('$subcube-vector-1', v.$subcube(3,12),        [11,11,11,12,11]);
-    test('$subcube-vector-2', v.$subcube([2,4],13),    [11,11,13,12,13]);
-    test('$subcube-vector-3', v.$subcube(0,14),        [14,11,13,12,13]);
-    test('$subcube-vector-4', v.$subcube([],15),       [14,11,13,12,13]);
-    test('$subcube-vector-5', v.$subcube(-4,16),       [14,16,13,12,13]);
-    test('$subcube-vector-6', v.$subcube([2,-1,0], [17,18,19]), [19,16,17,12,18]);
-    test('$subcube-vector-7', v.$subcube([2,4], [20]), [19,16,20,12,20]);
-    test('$subcube-vector-8', v.$subcube([2,4], [obj, wrapObj]), [19,16,obj,12,wrapObj]);
-    test('$subcube-vector-9', v.$subcube(0, obj),        [obj,16,obj,12,wrapObj]);
-    test('$subcube-vector-10', v.$subcube(0, wrapObj),   [obj,16,obj,12,wrapObj]);
-    test('$subcube-vector-11', v.$subcube(0, [wrapObj]), [wrapObj,16,obj,12,wrapObj]);
-    
+    test('$subcube-vector-0', v.$subcube(null, null, null, 11),   [11,11,11,11,11]);
+    test('$subcube-vector-1', v.$subcube(3, null, null, 12),      [11,11,11,12,11]);
+    test('$subcube-vector-2', v.$subcube([2,4], null, null, 13),  [11,11,13,12,13]);
+    test('$subcube-vector-3', v.$subcube(0, null, null, 14),      [14,11,13,12,13]);
+    test('$subcube-vector-4', v.$subcube([], undefined, undefined, 15),      [14,11,13,12,13]);
+    test('$subcube-vector-5', v.$subcube(-4, null, null, 16),                [14,16,13,12,13]);
+    test('$subcube-vector-6', v.$subcube([2,-1,0], null, null, [17,18,19]),  [19,16,17,12,18]);
+    test('$subcube-vector-7', v.$subcube([2,4], null, null, [20]),           [19,16,20,12,20]);
+    test('$subcube-vector-8', v.$subcube([2,4], null, null, [obj, wrapObj]), [19,16,obj,12,wrapObj]);
+    test('$subcube-vector-9', v.$subcube(0, null, null, obj),                [obj,16,obj,12,wrapObj]);
+    test('$subcube-vector-10', v.$subcube(0, null, null, wrapObj),           [obj,16,obj,12,wrapObj]);
+    test('$subcube-vector-11', v.$subcube(0, null, null, [wrapObj]),         [wrapObj,16,obj,12,wrapObj]);
+    test('$subcube-vector-12', v.$subcube(),  new Array(5));
+    test('$subcube-vector-13', v.$subcube(null),  new Array(5));
+    test('$subcube-vector-14', v.$subcube(null, null),  new Array(5));
+    test('$subcube-vector-15', v.$subcube(null, null, null),  new Array(5));
+
     v = [5,6,7,8,9];
-    test('$row-vector-0', v.$row(11),          [11,11,11,11,11]); 
-    test('$row-vector-1', v.$row(3,12),        [11,11,11,12,11]); 
-    test('$row-vector-2', v.$row([2,4],13),    [11,11,13,12,13]); 
-    test('$row-vector-3', v.$row(0,14),        [14,11,13,12,13]); 
-    test('$row-vector-4', v.$row([],15),       [14,11,13,12,13]); 
-    test('$row-vector-5', v.$row(-4,16),       [14,16,13,12,13]); 
-    test('$row-vector-6', v.$row([2,-1,0],     [17,18,19]), [19,16,17,12,18]);
-    test('$row-vector-7', v.$row([2,4], [20]), [19,16,20,12,20]);
-    test('$row-vector-8', v.$row([2,4], [obj, wrapObj]), [19,16,obj,12,wrapObj]);
+    test('$row-vector-0', v.$row(null, 11),    [11,11,11,11,11]); 
+    test('$row-vector-1', v.$row(3, 12),       [11,11,11,12,11]); 
+    test('$row-vector-2', v.$row([2,4], 13),   [11,11,13,12,13]); 
+    test('$row-vector-3', v.$row(0, 14),       [14,11,13,12,13]); 
+    test('$row-vector-4', v.$row([], 15),      [14,11,13,12,13]); 
+    test('$row-vector-5', v.$row(-4, 16),      [14,16,13,12,13]); 
+    test('$row-vector-6', v.$row([2,-1,0], [17,18,19]),     [19,16,17,12,18]);
+    test('$row-vector-7', v.$row([2,4], [20]),              [19,16,20,12,20]);
+    test('$row-vector-8', v.$row([2,4], [obj, wrapObj]),    [19,16,obj,12,wrapObj]);
     test('$row-vector-9', v.$row(0, obj),        [obj,16,obj,12,wrapObj]);
     test('$row-vector-10', v.$row(0, wrapObj),   [obj,16,obj,12,wrapObj]);
     test('$row-vector-11', v.$row(0, [wrapObj]), [wrapObj,16,obj,12,wrapObj]);
+    test('$row-vector-12', v.$row(), new Array(5));
     
     v = [5,6,7,8,9];
-    test('$down-vector-0', v.$down(11),              [11,11,11,11,11]); 
-    test('$down-vector-1', v.$down(1,12),            [11,12,12,12,12]); 
-    test('$down-vector-2', v.$down(null,2,13),       [13,13,13,12,12]); 
-    test('$down-vector-3', v.$down(1,3,[14,15,16]),  [13,14,15,16,12]); 
-    test('$down-vector-4', v.$down(-2,-1,[17,18]),   [13,14,15,17,18]); 
-    
+    test('$rowSlice-vector-0', v.$rowSlice(null, null, 11),  [11,11,11,11,11]); 
+    test('$rowSlice-vector-1', v.$rowSlice(1, null,12),      [11,12,12,12,12]);
+    test('$rowSlice-vector-2', v.$rowSlice(undefined,2,13),  [13,13,13,12,12]); 
+    test('$rowSlice-vector-3', v.$rowSlice(1,3,[14,15,16]),  [13,14,15,16,12]); 
+    test('$rowSlice-vector-4', v.$rowSlice(-2,-1,[17,18]),   [13,14,15,17,18]);
+    v.$key(0, ['a','b','c','d','e']);
+    test('$rowSlice-vector-5', v.$rowSlice(null, 'c', 19), 
+         [19,19,19,17,18].$key(0, ['a','b','c','d','e']));
+    test('$rowSlice-vector-6', v.$rowSlice('b', undefined, 20),
+         [19,20,20,20,20].$key(0, ['a','b','c','d','e']));    
+    test('$rowSlice-vector-7', v.$rowSlice(null, null, [21,22,23,24,25]), 
+         [21,22,23,24,25].$key(0, ['a','b','c','d','e']));
+    test('$rowSlice-vector-8', v.$rowSlice(),  
+         (new Array(5)).$key(0, ['a','b','c','d','e']));
+  
     //book
     const marks = () => {
       return [11,12,13,14,15,16,17,18,19,20,
@@ -1380,7 +1399,7 @@
               31,32,33,34];
     };
     const addKeys = x => {
-      return x.$key(['Alice','Bob','Cath'])
+      return x.$key(0,['Alice','Bob','Cath'])
        .$key(1,['math','biol','chem','phys'])
        .$key(2,['Autumn','Spring']);
     };
@@ -1456,18 +1475,18 @@
     test('row-col-page-book-0',
       b.row('Alice').col(['biol','chem']).page('Spring'), aliceBiolChemSpring);
     
-    test('down-book-0', b.down(), book());
-    test('down-book-1', b.down('Bob','Bob'), bob);
-    test('along-book-0', b.along('biol','chem'), biolChem); 
-    test('along-book-1', emptyCol.along(), emptyCol); 
-    test('along-book-2', b.along('biol','chem', 'full'), biolChem);
-    test('along-book-3', b.along('biol','chem', 'core'), 
+    test('rowSlice-book-0', b.rowSlice(), book());
+    test('rowSlice-book-1', b.rowSlice('Bob','Bob'), bob);
+    test('colSlice-book-0', b.colSlice('biol','chem'), biolChem); 
+    test('colSlice-book-1', emptyCol.colSlice(), emptyCol); 
+    test('colSlice-book-2', b.colSlice('biol','chem', 'full'), biolChem);
+    test('colSlice-book-3', b.colSlice('biol','chem', 'core'), 
       [14,15,16,17,18,19,26,27,28,29,30,31].$shape([3,2,2]))
-    test('along-book-4', b.along('biol','chem', 'array'), 
+    test('colSlice-book-4', b.colSlice('biol','chem', 'array'), 
       [14,15,16,17,18,19,26,27,28,29,30,31])
-    test('back-book-0', b.back('Spring','Spring'), spring);
-    test('down-along-back-0',
-      b.down('Alice','Alice').along('biol','chem').back('Spring','Spring'),
+    test('pageSlice-book-0', b.pageSlice('Spring','Spring'), spring);
+    test('rowSlice-colSlice-pageSlice-0',
+      b.rowSlice('Alice','Alice').colSlice('biol','chem').pageSlice('Spring','Spring'),
         aliceBiolChemSpring);
     
     test('head-book-0', b.head(5,5,5), book());
@@ -1479,19 +1498,21 @@
         .$key(2,'Autumn')));    
     
     b = book();
-    test('$subcube-book-0', b.$subcube(50), addLabels(addKeys([3,4,2].cube(50))));
+    test('$subcube-book-0', b.$subcube(null, null, null, 50), addLabels(addKeys([3,4,2].cube(50))));
     b = book();
-    test('$subcube-book-1', b.$subcube([24].cube(51)), addLabels(addKeys([3,4,2].cube(51))));
+    test('$subcube-book-1', b.$subcube(null, null, null, [24].cube(51)), addLabels(addKeys([3,4,2].cube(51))));
+    b = book();
+    test('$subcube-book-2', b.$subcube(), addLabels(addKeys([3,4,2].cube())));
     
     bTmp = book();
     bTmp[1] = 52;    bTmp[4] = 52;    bTmp[7] = 52;    bTmp[10] = 52; 
     bTmp[13] = 52;   bTmp[16] = 52;   bTmp[19] = 52;   bTmp[22] = 52; 
     b = book();
-    test('$subcube-book-2', b.$subcube('Bob',52), bTmp);
+    test('$subcube-book-3', b.$subcube('Bob', null, null, 52), bTmp);
     b = book();
     test('$row-book-0', b.$row('Bob',52), bTmp);
     b = book();
-    test('$down-book-0', b.$down('Bob','Bob',52), bTmp);
+    test('$rowSlice-book-0', b.$rowSlice('Bob','Bob',52), bTmp);
     
     bTmp = book();
     valTmp = [53,54,55,56,57,58,59,60,61,62,63,64];
@@ -1500,52 +1521,52 @@
     bTmp[15] = 59;   bTmp[16] = 60;   bTmp[17] = 61;
     bTmp[18] = 62;   bTmp[19] = 63;   bTmp[20] = 64;
     b = book();
-    test('$subcube-book-3', b.$subcube(null,['biol','chem'],valTmp), bTmp);
+    test('$subcube-book-4', b.$subcube(null, ['biol','chem'], null, valTmp), bTmp);
     b = book();
     test('$col-book-0', b.$col(['biol','chem'],valTmp), bTmp);
     b = book();
-    test('$along-book-0', b.$along('biol','chem',valTmp), bTmp);
+    test('$colSlice-book-0', b.$colSlice('biol','chem',valTmp), bTmp);
     
     bTmp = book();
     bTmp[15] = 65;    bTmp[18] = 66; 
     b = book();
-    test('$subcube-book-4', b.$subcube('Alice', ['biol','chem'], 'Spring', [65,66]), bTmp);
+    test('$subcube-book-5', b.$subcube('Alice', ['biol','chem'], 'Spring', [65,66]), bTmp);
     
     b = book();
-    test('$subcube-book-5', b.$subcube(null, null, [], 67),  book());
+    test('$subcube-book-6', b.$subcube(null, null, [], 67),  book());
     test('$page-book-0', b.$page([], 67),  book());
+    b = book();
+    test('$page-book-1', b.$page(),  addLabels(addKeys([3,4,2].cube())));
+    b = book();
+    test('$pageSlice-book-0', b.$pageSlice('Autumn', null, 67), addLabels(addKeys([3,4,2].cube(67))));
+    b = book();
+    test('$pageSlice-book-1', b.$pageSlice(), addLabels(addKeys([3,4,2].cube())));
 
     b = book();
     assert.throwEach('throw-subcube', [
       () => b.subcube('x'),
       () => b.subcube('Bob', 'x'),
       () => b.subcube('Bob', 'biol', 'x'),
-      () => b.$subcube('x', 10),
-      () => b.$subcube('Bob', 'x', 10),
+      () => b.$subcube('x', null, null, 10),
+      () => b.$subcube('Bob', 'x', null, 10),
       () => b.$subcube('Bob', 'biol', 'x', 10),
       () => b.subcube([['Alice']]),
       () => b.subcube(null, null, null, 'x'),
       () => b.row('x'),
       () => b.col('x'),
       () => b.page('x'),
-      () => b.down('x'),
-      () => b.along('x'),
-      () => b.back('x'),
-      () => b.$subcube(),
-      () => b.$row('Alice',2,3),
-      () => b.$col('biol',2,3),
-      () => b.$page('Spring',2,3),
-      () => b.$down('Alice','Bob',3,4),
-      () => b.$along('biol','chem',3,4),
-      () => b.$back('Spring','Spring',3,4),
-      () => b.along('chem','biol'),
-      () => b.$along('chem','biol',10),
-      () => b.along('biol',[['chem']]),
-      () => b.$along('biol',[['chem']],10),
-      () => b.$subcube([10,11]),
+      () => b.rowSlice('x'),
+      () => b.colSlice('x'),
+      () => b.pageSlice('x'),
+      () => b.colSlice('chem','biol'),
+      () => b.$colSlice('chem','biol',10),
+      () => b.colSlice('biol',[['chem']]),
+      () => b.$colSlice('biol',[['chem']],10),
+      () => b.$subcube(null, null, null, [10,11]),
       () => b.$row('Alice',[10,11]),
-      () => b.$down('Alice','Bob',[10,11])
+      () => b.$rowSlice('Alice','Bob',[10,11])
     ]);
+    
   }
   
   console.log('--- generators');
