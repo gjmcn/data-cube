@@ -1,4 +1,4 @@
-{	
+{
 	'use strict';
 	    
   const _isEqual = require('lodash.isequal');
@@ -728,8 +728,8 @@
     test('dc-9', dc(), [undefined]);
     assert.cube('dc-10', dc());
   
-    const c = dc([2,3,4,5,6,7].$shape([2,3]).$key(['a','b']));
-    test('dc-11', c, [2,3,4,5,6,7].$shape([2,3]).$key(['a','b']));
+    const c = dc([2,3,4,5,6,7].$shape([2,3]).$key(0, ['a','b']));
+    test('dc-11', c, [2,3,4,5,6,7].$shape([2,3]).$key(0, ['a','b']));
     assert.cube('dc-12', c);
   }
   
@@ -917,28 +917,28 @@
     
     const dt = new Date();
     const a = [5,6]
-      .$key(['a',dt])
+      .$key(0,['a',dt])
       .$label(0,'row')
       .$label(2,'page');
     assert('copy-array-0', () => a.copy('array')._data_cube, undefined);
     test('copy-array-1', a.copy('array'), [5,6]);
     assert.cube('copy-array-2', a.copy('full'));
     test('copy-array-3', a.copy('full'),
-      [5,6].$key(['a',dt]).$label(0,'row').$label(2,'page'));
+      [5,6].$key(0,['a',dt]).$label(0,'row').$label(2,'page'));
     assert.cube('copy-array-4', a.copy('core'));
     test('copy-array-5', a.copy('core'),
       [5,6]);
     assert.cube('copy-array-6', a.copy('shell'));
     test('copy-array-7', a.copy('shell'),
-      [,,].$key(['a',dt]).$label(0,'row').$label(2,'page'));
+      [,,].$key(0,['a',dt]).$label(0,'row').$label(2,'page'));
     test.throw('throw-copy-array', a.copy('shell'),
-      [,,].$key(['a', new Date(+dt)]).$label(0,'row').$label(2,'page'));
+      [,,].$key(0,['a', new Date(+dt)]).$label(0,'row').$label(2,'page'));
     
     assert('copy-dc-array-0', () => dc.copy(a,'array')._data_cube, undefined);
     test('copy-dc-array-1', dc.copy(a,'array'), [5,6]);
     assert.cube('copy-dc-array-2', dc.copy(a,'full'));
     test('copy-dc-array-3', dc.copy(a,'full'),
-      [5,6].$key(['a',dt]).$label(0,'row').$label(2,'page'));
+      [5,6].$key(0,['a',dt]).$label(0,'row').$label(2,'page'));
     
     const obj = {};
     const b = [4,5,6,obj,7,8]
@@ -1037,15 +1037,13 @@
     const obj = {a:5};
     const e = [].$label(1,'columns');
     const m = [5,6].cube()
-      .$label(1)  //label on dim 0 will be '1'
+      .$label(0,1)  //label on dim 0 will be '1'
       .$label(1,'columns')
       .$label([2],obj);
     
     assert.throwEach('throw-label', [
       () => e.label(3),
       () => e.label([1,2]),
-      () => e.$label(0,'a','b'),
-      () => e.$label(),
       () => e.$label('1','a'),
       () => e.$label(1,['a','b']),
       () => e.$label(''),
@@ -1071,46 +1069,61 @@
     ]);
     
     e.$label(1,null);
-    m.$label(1,[null])
-     .$label([2], null);
-    m.$label(2,'columns again');
+    m.$label(1,undefined)
+     .$label([2], [null]);
+    m.$label(2,'pages');
     assert.each('label-3', [
       [() => e.label(0), null],
       [() => e.label(1), null],
       [() => e.label(2), null],
       [() => m.label(), '1'],      
       [() => m.label(1), null],      
-      [() => m.label(2), 'columns again'],     
+      [() => m.label(2), 'pages'],  
     ]);
-
+    m.$label();
+    assert.each('label-4', [
+      [() => h.equalArray(m._l, [,,'pages']), true],      
+      [() => m.label(), null],      
+      [() => m.label(1), null],      
+      [() => m.label(2), 'pages'],  
+    ]);
+    m.$label(2);
+    assert.each('label-5', [
+      [() => m._l, undefined],
+      [() => m.label(0), null],      
+      [() => m.label(1), null],      
+      [() => m.label(2), null],  
+    ]); 
+    
   }
     
-  console.log('--- key, $key')
+  console.log('--- key, $key');
   {
     const obj = {a:5};
     const e = []
-      .$key([])
+      .$key(0,[])
       .$key(1,'a')
       .$key(2,'b')
     const v = [5,6]
       .$key(0,['a',obj]);
     const b = [2,3,4].cube()
-      .$key([obj,'' + obj])
+      .$key(0,[obj,'' + obj])
       .$key(2,['a','b',true,false])
       .$key(1,[10,20,30]);
     
     assert.throwEach('throw-key', [
       () => e.key(3),
       () => e.key([1,2]),
-      () => b.$key(1,[5,6,7],8),
-      () => b.$key(),
       () => e.$key('1','a'),
       () => e.$key('a'),
       () => e.$key(0,'a'),
       () => b.$key(1,['a']),
       () => b.$key(1,[5,6,7,8]),
-      () => b.$key(1,[5,6,null]),
       () => b.$key(1,[undefined,6,7]),
+      () => b.$key(1,[6,undefined,7]),
+      () => b.$key(1,[null,6,7]),
+      () => b.$key(1,[6,null,7]),
+      () => b.$key(1,[5,6,null]),  
       () => b.$key(1,[6,6,7]),
       () => b.$key(1,[5,6,7,6]),
       () => b.$key(0,[null,null]),
@@ -1143,12 +1156,12 @@
       [() => [].key(2), null]
     ]);
     
-    e.$key(null)
+    e.$key()
      .$key(1,[null])
      .$key([2],null)
-    v.$key(0,null)
+    v.$key(0,undefined)
      .$key(1,'col-0');
-    b.$key(1,null)
+    b.$key(1)
     assert.each('key-5', [
       [() => e.key(), null],
       [() => e.key(1), null],
@@ -1191,7 +1204,7 @@
     
     const obj = {a:5};
     const b = [2,3,4].cube()
-      .$key([obj,'' + obj])
+      .$key(0,[obj,'' + obj])
       .$key(2,['a','b',true,false]);
     assert.each('has-key-2', [
       [() => b.hasKey(), true],
@@ -1210,7 +1223,7 @@
     ]);
     assert.throw('throw-has-key-2', () => b.hasKey(2,['a','b']));
 
-    const e = [].$key([]);
+    const e = [].$key(0,[]);
     assert.each('has-key-3', [
       [() => e.hasKey(), true],
       [() => e.hasKey(0,undefined), true],
@@ -1412,35 +1425,35 @@
     const bob = addLabels(
       [12,15,18,21,24,27,30,33]
         .$shape([1,4,2])
-        .$key('Bob')
+        .$key(0,'Bob')
         .$key(1,['math','biol','chem','phys'])
         .$key(2,['Autumn','Spring'])
     );
     const biolChem = addLabels(
       [14,15,16,17,18,19,26,27,28,29,30,31]
         .$shape([3,2,2])
-        .$key(['Alice','Bob','Cath'])
+        .$key(0,['Alice','Bob','Cath'])
         .$key(1,['biol','chem'])
         .$key(2,['Autumn','Spring'])
     );
     const aliceBiolChemSpring = addLabels(
       [26,29]
         .$shape([1,2,1])
-        .$key('Alice')
+        .$key(0,'Alice')
         .$key(1,['biol','chem'])
         .$key(2,'Spring')
     );
     const spring = addLabels(
       [23,24,25,26,27,28,29,30,31,32,33,34]
         .$shape([3,4,1])
-        .$key(['Alice','Bob','Cath'])
+        .$key(0,['Alice','Bob','Cath'])
         .$key(1,['math','biol','chem','phys'])
         .$key(2,'Spring')
     );
     const emptyCol = addLabels(
       []
         .$shape([3,0,2])
-        .$key(['Alice','Bob','Cath'])
+        .$key(0,['Alice','Bob','Cath'])
         .$key(1,[])
         .$key(2,['Autumn','Spring'])
     );
@@ -1493,7 +1506,7 @@
     test('head-book-1', b.head(2,3,1), addLabels(
       [11,12,14,15,17,18]
         .$shape([2,3,1])
-        .$key(['Alice','Bob'])
+        .$key(0,['Alice','Bob'])
         .$key(1,['math','biol','chem'])
         .$key(2,'Autumn')));    
     
@@ -1659,7 +1672,7 @@
          21,22,23,24,25,26,27,28,29,30,
          31,32,33,34]
       .$shape([3,4,2])
-      .$key(['Alice','Bob','Cath'])
+      .$key(0,['Alice','Bob','Cath'])
       .$key(1,['math','biol','chem','phys'])
       .$key(2,['Autumn','Spring'])
       .$label(0,'Student')
@@ -2167,7 +2180,7 @@
                21,22,23,24,25,26,27,28,29,30,
                31,32,33,34]
       .$shape([3,4,2])
-      .$key(['Alice','Bob','Cath'])
+      .$key(0,['Alice','Bob','Cath'])
       .$key(2,['Autumn','Spring'])
       .$label(0,'Student')
       .$label(1,'Subject')
@@ -2188,17 +2201,6 @@
   
   console.log('\nTests finished');
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

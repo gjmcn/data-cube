@@ -453,14 +453,12 @@
     return null;
   });
     
-  //[num], str -> cube
+  //[num, *] -> cube
   addArrayMethod('$label', function(dim,val) {
     this.toCube();
-    const nArg = assert.argRange(arguments,1,2); 
-    if (nArg === 1) [dim,val] = [undefined,dim];
     dim = assert.dim(dim);
     val = assert.single(val);
-    if (val === null) {
+    if (val === undefined || val === null) {
       const _l = this._l;
       if (_l && _l[dim]) {
         _l[dim] = undefined;
@@ -490,14 +488,12 @@
     return null;
   });
     
-  //[num], * -> cube
+  //[num, *] -> cube
   addArrayMethod('$key', function(dim,val) {
     this.toCube();
-    const nArg = assert.argRange(arguments,1,2);    
-    if (nArg === 1) [dim,val] = [undefined,dim];
     dim = assert.dim(dim);
     val = toArray(val);
-    if (val.length === 1 && val[0] === null) {
+    if (val.length === 1 && (val[0] === undefined || val[0] === null)) {
       const _k = this._k;
       if (_k && _k[dim]) {
         _k[dim] = undefined;
@@ -518,8 +514,7 @@
   
   //-> cube
   addArrayMethod('$strip', function() {
-    this.toCube();
-    assert.argRange(arguments,0,0);    
+    this.toCube();   
     delete this._k;
     delete this._l;
     return this;
@@ -1722,7 +1717,7 @@
       return y.vec(scFloor).mul([1].sub(wt)).add( y.vec(sc.ceil()).mul(wt) );
     };
     let z;
-    if (dim === -1) z = quant(copyArray(this)).$key(prob);
+    if (dim === -1) z = quant(copyArray(this)).$key(0,prob);
     else {
       if (![0,1,2].includes(dim)) throw Error('invalid dimension');
       const z_s = copyArray(this._s);
@@ -2325,7 +2320,7 @@
       if (ent !== 'subcube' && ent !== 'count' && typeof ent !== 'function') {
         throw Error(`'subcube', 'count' or function expected`);
       }
-      if (nd === 0) return [].$key([]);
+      if (nd === 0) return [].$key(0,[]);
       //map for each 'grouping vector'
       const ky = new Array(zDim);
       let j = 0;
