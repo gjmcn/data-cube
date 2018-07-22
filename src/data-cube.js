@@ -1262,86 +1262,39 @@
   });
   
   
-  //--------------- entrywise: prop ---------------//
-  //(and for now, some html style, attr and class methods)
+  //--------------- prop, $prop ---------------//
   
-  {
-
-    //array/cube, str, * -> array/cube. Only converts x to a
-    //cube and returns a cube if mthd is 'prop'; other methods
-    //are HTML methods.
-    const getInfo = (x, mthd, nm) => {
-      if (mthd === 'prop') x.toCube();
-      const n = x.length;
-      var [nm,nmSingle] = polarize(nm);
-      if (!nmSingle && nm.length !== n) throw Error('shape mismatch');
-      const z = (mthd === 'prop') ? x.copy('shell') : new Array(n);
-      const getName = nmSingle ? () => nm : i => nm[i];
-      if      (mthd === 'prop')     { for (let i=0; i<n; i++) z[i] = x[i][getName(i)] }
-      else if (mthd === 'style')    { for (let i=0; i<n; i++) z[i] = window.getComputedStyle(x[i])[getName(i)] }
-      else if (mthd === 'attr')     { for (let i=0; i<n; i++) z[i] = x[i].getAttribute(getName(i)) }
-      else if (mthd === 'hasAttr')  { for (let i=0; i<n; i++) z[i] = x[i].hasAttribute(getName(i)) }
-      else if (mthd === 'hasClass') { for (let i=0; i<n; i++) z[i] = x[i].classList.contains(getName(i)) }
-      else throw Error('invalid argument');
-      return z;
-    };
-
-    //* -> array/cube
-    ['prop','attr','style','hasAttr','hasClass'].forEach(mthd => {
-      addArrayMethod(mthd, function(nm) {
-        return getInfo(this, mthd, nm);
-      });
-    });
-
-    //array/cube, str, array -> array/cube. Only converts x to a
-    //cube if mthd is '$prop'; other methods are HTML methods.
-    const setInfo = (x, mthd, nameVal) => {
-      if (mthd === '$prop') x.toCube();
-      const n = x.length;
-      const nArg = nameVal.length;
-      if (nArg < 2 || nArg % 2 !== 0) throw Error('invalid number of arguments');
-      const nPair = nArg / 2;
-      const getName = new Array(nPair);
-      const getVal  = new Array(nPair);
-      for (let i=0; i<nPair; i++) {
-        let [name, nameSingle] = polarize(nameVal[2*i]);
-        let [val,  valSingle]  = polarize(nameVal[2*i + 1]);
-        if (!nameSingle && name.length !== n) throw Error('shape mismatch');
-        if (!valSingle  &&  val.length !== n) throw Error('shape mismatch');
-        getName[i] = nameSingle ? () => name : j => name[j];
-        if (valSingle) {
-          getVal[i] = (typeof val === 'function') ? j => val(x[j],j,x) : () => val;
-        }
-        else {
-          getVal[i] = j => (typeof val[j] === 'function') ? val[j](x[j],j,x) : val[j];
-        }
-      }
-      for (let i=0; i<nPair; i++) {
-        let getName_i = getName[i];
-        let getVal_i = getVal[i];
-        if (mthd === '$prop') {
-          for (let j=0; j<n; j++) x[j][getName_i(j)] = getVal_i(j);
-        }
-        else if (mthd === '$style') {
-          for (let j=0; j<n; j++) x[j].style[getName_i(j)] = getVal_i(j);
-        }
-        else if (mthd === '$attr') {
-          for (let j=0; j<n; j++) x[j].setAttribute(getName_i(j), getVal_i(j));
-        }
-        else throw Error('invalid argument');
-      }
-      return x;
-    };
-        
-    //*, *[, *, *, *, * ...] -> array/cube
-    ['$prop','$attr','$style'].forEach(mthd => {
-      addArrayMethod(mthd, function(...nameVal) {
-        return setInfo(this, mthd, nameVal);
-      });
-    });
+  //str -> cube
+  addArrayMethod('prop', function(nm) {
+    this.toCube();
+    nm = assert.single(nm);
+    const n = this.length,
+          z = this.copy('shell');
+    for (let i=0; i<n; i++) z[i] = this[i][nm];
+    return z;
+  });
     
-  }
-    
+  //str, * -> cube
+  addArrayMethod('$prop', function(nm, val) {
+    this.toCube();
+    nm = assert.single(nm);
+    var [val, valSingle] = polarize(val);
+    const n = this.length;
+    if (valSingle) {
+      if (typeof val === 'function') {
+        for (let j=0; j<n; j++) this[j][nm] = val(this[j], j, this);
+      }
+      else {
+        for (let j=0; j<n; j++) this[j][nm] = val;
+      }
+    }
+    else {
+      if (val.length !== n) throw Error('shape mismatch');
+      for (let j=0; j<n; j++) this[j][nm] = val[j];
+    }
+    return this;
+  });
+
 
   //--------------- entrywise, cmap ---------------//
 
