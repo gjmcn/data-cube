@@ -1,11 +1,12 @@
-# Data-Cube
+Data-Cube adds array-oriented programming to JavaScript:
 
-Data-Cube manipulates JavaScript's native arrays so that an array behaves both as a normal array and as a *cube*: a 3-dimensional array whose entries and *subcubes* can be accessed using integer indices or keys (which can be anything). Cubes make it easy to handle data that naturally fit into a multidimensional array or a 'data-table'. Since Data-Cube manipulates the native array class, the syntax for using cubes is simple and clean, e.g.
+* A native array behaves as both a normal array and as a 'cube': a 3-dimensional array whose entries and subcubes can be accessed using indices (negative indices count back from the end of a dimension) or keys (which can be any data type).
 
-```js
-[3,4].cube(1);         //3-by-4 matrix, each entry is 1
-[5,6,7,8].$shape(2);   //change shape of array to 2-by-2 ($ indicates a setter)
-```
+* New array methods make it easier to work with arrays and also, allow us to take advantage of the additional array structure.
+
+See the [Wiki](https://github.com/gjmcn/data-cube/wiki) for more details and the docs.
+
+See this [Observable notebook](https://beta.observablehq.com/@gjmcn/data-cube-array-oriented-javascript) for a quick overview of Data-Cube.
 
 ## Install/Load
 
@@ -19,7 +20,7 @@ Data-Cube exports the function `dc`:
 
 * `dc` converts an existing array to a cube &mdash; see [toCube](https://github.com/gjmcn/data-cube/wiki/Other-Methods#method_to_cube).
 
-* `dc` has properties that can be used to create new cubes &mdash; see [Create and Copy](https://github.com/gjmcn/data-cube/wiki/Create-and-Copy).
+* `dc` has properties that can be used to create new cubes &mdash; see [Create, Copy and Convert](https://github.com/gjmcn/data-cube/wiki/Create-Copy-and-Convert).
 
 In practice, `dc` is rarely required. For example:
 
@@ -33,7 +34,3 @@ dc.cube([3,4]);            //dc.cube function
 [3,4].cube();              //cube method, slightly cleaner
 
 ```
-
----
-
-**See the [Wiki](https://github.com/gjmcn/data-cube/wiki) for more details and the documentation.**
