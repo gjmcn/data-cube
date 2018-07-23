@@ -1229,40 +1229,59 @@
   
   
   //--------------- entrywise: method ---------------//
-  
+
   //*[, *, *, *, ...] -> cube
   addArrayMethod('method', function(nm, ...mthdArg) {
     this.toCube();
-    const z = this.copy('shell');
-    const n = this.length;
-    var [nm,nmSingle] = polarize(nm);
-    if (!nmSingle && nm.length !== n) throw Error('shape mismatch');
-    const getName = nmSingle ? () => nm : i => nm[i];
-    const na = mthdArg.length;
+    nm = assert.single(nm);
+    const n = this.length,
+          na = mthdArg.length,
+          z = this.copy('shell');
     if (na === 0) {
-      for (let i=0; i<n; i++) z[i] = this[i][getName(i)]();
-      return z;
+      for (let i=0; i<n; i++) z[i] = this[i][nm]();
     }
-    const getArg = new Array(na);
-    for (let i=0; i<na; i++) {
-      let [a, aSingle] = polarize(mthdArg[i]);
-      if (aSingle) getArg[i] = () => a;
+    else if (na < 3) {
+      const [a_0, aSingle_0] = polarize(mthdArg[0]);
+      if (!aSingle_0 && a_0.length !== n) throw Error('shape mismatch');
+      if (na === 1) {
+        if (aSingle_0) for (let i=0; i<n; i++) z[i] = this[i][nm](a_0);
+        else           for (let i=0; i<n; i++) z[i] = this[i][nm](a_0[i]);
+      }
       else {
-        if (a.length !== n) throw Error('shape mismatch');
-        getArg[i] = j => a[j];
-      } 
+        const [a_1, aSingle_1] = polarize(mthdArg[1]);
+        if (!aSingle_1 && a_1.length !== n) throw Error('shape mismatch');
+        if (aSingle_0) {
+          if (aSingle_1) for (let i=0; i<n; i++) z[i] = this[i][nm](a_0, a_1);
+          else           for (let i=0; i<n; i++) z[i] = this[i][nm](a_0, a_1[i]);
+        }
+        else {
+          if (aSingle_1) for (let i=0; i<n; i++) z[i] = this[i][nm](a_0[i], a_1);
+          else           for (let i=0; i<n; i++) z[i] = this[i][nm](a_0[i], a_1[i]);
+        }
+      }
     }
-    const getAllArg = j => {
-      const arg = new Array(na);
-      for (let i=0; i<na; i++) arg[i] = getArg[i](j);
-      return arg;
+    else {
+      const getArg = new Array(na);
+      for (let i=0; i<na; i++) {
+        let [a, aSingle] = polarize(mthdArg[i]);
+        if (aSingle) getArg[i] = () => a;
+        else {
+          if (a.length !== n) throw Error('shape mismatch');
+          getArg[i] = j => a[j];
+        }
+      }
+      const getAllArg = j => {
+        const arg = new Array(na);
+        for (let i=0; i<na; i++) arg[i] = getArg[i](j);
+        return arg;
+      };
+      for (let i=0; i<n; i++) z[i] = this[i][nm](...getAllArg(i));
     }
-    for (let i=0; i<n; i++) z[i] = this[i][getName(i)](...getAllArg(i));
     return z;
   });
   
-  
-  //--------------- prop, $prop ---------------//
+
+  //--------------- entrywise: prop, $prop ---------------//
   
   //str -> cube
   addArrayMethod('prop', function(nm) {
@@ -1296,7 +1315,7 @@
   });
 
 
-  //--------------- entrywise, cmap ---------------//
+  //--------------- entrywise: cmap ---------------//
 
   addArrayMethod('cmap', function(f, asThis) {
     this.toCube();
