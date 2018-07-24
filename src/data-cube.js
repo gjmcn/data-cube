@@ -520,6 +520,22 @@
     return this;
   });
   
+  
+  //--------------- ind, indOrKey ---------------//
+  
+  //[num] -> array
+  addArrayMethod('ind', function(dim) {
+    this.toCube();
+    dim = assert.dim(dim);
+    return helper.simpleRange(this._s[dim]);
+  });
+  
+  //[num] -> array
+  addArrayMethod('indOrKey', function(dim) {
+    return this.key(dim) || helper.simpleRange(this._s[assert.dim(dim)]);
+  });
+  
+  
   //--------------- copy ---------------//
       
   //[str] -> array/cube
@@ -908,92 +924,7 @@
     });
   }
   
-  
-  //--------------- generators: rows, cols, pages ---------------//
-  
-  {
-    //cube, num, str, num[, *] -> cube, optimized subcube function
-    //for generators; gets individual row, col or page. Assumes:
-    //  -x already a cube
-    //  -dim a valid dimension
-    //  -ret is 'full', 'core' or 'array'
-    //  -xSkel is the skelton of x when the generator was created
-    //  -m is a valid non-neg index of dim
-    //  -mKey is the key that corresponds to m if dim has keys
-    const singleRCP = (x, dim, ret, xSkel, m, mKey) => {
-      const [nr, nc, np] = xSkel._s;
-      const epp = nr * nc;
-      let j = 0;
-      let z;
-      if (dim === 0) {
-        z = new Array(nc * np);        
-        for (let p=0; p<np; p++)  for (let c=0; c<nc; c++)  z[j++] = x[m + nr*c + epp*p];
-      }
-      else if (dim === 1) {
-        z = new Array(nr * np);
-        for (let p=0; p<np; p++)  for (let r=0; r<nr; r++)  z[j++] = x[r + nr*m + epp*p];
-      }
-      else {
-        z = new Array(nr * nc);
-        for (let c=0; c<nc; c++)  for (let r=0; r<nr; r++)  z[j++] = x[r + nr*c + epp*m];
-      }
-      if (ret === 'array') return z;
-      z.toCube();
-      //shape
-      z._s[0] = nr,  z._s[1] = nc,  z._s[2] = np;
-      z._s[dim] = 1;
-      if (ret === 'core') return z;
-      //extras
-      copyKey(xSkel,z,dim);  //xSkel does not have keys on dim
-      if (mKey !== undefined) {
-        ensureKey(z); 
-        const mp = new Map();
-        mp.set(mKey,0);
-        z._k[dim] = mp;
-      }
-      copyLabel(xSkel,z);
-      return z;      
-    };
-
-    //array/cube, num[, str] -> generator
-    const dimLoop = (x, dim, ret) => {
-      x.toCube();
-      ret = def(assert.single(ret), 'none');
-      const ky = x._k && x._k[dim];
-      const n = x._s[dim];
-      if (ret === 'none') {
-        if (ky) {
-          return (function* () {
-            for (let j of x._k[dim].keys()) yield j;
-          })();
-        }
-        return (function* () {
-          for (let i=0; i<n; i++) yield i;
-        })();
-      }
-      else {
-        const xSkel = skeleton(x,dim);
-        if (ret !== 'full' && ret !== 'core' && ret !== 'array') {
-          throw Error(`'none', 'full', 'core', or 'array' expected`);
-        }
-        if (ky) { 
-          return (function* () {
-            for (let [j,i] of x._k[dim].entries()) yield [j, singleRCP(x, dim, ret, xSkel, i, j)];
-          })();
-        }
-        return (function* () {
-          for (let i=0; i<n; i++) yield [i, singleRCP(x, dim, ret, xSkel, i)]; 
-        })();
-      }
-    };
     
-    ['rows', 'cols', 'pages'].forEach( (name,d) => {
-      addArrayMethod(name, function(ret) { return dimLoop(this, d, ret) });
-    });    
-    
-  }
-  
-  
   //--------------- vble ---------------//
   
   //[num] -> array
@@ -1611,9 +1542,9 @@
           z = [1,nc,np].cube();
           const ind_c = indFactory(1),
                 ind_p = indFactory(2);
-          for (let p of this.pages()) {
+          for (let p of this.indOrKey(2)) {
             let pi = ind_p(p) * nc;
-            for (let c of this.cols()) {
+            for (let c of this.indOrKey(1)) {
               z[ind_c(c) + pi] = this.subcube(null, c, p, sc);         
             }
           }
@@ -1622,9 +1553,9 @@
           z = [nr,1,np].cube();
           const ind_r = indFactory(0),
                 ind_p = indFactory(2);
-          for (let p of this.pages()) {
+          for (let p of this.indOrKey(2)) {
             let pi = ind_p(p) * nr;
-            for (let r of this.rows()) {
+            for (let r of this.indOrKey(0)) {
               z[ind_r(r) + pi] = this.subcube(r, null, p, sc);         
             }
           }
@@ -1633,9 +1564,9 @@
           z = [nr,nc,1].cube();
           const ind_r = indFactory(0),
                 ind_c = indFactory(1);
-          for (let c of this.cols()) {
+          for (let c of this.indOrKey(1)) {
             let ci = ind_c(c) * nr;
-            for (let r of this.rows()) {
+            for (let r of this.indOrKey(0)) {
               z[ind_r(r) + ci] = this.subcube(r, c, null, sc);         
             }
           }
@@ -1699,22 +1630,22 @@
       copyLabel(this, z, dim);
       z.$key(dim, prob);
       if (dim === 0) {
-        for (let p of this.pages()) {
-          for (let c of this.cols()) {
+        for (let p of this.indOrKey(2)) {
+          for (let c of this.indOrKey(1)) {
             z.$subcube(null, c, p, quant(this.subcube(null, c, p, 'array')));  
           }
         }
       }
       else if (dim === 1) {
-        for (let p of this.pages()) {
-          for (let r of this.rows()) {
+        for (let p of this.indOrKey(2)) {
+          for (let r of this.indOrKey(0)) {
             z.$subcube(r, null, p, quant(this.subcube(r, null, p, 'array')));  
           }
         }
       }
       else {  //dim is 2
-        for (let c of this.cols()) {
-          for (let r of this.rows()) {
+        for (let c of this.indOrKey(1)) {
+          for (let r of this.indOrKey(0)) {
             z.$subcube(r, c, null, quant(this.subcube(r, c, null, 'array')));  
           }
         }
@@ -2352,13 +2283,13 @@
               j++;
             };
         if (zDim === 1) {
-          for (let r of z.rows()) sc(r);
+          for (let r of z.key(0)) sc(r);
         }
         else if (zDim === 2) {
-          for (let c of z.cols()) for (let r of z.rows()) sc(r, c);
+          for (let c of z.key(1)) for (let r of z.key(0)) sc(r, c);
         }
         else {  //zDim is 3
-          for (let p of z.pages()) for (let c of z.cols()) for (let r of z.rows()) sc(r, c, p);
+          for (let p of z.key(2)) for (let c of z.key(1)) for (let r of z.key(0)) sc(r, c, p);
         }
       }
       else {  //ent is 'count' or 'subcube'
