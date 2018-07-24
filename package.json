@@ -1,7 +1,7 @@
 {
   "name": "data-cube",
   "version": "0.1.0",
-  "description": "Treat JavaScript arrays as multidimensional tables.",
+  "description": "Array-Oriented JavaScript.",
   "main": "dist/data-cube.js",
   "scripts": {
     "test": "node src/test.js",
