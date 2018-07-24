@@ -16,7 +16,7 @@ Data-Cube exports the function `dc`:
 
 * `dc` is a global variable when Data-Cube is loaded in a `<script>` tag.
 
-* `dc` converts an existing array to a cube &mdash; see [toCube](https://github.com/gjmcn/data-cube/wiki/Other#method_to_cube).
+* `dc` converts an existing array to a cube &mdash; see [toCube](https://github.com/gjmcn/data-cube/wiki/Create-Copy-and-Convert#method_to_cube).
 
 * `dc` has properties that can be used to create new cubes &mdash; see [Create, Copy and Convert](https://github.com/gjmcn/data-cube/wiki/Create-Copy-and-Convert).
 
@@ -27,6 +27,6 @@ dc([4,5,6,7]).$shape(2);   //convert to cube, set shape
 [4,5,6,7].$shape(2);       //automatic conversion
 
 dc.cube([3,4]);            //create 3-by-4(-by-1) cube
-[3,4].cube();              //same, slightly cleaner
+[3,4].cube();              //slightly cleaner
 
 ```
