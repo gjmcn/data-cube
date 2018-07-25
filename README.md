@@ -8,7 +8,7 @@ See the [Wiki](https://github.com/gjmcn/data-cube/wiki) for more details and the
 
 ## Install/Load
 
-Install: `npm install --save data-cube`
+Install: `npm install --save @gjmcn/data-cube`
 
 Data-Cube exports the function `dc`:
 

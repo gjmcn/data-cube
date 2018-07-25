@@ -1,5 +1,5 @@
 {
-  "name": "data-cube",
+  "name": "@gjmcn/data-cube",
   "version": "0.1.0",
   "description": "Array-Oriented JavaScript.",
   "main": "dist/data-cube.js",
