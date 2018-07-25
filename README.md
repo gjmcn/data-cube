@@ -6,6 +6,8 @@ Data-Cube adds array-oriented programming to JavaScript:
 
 See the [Wiki](https://github.com/gjmcn/data-cube/wiki) for more details and the docs.
 
+See this [Observable notebook](https://beta.observablehq.com/@gjmcn/data-cube-array-oriented-javascript) for a quick overview of Data-Cube.
+
 ## Install/Load
 
 Install: `npm install --save @gjmcn/data-cube`
