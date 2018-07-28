@@ -2364,7 +2364,7 @@
   });
   
   
-  //--------------- convert data ---------------//
+  //--------------- toMatrix ---------------//
   
   //!!NOTE: THIS IS MAY GET REMOVED SINCE IS A SPECIAL CASE OF 'unvble'
   //-> cube, this typically an array/vector; all entries assumed to
@@ -2388,6 +2388,71 @@
   });
   
   
+  //--------------- csv, tsv ---------------//
+  
+  
+  NOT FINISHED!
+  -should allow arb delimiter - how escape delim? since must construct regex dynamically and therefore use constructor 
+  -works if one field?
+  -creator op so do not convert to cube?
+  
+  {
+    
+    //array/cube, bool, string -> cube
+    const dsv = (x, key, delim) => {
+      if (x.length !== 1) throw Error('1-entry array expected');
+      key = def(assert.single(key), true);
+  //    delim = '' + def(assert.single(delim), ',');
+  //    if (delim.length !== 1) throw Error('delimiter must be a single character');
+      const s = '' + x[0],
+            reg = delim === ',' 
+              ? /(^"[^"\\]*(?:\\.[^"\\]*)*"|[^,\r\n]*)(,|\r?\n)/g
+              : /(^"[^"\\]*(?:\\.[^"\\]*)*"|[^\t\r\n]*)(\t|\r?\n)/g;
+      //first row
+      let line = 1,
+          i = 0,
+          z = [];
+      const firstRow = key ? [] : z;
+      while (true) {
+        let match = reg.match(s);
+        if (!match) throw Error('invalid entry on line 1');
+        firstRow[i++] = match[1];
+        if (match[2] !== delim)  break;
+      }
+      //all other rows
+      const nField = i;
+      if (nField === 0) throw Error('at least one field expected');
+      while (true) {
+        line++;
+        if (/^\s*$/.test(s.slice([match.index]))) {
+          if (i % nField) throw Error(`unexpected end of data, line ${line}`);
+          break;
+        }
+        z.length += nField;
+        let match = reg.match(s);
+        if (!match) throw Error(`invalid entry on line ${line}`);
+        if (i % nField) {  //not last field in row
+          if (match[2] !== delim) throw Error(`unexpected number of fields on line ${line}`);
+        }
+        else if (match[2] === delim) {  //last field in row
+          throw Error(`unexpected number of fields on line ${line}`);
+        }
+        z[i++] = match[1];
+      }
+      z = z.$shape(nField).tp();
+      if (name) z.$key(1, firstRow);
+      return z;
+    };
+
+    //[bool] -> cube
+    addArrayMethod('csv', function(key) {
+      return dsv(this, key, ',');
+    });
+    addArrayMethod('tsv', function(key) {
+      return dsv(this, key, '\t');
+    });
+
+  }
     
   //--------------- export dc function ---------------//
       
