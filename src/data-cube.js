@@ -2364,95 +2364,92 @@
   });
   
   
-  //--------------- toMatrix ---------------//
-  
-  //!!NOTE: THIS IS MAY GET REMOVED SINCE IS A SPECIAL CASE OF 'unvble'
-  //-> cube, this typically an array/vector; all entries assumed to
-  //be an object with the same own properties - properties (enumerable own)
-  //of first entry used to extract vals from all and as column keys
-  addArrayMethod('toMatrix', function() {
-    this.toCube();
-    const nr = this.length;
-    if (nr === 0) throw Error('non-empty array/cube expected');
-    const ky = Object.keys(this[0]);
-    const nc = ky.length;
-    const z = [nr,nc].cube();
-    z.$key(1,ky);
-    for (let r=0; r<nr; r++) {
-      let obj = this[r];
-      for (let c=0; c<nc; c++) {
-        z[r + nr*c] = obj[ky[c]];  
-      }
-    }
-    return z; 
-  });
-  
-  
-  //--------------- csv, tsv ---------------//
-  
-  
-  NOT FINISHED!
-  -should allow arb delimiter - how escape delim? since must construct regex dynamically and therefore use constructor 
-  -works if one field?
-  -creator op so do not convert to cube?
+  //--------------- toMatrix, dsv ---------------//
   
   {
     
-    //array/cube, bool, string -> cube
-    const dsv = (x, key, delim) => {
-      if (x.length !== 1) throw Error('1-entry array expected');
+    const d3 = require('d3-dsv');
+    
+    //-> cube
+    addArrayMethod('toMatrix', function() {
+      const nr = this.length;
+      if (nr === 0) throw Error('non-empty array/cube expected');
+      let z,
+          ent = this[0];
+      if (Array.isArray(ent)) {
+        const nc = ent.length;
+        z = [nr,nc].cube();
+        for (let r=0; r<nr; r++) {
+          ent = this[r];
+          for (let c=0; c<nc; c++) {
+            z[r + nr * c] = ent[c];  
+          }
+        }
+      }
+      else if (typeof ent === 'object') {
+        const ky = Object.keys(ent),
+              nc = ky.length;
+        z = [nr,nc].cube();
+        z.$key(1,ky);
+        for (let r=0; r<nr; r++) {
+          ent = this[r];
+          for (let c=0; c<nc; c++) {
+            z[r + nr * c] = ent[ky[c]];  
+          }
+        }
+      }
+      else ('array or object expected');
+      return z; 
+    });
+  
+    //[bool, func, str] -> cube
+    addArrayMethod('dsv', function(key, format, delim) {
+      if (this.length !== 1) throw Error('1-entry array expected');
+      const s = '' + this[0];
       key = def(assert.single(key), true);
-  //    delim = '' + def(assert.single(delim), ',');
-  //    if (delim.length !== 1) throw Error('delimiter must be a single character');
-      const s = '' + x[0],
-            reg = delim === ',' 
-              ? /(^"[^"\\]*(?:\\.[^"\\]*)*"|[^,\r\n]*)(,|\r?\n)/g
-              : /(^"[^"\\]*(?:\\.[^"\\]*)*"|[^\t\r\n]*)(\t|\r?\n)/g;
-      //first row
-      let line = 1,
-          i = 0,
-          z = [];
-      const firstRow = key ? [] : z;
-      while (true) {
-        let match = reg.match(s);
-        if (!match) throw Error('invalid entry on line 1');
-        firstRow[i++] = match[1];
-        if (match[2] !== delim)  break;
-      }
-      //all other rows
-      const nField = i;
-      if (nField === 0) throw Error('at least one field expected');
-      while (true) {
-        line++;
-        if (/^\s*$/.test(s.slice([match.index]))) {
-          if (i % nField) throw Error(`unexpected end of data, line ${line}`);
-          break;
-        }
-        z.length += nField;
-        let match = reg.match(s);
-        if (!match) throw Error(`invalid entry on line ${line}`);
-        if (i % nField) {  //not last field in row
-          if (match[2] !== delim) throw Error(`unexpected number of fields on line ${line}`);
-        }
-        else if (match[2] === delim) {  //last field in row
-          throw Error(`unexpected number of fields on line ${line}`);
-        }
-        z[i++] = match[1];
-      }
-      z = z.$shape(nField).tp();
-      if (name) z.$key(1, firstRow);
-      return z;
-    };
-
-    //[bool] -> cube
-    addArrayMethod('csv', function(key) {
-      return dsv(this, key, ',');
+      format = assert.single(format);
+      if (f && typeof f !== 'function') throw Error('function expected');
+      delim = def(assert.single(delim), ',');
+      return d3.dsvFormat(delim)[key ? 'parse' : 'parseRows'](s, format).toMatrix();
     });
-    addArrayMethod('tsv', function(key) {
-      return dsv(this, key, '\t');
-    });
-
+    
   }
+  
+  //--------------- stringify, parse ---------------//
+  
+  //-> string
+  addArrayMethod('stringify', function() {
+    if (this._data_cube) return JSON.stringify(this);
+    return JSON.stringify({
+      array: this,
+      _data_cube: true,
+      _s: this._s,
+      _k: this._k ? this._k.map((ky,d) => this.key(d)) : undefined,
+      _l: this._l  //undefined values are removed by JSON.stringify()
+    });
+  });
+       
+  //-> array/cube
+  addArrayMethod('parse', function() {
+    if (this.length !== 1) throw Error('1-entry array expected');
+    data = JSON.parse('' + this[0]);
+    if (Array.isArray(data)) return data;
+    else if (data._data_cube) {
+      const z = data.array;
+      z._data_cube = true;
+      z._s = data._s;
+      if (data._k) {
+        ensureKey(z);
+        for (let d=0; d<3; d++) {
+          if (data_k[d]) z.$key(d, data._k[d]);
+        }
+      }
+      if (data._l) z._l = data._l; 
+      return z;
+    }
+    else throw Error('serialized array or cube expected');
+  });
+  
     
   //--------------- export dc function ---------------//
       
@@ -2460,7 +2457,8 @@
     const dc = ar => toArray(ar).toCube();
       
     ['cube','rand','normal',
-     'seq','lin','grid','copy','toArray'].forEach( nm => {
+     'seq','lin','grid','copy','toArray',
+     'toMatrix','dsv','stringify','parse'].forEach( nm => {
       dc[nm] = (x,...args) => toArray(x)[nm](...args);
     });
                                          
