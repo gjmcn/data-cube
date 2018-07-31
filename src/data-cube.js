@@ -2368,49 +2368,99 @@
   
   {
     
-    const d3 = require('d3-dsv');
+    const stripBom = require('strip-bom'),
+          d3 = require('d3-dsv');
     
-    //-> cube
-    addArrayMethod('toMatrix', function() {
-      const nr = this.length;
-      if (nr === 0) throw Error('non-empty array/cube expected');
+    //[str, bool] -> cube
+    addArrayMethod('toMatrix', function(delim, name) {
+      delim = assert.single(delim);
+      let data;
+      if (delim) {  //get matrix from string in dsv format
+        if (this.length !== 1) throw Error('1-entry array expected');
+        name = def(assert.single(name), true);
+        data = d3.dsvFormat(delim)[name ? 'parse' : 'parseRows'](stripBom(this[0]));
+      }
+      else data = this;  //get matrix from array-of-arrays/objects
+      const n = data.length;
+      if (n === 0) throw Error('non-empty array expected');
       let z,
-          ent = this[0];
+          ent = data[0];
       if (Array.isArray(ent)) {
         const nc = ent.length;
-        z = [nr,nc].cube();
-        for (let r=0; r<nr; r++) {
-          ent = this[r];
+        z = [n,nc].cube();
+        for (let r=0; r<n; r++) {
+          ent = data[r];
           for (let c=0; c<nc; c++) {
-            z[r + nr * c] = ent[c];  
+            z[r + n*c] = ent[c];  
           }
         }
       }
       else if (typeof ent === 'object') {
         const ky = Object.keys(ent),
               nc = ky.length;
-        z = [nr,nc].cube();
+        z = [n,nc].cube();
         z.$key(1,ky);
-        for (let r=0; r<nr; r++) {
-          ent = this[r];
+        for (let r=0; r<n; r++) {
+          ent = data[r];
           for (let c=0; c<nc; c++) {
-            z[r + nr * c] = ent[ky[c]];  
+            z[r + n*c] = ent[ky[c]];
           }
         }
       }
-      else ('array or object expected');
-      return z; 
+      else throw Error('array or object expected');
+      return z;
     });
-  
-    //[bool, func, str] -> cube
-    addArrayMethod('dsv', function(key, format, delim) {
-      if (this.length !== 1) throw Error('1-entry array expected');
-      const s = '' + this[0];
-      key = def(assert.single(key), true);
-      format = assert.single(format);
-      if (f && typeof f !== 'function') throw Error('function expected');
-      delim = def(assert.single(delim), ',');
-      return d3.dsvFormat(delim)[key ? 'parse' : 'parseRows'](s, format).toMatrix();
+
+    //-> cube
+    addArrayMethod('toArAr', function() {
+      const n = this.length,
+            z = new Array(n);
+      if (this._data_cube) {
+        const [nr, nc, np] = this._s;
+        if (np !== 1) throw new Error('single page expected');
+        for (let i=0; i<nr; i++) {
+          let rw = new Array(nc);
+          for (let j=0; j<nc; j++) {
+            rw[c] = this[r + nr * c];
+          }
+          z[i] = rw;
+        }
+      }
+      else {
+        for (let i=0; i<n; i++) z[i] [this[i]];
+      }
+      return z;
+    });
+    
+    //-> cube
+    addArrayMethod('toArObj', function() {
+      if (!this._data_cube || !this._k || !this._k[1]) {
+        throw Error('column keys expected');
+      }
+      const [nr, nc, np] = this._s;
+      if (np !== 1) throw new Error('single page expected');
+      const z = new Array(nr * nc),
+            ky = this.key(1).string();
+      if (!ky.isUnique()) throw Error('duplicate property names');
+      for (let i=0; i<nr; i++) {
+        let obj = {};
+        for (let j=0; j<nc; j++) {
+          obj[ky[c]] = this[r + nr * c];
+        }
+        z[i] = obj;
+      }
+      return z;
+    });
+    
+    //[str] -> cube
+    addArrayMethod('toDSV', function(delim) {
+      delim = assert.single(delim);
+      if (this._data_cube && this._k && this._k[1]) {
+        return d3.dsvFormat(delim).format(this.ArObj());
+      }
+      else {
+        return d3.dsvFormat(delim).formatRows(this.ArAr());
+      }
     });
     
   }
