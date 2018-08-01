@@ -2364,7 +2364,7 @@
   });
   
   
-  //--------------- toMatrix, dsv ---------------//
+  //--------------- toMatrix, toArAr, toArObj, toDSV ---------------//
   
   {
     
@@ -2374,11 +2374,15 @@
     //[str, bool] -> cube
     addArrayMethod('toMatrix', function(delim, name) {
       delim = assert.single(delim);
-      let data;
+      let ky, data;
       if (delim) {  //get matrix from string in dsv format
         if (this.length !== 1) throw Error('1-entry array expected');
         name = def(assert.single(name), true);
-        data = d3.dsvFormat(delim)[name ? 'parse' : 'parseRows'](stripBom(this[0]));
+        if (name) {
+          data = d3.dsvFormat(delim).parse(stripBom(this[0]));
+          ky = data.columns;  //so can preserve dsv column order 
+        }
+        else data = d3.dsvFormat(delim).parseRows(stripBom(this[0]));
       }
       else data = this;  //get matrix from array-of-arrays/objects
       const n = data.length;
@@ -2396,10 +2400,10 @@
         }
       }
       else if (typeof ent === 'object') {
-        const ky = Object.keys(ent),
-              nc = ky.length;
+        ky = ky || Object.keys(ent);
+        const nc = ky.length;
         z = [n,nc].cube();
-        z.$key(1,ky);
+        z.$key(1, ky);
         for (let r=0; r<n; r++) {
           ent = data[r];
           for (let c=0; c<nc; c++) {
@@ -2411,58 +2415,61 @@
       return z;
     });
 
-    //-> cube
+    //-> array
     addArrayMethod('toArAr', function() {
-      const n = this.length,
-            z = new Array(n);
+      let z;
       if (this._data_cube) {
         const [nr, nc, np] = this._s;
-        if (np !== 1) throw new Error('single page expected');
-        for (let i=0; i<nr; i++) {
+        if (np !== 1) throw Error('single page expected');
+        z = new Array(nr);
+        for (let r=0; r<nr; r++) {
           let rw = new Array(nc);
-          for (let j=0; j<nc; j++) {
-            rw[c] = this[r + nr * c];
+          for (let c=0; c<nc; c++) {
+            rw[c] = this[r + nr*c];
           }
-          z[i] = rw;
+          z[r] = rw;
         }
       }
       else {
-        for (let i=0; i<n; i++) z[i] [this[i]];
+        const n = this.length;
+        z = new Array(n);
+        for (let r=0; r<n; r++) z[r] = [this[r]];
       }
       return z;
     });
     
-    //-> cube
+    //-> array
     addArrayMethod('toArObj', function() {
       if (!this._data_cube || !this._k || !this._k[1]) {
         throw Error('column keys expected');
       }
-      const [nr, nc, np] = this._s;
-      if (np !== 1) throw new Error('single page expected');
-      const z = new Array(nr * nc),
-            ky = this.key(1).string();
-      if (!ky.isUnique()) throw Error('duplicate property names');
-      for (let i=0; i<nr; i++) {
+      if (this._s[2] !== 1) throw Error('single page expected');
+      const name = this.key(1).string();
+      if (!name.isUnique()) throw Error('two column keys convert to the same string');
+      const [nr, nc] = this._s,
+            z = new Array(nr);
+      for (let r=0; r<nr; r++) {
         let obj = {};
-        for (let j=0; j<nc; j++) {
-          obj[ky[c]] = this[r + nr * c];
+        for (let c=0; c<nc; c++) {
+          obj[name[c]] = this[r + nr*c];
         }
-        z[i] = obj;
+        z[r] = obj;
       }
       return z;
     });
     
-    //[str] -> cube
+    //[str] -> string
     addArrayMethod('toDSV', function(delim) {
-      delim = assert.single(delim);
+      delim = def(assert.single(delim), ',');
+      const data = this.toArAr();
       if (this._data_cube && this._k && this._k[1]) {
-        return d3.dsvFormat(delim).format(this.ArObj());
+        const name = this.key(1).string();
+        if (!name.isUnique()) throw Error('two column keys convert to the same string');
+        data.unshift(name.toArray());
       }
-      else {
-        return d3.dsvFormat(delim).formatRows(this.ArAr());
-      }
+      return d3.dsvFormat(delim).formatRows(data);
     });
-    
+
   }
   
   //--------------- stringify, parse ---------------//
@@ -2508,7 +2515,8 @@
       
     ['cube','rand','normal',
      'seq','lin','grid','copy','toArray',
-     'toMatrix','dsv','stringify','parse'].forEach( nm => {
+     'toMatrix','toArAr','toArObj','toDSV',
+     'stringify','parse'].forEach( nm => {
       dc[nm] = (x,...args) => toArray(x)[nm](...args);
     });
                                          
