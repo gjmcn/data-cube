@@ -178,7 +178,7 @@
       return a === undefined ? v : a;
     },
     
-    //str, * -> undef, add property to Array.prototype
+    //str, * -> undef, add property/method to Array.prototype
     addArrayMethod: (name,f) => {
       if (name in Array.prototype) {
         throw Error(name + ' is already a property of Array.prototype');      
@@ -188,6 +188,18 @@
         configurable: true,
         enumerable: false,
         writable: true
+      });
+    },
+    
+    //str, func -> undef, add accessor property to Array.prototype
+    addArrayGetter: (name,f) => {
+      if (name in Array.prototype) {
+        throw Error(name + ' is already a property of Array.prototype');      
+      }
+      Object.defineProperty( Array.prototype, name, {
+        configurable: true,
+        enumerable: false,
+        get: f
       });
     },
           
