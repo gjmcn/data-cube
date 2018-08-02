@@ -2364,7 +2364,7 @@
   });
   
   
-  //--------------- toMatrix, toArAr, toArObj, toDSV ---------------//
+  //--------------- matrix, arAr, arObj, dsv ---------------//
   
   {
     
@@ -2372,7 +2372,7 @@
           d3 = require('d3-dsv');
     
     //[str, bool] -> cube
-    addArrayMethod('toMatrix', function(delim, name) {
+    addArrayMethod('matrix', function(delim, name) {
       delim = assert.single(delim);
       let ky, data;
       if (delim) {  //get matrix from string in dsv format
@@ -2416,7 +2416,7 @@
     });
 
     //-> array
-    addArrayMethod('toArAr', function() {
+    addArrayMethod('arAr', function() {
       let z;
       if (this._data_cube) {
         const [nr, nc, np] = this._s;
@@ -2439,7 +2439,7 @@
     });
     
     //-> array
-    addArrayMethod('toArObj', function() {
+    addArrayMethod('arObj', function() {
       if (!this._data_cube || !this._k || !this._k[1]) {
         throw Error('column keys expected');
       }
@@ -2459,9 +2459,9 @@
     });
     
     //[str] -> string
-    addArrayMethod('toDSV', function(delim) {
+    addArrayMethod('dsv', function(delim) {
       delim = def(assert.single(delim), ',');
-      const data = this.toArAr();
+      const data = this.arAr();
       if (this._data_cube && this._k && this._k[1]) {
         const name = this.key(1).string();
         if (!name.isUnique()) throw Error('two column keys convert to the same string');
@@ -2515,8 +2515,7 @@
       
     ['cube','rand','normal',
      'seq','lin','grid','copy','toArray',
-     'toMatrix','toArAr','toArObj','toDSV',
-     'stringify','parse'].forEach( nm => {
+     'matrix','arAr','arObj','dsv','stringify','parse'].forEach( nm => {
       dc[nm] = (x,...args) => toArray(x)[nm](...args);
     });
                                          
