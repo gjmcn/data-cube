@@ -2374,15 +2374,12 @@
     //[str, bool] -> cube
     addArrayMethod('matrix', function(delim, name) {
       delim = assert.single(delim);
-      let ky, data;
+      let dsvKy, data;
       if (delim) {  //get matrix from string in dsv format
         if (this.length !== 1) throw Error('1-entry array expected');
         name = def(assert.single(name), true);
-        if (name) {
-          data = d3.dsvFormat(delim).parse(stripBom(this[0]));
-          ky = data.columns;  //so can preserve dsv column order 
-        }
-        else data = d3.dsvFormat(delim).parseRows(stripBom(this[0]));
+        data = d3.dsvFormat(delim).parseRows(stripBom(this[0]));
+        if (name) dsvKy = data.shift();
       }
       else data = this;  //get matrix from array-of-arrays/objects
       const n = data.length;
@@ -2390,8 +2387,9 @@
       let z,
           ent = data[0];
       if (Array.isArray(ent)) {
-        const nc = ent.length;
+        const nc = (dsvKy || ent).length;
         z = [n,nc].cube();
+        if (dsvKy) z.$key(1, dsvKy);
         for (let r=0; r<n; r++) {
           ent = data[r];
           for (let c=0; c<nc; c++) {
@@ -2400,8 +2398,8 @@
         }
       }
       else if (typeof ent === 'object') {
-        ky = ky || Object.keys(ent);
-        const nc = ky.length;
+        const ky = Object.keys(ent),
+              nc = ky.length;
         z = [n,nc].cube();
         z.$key(1, ky);
         for (let r=0; r<n; r++) {

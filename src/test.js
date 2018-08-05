@@ -2122,6 +2122,170 @@
   
   }
   
+  console.log('--- entrywise: 0 args');
+  {
+    
+    test('ew-neg',    [-2,3].neg(), [2,-3]);
+    test('ew-sqrt',   [4,9].sqrt(), [2,3]);
+    test('ew-cbrt',   [8,27].cbrt(), [2,3]);
+    test('ew-abs',    [-2,3].abs(), [2,3]);
+    test('ew-round',  [-1.2,3.7].round(), [-1,4]);    
+    test('ew-floor',  [-1.2,3.7].floor(), [-2,3]);
+    test('ew-ceil',   [-1.2,3.7].ceil(), [-1,4]);
+    test('ew-trunc',  [-1.2,3.7].trunc(), [-1,3]);
+    test('ew-sign',   [-1.2,3.7].sign(), [-1,1]);
+    test('ew-exp',    [1,2].exp().toFixed(2), ['2.72','7.39']);
+    test('ew-expm1',  [1,2].expm1().toFixed(2), ['1.72','6.39']);
+    test('ew-log',    [1,2].log().toFixed(2), ['0.00','0.69']);
+    test('ew-log10',  [1,10].log10(), [0,1]);
+    test('ew-log2',   [1,2].log2(), [0,1]);
+    test('ew-log1p',  [0,1].log1p().toFixed(2), ['0.00','0.69']);
+    test('ew-sin',    [-2,3].sin().toFixed(2), ["-0.91", "0.14"]);
+    test('ew-cos',    [-2,3].cos().toFixed(2), ["-0.42", "-0.99"]);
+    test('ew-tan',    [-2,3].tan().toFixed(2), ["2.19", "-0.14"]);
+    test('ew-asin',   [-1,0.5].asin().toFixed(2), ["-1.57", "0.52"]);
+    test('ew-acos',   [-1,0.5].acos().toFixed(2), ["3.14", "1.05"]);
+    test('ew-atan',   [-1,0.5].atan().toFixed(2), ["-0.79", "0.46"]);
+    test('ew-sinh',   [-2,3].sinh().toFixed(2), ["-3.63", "10.02"]);
+    test('ew-cosh',   [-2,3].cosh().toFixed(2), ["3.76", "10.07"]);
+    test('ew-tanh',   [-2,3].tanh().toFixed(2), ["-0.96", "1.00"]);
+    test('ew-asinh',  [-1,0.5].asinh().toFixed(2), ["-0.88", "0.48"]);
+    test('ew-acosh',  [1,1.5].acosh().toFixed(2), ["0.00", "0.96"]);
+    test('ew-atanh',  [-0.5,0].atanh().toFixed(2), ["-0.55", "0.00"]);
+    test('ew-number-0', ['-2',false].number(), [-2,0]);
+    test('ew-string', [-2,true].string(), ['-2','true']);
+    test('ew-boolean',[null,5].boolean(), [false,true]);
+    test('ew-isInteger',   [-2,3.4].isInteger(), [true,false]);
+    test('ew-isFinite',    [-2,'3'].isFinite(), [true,false]);
+    test('ew-isNaN',       [-2,NaN].isNaN(), [false,true]);
+    test('ew-toLowerCase', ['a','B'].toLowerCase(), ['a','b']);
+    test('ew-toUpperCase', ['a','B'].toUpperCase(), ['A','B']);
+    test('ew-trim',        [' a ','b '].trim(), ['a','b']);
+    test('ew-not',         [true,null].not(), [false,true]);
+    test('ew-typeof',      [-2,'a'].typeof(), ['number','string']);
+    
+    const dt = ['Dec 2020', 'July 15 2030'].date();
+    assert('ew-date-0', () => dt[0].getMonth(), 11);
+    assert('ew-date-1', () => dt[1].getDate(),  15);
+    
+    test('ew-number-1', [].number(), []);
+    test('ew-number-2', 
+         [2,0,3].cube().$key(0, ['a','b']).number(),
+         [2,0,3].cube().$key(0, ['a','b']));
+    
+    const b = [1,'2',false,'Infinity']
+      .$shape([2,1,2])
+      .$key(1, 'a')
+      .$key(2, ['U','V'])
+      .$label(0, 'rows')
+      .$label(2, 'pages');
+    test('ew-number-3',
+         b.number(), 
+         b.copy('shell').$vec(null, [1,2,0,Infinity]));
+    
+    assert.throwEach('throw-ew-no-arg', [
+      () => [5].toUpperCase(),
+      () => [5].toLowerCase(),
+      () => ['a',false].trim()
+    ]);
+  
+  }
+  
+  console.log('--- matrix');
+  {
+    
+    //from dsv
+    {
+      
+      test( 'matrix-from-dsv-corner-case-0',
+            ['\n'].matrix(',', false),
+            [''] );
+      test( 'matrix-from-dsv-corner-case-1',
+            ['\n\n'].matrix(',', false),
+            ['',''] );
+      test( 'matrix-from-dsv-corner-case-2',
+            [','].matrix(',', false),
+            [1,2].cube('') );
+      test( 'matrix-from-dsv-corner-case-3',
+            [',,'].matrix(',', false),
+            [1,3].cube('') );
+      test( 'matrix-from-dsv-corner-case-4',
+            [',\n,'].matrix(',', false),
+            [2,2].cube('') );
+      test( 'matrix-from-dsv-corner-case-5',
+            ['\n\n'].matrix(','),
+            [''].$key(1,'') );
+
+      //different length rows
+      const d = '3,4\n,5\n6,7,8,9\n10';
+      test( 'matrix-from-dsv-diff-length-rows-0',
+            dc.matrix(d, ',', false),
+            ['3','','6','10','4','5','7',,].$shape(4) );
+      test( 'matrix-from-dsv-diff-length-rows-1',
+            dc.matrix(d, ',', true),
+            ['','6','10','5','7',,].$shape(3).$key(1,['3','4']) );
+      
+      //single entry
+      test( 'matrix-from-dsv-single-entry-0',
+            ['3.4'].matrix(',', false),
+            ['3.4'] );
+      test( 'matrix-from-dsv-single-entry-1',
+            ['3.4\n'].matrix(',', false),
+            ['3.4'] );
+      
+      //vector
+      const v = '3.4\n5\n a b ';
+      test( 'matrix-from-dsv-vector-0',
+            [v].matrix(',', false),
+            ['3.4','5',' a b '] );
+      test( 'matrix-from-dsv-vector-1',
+            [v].matrix(','),
+            ['5',' a b '].$key(1, '3.4') );          
+          
+      
+      
+      //HERE!!!!!!!!!!!!!!!!!!!!!
+      
+      //single row - USE DIFF DELIM
+
+      
+      //single row with keys
+      
+      
+      //standard - multiple rows and columns
+
+
+      assert.throw( 'throw-matrix-from-dsv-empty-0',
+                    () => [''].matrix(',') );
+      assert.throw( 'throw-matrix-from-dsv-empty-1',
+                    () => ['\n'].matrix(',') );  //first line used as key so array empty
+      assert.throw( 'throw-matrix-from-dsv-empty-2',
+                    () => [','].matrix(',') );  //first line used as key so array empty
+      assert.throw( 'throw-matrix-from-dsv-repeated-column-keys',
+                    () => [',,\n,,'].matrix(',') ); //repeated col names
+   
+//      ERROR IF NOT A STRING (THROWN BY STRIP-BOM)
+      
+  }
+      
+
+    
+    //from array of arrays
+    {
+      
+      
+    }
+    
+    //from array of objects
+    {
+      
+      
+    }
+    
+    
+  }
+  
+  
   
   console.log('\nTests finished');
 }
