@@ -2197,6 +2197,7 @@
     //from dsv
     {
       
+      //corner cases
       test( 'matrix-from-dsv-corner-case-0',
             ['\n'].matrix(',', false),
             [''] );
@@ -2241,48 +2242,209 @@
       test( 'matrix-from-dsv-vector-1',
             [v].matrix(','),
             ['5',' a b '].$key(1, '3.4') );          
-          
-      
-      
-      //HERE!!!!!!!!!!!!!!!!!!!!!
-      
-      //single row - USE DIFF DELIM
-
+            
+      //single row
+      test( 'matrix-from-dsv-single-row-0',
+            ['5|6|7'].matrix('|', false),
+            ['5','6','7'].tp() );
       
       //single row with keys
-      
+      test( 'matrix-from-dsv-single-row-1',
+            ['"a\nb"|c"d|e\'f\n"g\nh"|i"j|k\'l'].matrix('|'),
+            ['g\nh','i"j','k\'l'].tp().$key(1, ['a\nb','c"d','e\'f']) );
       
       //standard - multiple rows and columns
-
-
+      const m = '5,a,false,{a:6}\n()=>7,Dec 2020,null,NaN\nundefined,[],{}, b c ';
+      test( 'matrix-from-dsv-standard-0',
+            [m].matrix(',', false),
+            ['5','()=>7','undefined','a','Dec 2020','[]',
+             'false','null','{}','{a:6}','NaN',' b c ']
+              .$shape(3) );
+      test( 'matrix-from-dsv-standard-1',
+            [m].matrix(',', [1]),
+            ['()=>7','undefined','Dec 2020','[]','null','{}','NaN',' b c ']
+              .$shape(2)
+              .$key(1, ['5','a','false','{a:6}']) );
+      
+      //strip BOM
+      const b = '\uFEFF5,6\n7,8';
+      test( 'matrix-from-dsv-strip-BOM-0',
+            [b].matrix(',', false),
+            ['5','7','6','8'].$shape(2) );
+      test( 'matrix-from-dsv-strip-BOM-1',
+            [b].matrix(','),
+            ['7','8'].tp().$key(1, ['5','6']) );
+      
       assert.throw( 'throw-matrix-from-dsv-empty-0',
-                    () => [''].matrix(',') );
+                    () => [''].matrix(',',false) );
       assert.throw( 'throw-matrix-from-dsv-empty-1',
-                    () => ['\n'].matrix(',') );  //first line used as key so array empty
+                    () => [''].matrix(',') );
       assert.throw( 'throw-matrix-from-dsv-empty-2',
-                    () => [','].matrix(',') );  //first line used as key so array empty
-      assert.throw( 'throw-matrix-from-dsv-repeated-column-keys',
-                    () => [',,\n,,'].matrix(',') ); //repeated col names
-   
-//      ERROR IF NOT A STRING (THROWN BY STRIP-BOM)
-      
-  }
-      
+                    () => ['\n'].matrix(',') );  //first line used as key so array empty
+      assert.throw( 'throw-matrix-from-dsv-empty-3',
+                    () => [','].matrix(',') );  //first line used as keys so array empty
+      assert.throw( 'throw-matrix-from-dsv-duplicate-column-keys-0',
+                    () => [',,\n,,'].matrix(',') );
+      assert.throw( 'throw-matrix-from-dsv-duplicate-column-keys-1',
+                    () => ['3,4,3\n5,6,7'].matrix(',') );
+      assert.throw( 'throw-matrix-from-dsv-not-string',
+                    () => [3.4].matrix(',', false) );  //strip-bom throws
 
-    
+    }
+
     //from array of arrays
     {
       
+      const stem = 'matrix-from-array-of-arrays';
+      
+      //corner cases
+      test( stem + '-corner-case-0',
+            [[]].matrix(),
+            [1,0].cube() );
+      test( stem + '-corner-case-1',
+            [[], []].matrix(),
+            [2,0].cube() );
+      test( stem + '-corner-case-2',
+            [ (new Array(3)) ].matrix(),
+            [1,3].cube() );
+      test( stem + '-corner-case-3',  //shape, keys and labels of inner arrays ignored
+            [
+              [2,3,4,5].$shape(2)
+                .$label(0, 'rows')
+                .$label(1, 'cols')
+                .$key(0, ['a','b'])
+                .$key(1, ['A', 'B']),
+              [6,7,8,9].$shape([1,1,4])    
+            ].matrix(),
+            [2,6,3,7,4,8,5,9].$shape(2) );
+      test( stem + '-corner-case-4',  //shape, keys and labels of outer array ignored
+            [ [2,3],
+              [4,5],
+              [6,7],
+              [8,9]
+            ].$shape(2)
+             .$label(0, 'rows')
+             .$label(1, 'cols')
+             .$key(0, ['a','b'])
+             .$key(1, ['A','B'])
+             .matrix(),
+            [2,4,6,8,3,5,7,9].$shape(4) );
+
+      //single row
+      const obj = {a:5};
+      test( stem + '-single-row',
+            [ ['a',false,null,obj] ].matrix(),
+            ['a',false,null,obj].tp() );
+      
+      //vector
+      test( stem + '-vector',
+            [ ['a'],[false],[null],[obj] ].matrix(),
+            ['a',false,null,obj] );
+      
+      //standard - multiple rows and columns
+      const arr = [6,7];
+      test( stem + '-standard',
+            [ 
+              ['a'  , true     , 5],
+              [null , obj      , Infinity],
+              [arr  , obj      , 8],
+              ['b c', undefined, 9 ]
+            ].matrix(),
+            ['a',null, arr,'b c',true,obj,obj,undefined,5,Infinity,8,9].$shape(4) );
+      
+      //different length rows
+      test( stem + '-different-length-rows',
+            dc.matrix([ 
+              [5,  6,  7],
+              [ ,  8,  9],
+              [10, 11],
+              [12, 13,,],
+              [14, 15, 16, 17]
+            ]),
+            [5, undefined, 10, 12, 14, 6, 8, 11, 13, 15, 7, 9, undefined, undefined, 16].$shape(5) );
       
     }
     
     //from array of objects
     {
+
+      const stem = 'matrix-from-array-of-objects';
       
+      //corner cases
+      test( stem + '-corner-case-0',
+            [{}].matrix(),
+            [1,0].cube().$key(1,[]) );
+      test( stem + '-corner-case-1',
+            [{}, {}].matrix(),
+            [2,0].cube().$key(1,[]) );
+      test( stem + '-corner-case-2',  //shape, keys and labels of outer array ignored
+            [ {u:2, v:3},
+              {u:4, v:5},
+              {u:6, v:7},
+              {v:9, u:8}
+            ].$shape(2)
+             .$label(0, 'rows')
+             .$label(1, 'cols')
+             .$key(0, ['a','b'])
+             .$key(1, ['A','B'])
+             .matrix().orderKey(1),
+            [2,4,6,8,3,5,7,9].$shape(4).$key(1, ['u','v']) );
+
+      //single row
+      const obj = {a:5};
+      test( stem + '-single-row',
+            [ {u:'a', v:false, w:null, x:obj} ].matrix().orderKey(1),
+            ['a',false,null,obj].tp().$key(1, ['u','v','w','x']) );
+      
+      //vector
+      test( stem + '-vector',
+            [ {u:'a'}, {u:false}, {u:null}, {u:obj} ].matrix(),
+            ['a',false,null,obj].$key(1, 'u') );
+      
+      //standard - multiple rows and columns
+      const arr = [6,7];
+      test( stem + '-standard',
+            dc.matrix([ 
+              {u:'a'  , vv:true     , www:5},
+              {u:null , vv:obj      , www:Infinity},
+              {u:arr  , vv:obj      , www:8},
+              {u:'b c', vv:undefined, www:9 }
+            ]).orderKey(1),
+            ['a',null, arr,'b c',true,obj,obj,undefined,5,Infinity,8,9] 
+              .$shape(4).$key(1, ['u','vv','www']) );
+      
+      //missing-and-extra-properties
+      test( stem + '-missing-and-extra-properties',
+            [ 
+              {v:5,  w:6,  u:7},
+              {a:undefined , w:8,  u:9},
+              {v:10, w:11},
+              {u:12, b:13},
+              {u:14, v:15, w:16, x:17}
+            ].matrix().col(['v', 'w', 'u']),
+            [5, undefined, 10, undefined, 15,
+             6, 8, 11, undefined, 16,
+             7, 9, undefined, 12, 14
+            ].$shape(5).$key(1, ['v', 'w', 'u']) );
       
     }
     
-    
+    //invalid array
+    {
+      assert.throw( 'throw-matrix-invalid array-0',
+                    () => [].matrix() );
+      assert.throw( 'throw-matrix-invalid array-1',
+                    () => [5].matrix() );
+      assert.throw( 'throw-matrix-invalid array-2',
+                    () => ['5'].matrix() );
+      assert.throw( 'throw-matrix-invalid array-3',
+                    () => ['5','6','7'].matrix() );
+      assert.throw( 'throw-matrix-invalid array-4',
+                    () => ['3,4,5\n6,7,8'].matrix() );
+      assert.throw( 'throw-matrix-invalid array-5',
+                    () => [[3,4], undefined].matrix() );
+    }
+
   }
   
   
