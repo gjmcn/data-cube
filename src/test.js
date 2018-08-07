@@ -2553,6 +2553,68 @@
     
   }
   
+  console.log('--- dsv');
+  {
+    
+    assert( 'dsv-empty-0', 
+            () => _isEqual([].dsv(), ''), true); 
+    assert( 'dsv-empty-1',
+            () => _isEqual([0,1].cube().dsv(), ''), true); 
+    assert( 'dsv-empty-2',
+            () => _isEqual([0,2].cube().dsv(), ''), true); 
+    assert( 'dsv-empty-3',
+            () => _isEqual([1,0].cube().dsv(), ''), true); 
+    assert( 'dsv-empty-4',
+            () => _isEqual([2,0].cube().dsv(), '\n'), true);
+    assert( 'dsv-empty-5', 
+            () => _isEqual([].$key(1, 'A').dsv(), 'A'), true); 
+    assert( 'dsv-empty-6',
+            () => _isEqual([0,1].cube().$key(1, 'A').dsv(), 'A'), true); 
+    assert( 'dsv-empty-7',
+            () => _isEqual([0,2].cube().$key(1, ['A','B']).dsv(), 'A,B'), true); 
+    assert( 'dsv-empty-8',
+            () => _isEqual([1,0].cube().$key(1, []).dsv(), '\n'), true); 
+    assert( 'dsv-empty-9',
+            () => _isEqual([2,0].cube().$key(1, []).dsv(), '\n\n'), true);
+    
+    const v = [5, undefined, 'a', false, 'b c,d\ne', null, 'f"g'],
+          m = [3,4,5,6,7,8,9,10,11,12,13,14]
+                .$shape(3)
+                .$label(0, 'rows')
+                .$label(1, 'cols')  
+                .$label(2, 'pages')
+                .$key(0, ['a','b','c'])
+                .$key(2, 'P');
+    
+    assert( 'dsv-single-entry',
+           () => _isEqual([5].dsv(), '5'), true);
+    assert( 'dsv-vector',
+           () => _isEqual(v.dsv(), '5\n\na\nfalse\n"b c,d\ne"\n\n"f""g"'), true);
+    assert( 'dsv-single-row',
+           () => _isEqual(dc.dsv(v.tp()), '5,,a,false,"b c,d\ne",,"f""g"'), true);
+    assert( 'dsv-multiple-rows-and columns',
+           () => _isEqual(m.dsv('|'), '3|6|9|12\n4|7|10|13\n5|8|11|14'), true );
+
+    v.$key(1, 'A');
+    m.$key(1, ['A','B','C','D D'])
+    const rv = [5, undefined, 'a', false, 'b c,d\ne', null, 'f"g']
+                 .tp()
+                 .$key(1, ['A','B','C','D','E','F','G']);
+    
+    assert( 'dsv-single-entry-column-key',
+           () => _isEqual([5].$key(1, 'A').dsv(), 'A\n5'), true);
+    assert( 'dsv-vector-column-key',
+           () => _isEqual(dc.dsv(v), 'A\n5\n\na\nfalse\n"b c,d\ne"\n\n"f""g"'), true);
+    assert( 'dsv-single-row-column-keys',
+           () => _isEqual(rv.dsv(), 'A,B,C,D,E,F,G\n5,,a,false,"b c,d\ne",,"f""g"'), true);
+    assert( 'dsv-multiple-rows-and-columns-column-keys',
+           () => _isEqual(m.dsv(','), 'A,B,C,D D\n3,6,9,12\n4,7,10,13\n5,8,11,14'), true );
+    
+    assert.throw( 'throw-dsv-not-1-page',
+                  () => [2,3,2].cube().dsv() );
+    assert.throw( 'throw-dsv-duplicate-column-keys',
+                  () => [2,3].cube().$key(1, ['5','6',5]).dsv() );
+  }
   
   console.log('\nTests finished');
 }
