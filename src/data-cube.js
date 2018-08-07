@@ -2474,37 +2474,38 @@
   
   //-> string
   addArrayMethod('stringify', function() {
-    if (this._data_cube) return JSON.stringify(this);
-    return JSON.stringify({
-      array: this,
-      _data_cube: true,
-      _s: this._s,
-      _k: this._k ? this._k.map((ky,d) => this.key(d)) : undefined,
-      _l: this._l  //undefined values are removed by JSON.stringify()
-    });
+    if (this._data_cube) {
+      return JSON.stringify({
+        array: this,
+        _data_cube: true,
+        _s: this._s,
+        _k: this._k ? this._k.map((ky,d) => this.key(d)) : undefined,
+        _l: this._l  //undefined values are removed by JSON.stringify()
+      });
+    }
+    return JSON.stringify(this);
   });
        
   //-> array/cube
   addArrayMethod('parse', function() {
     if (this.length !== 1) throw Error('1-entry array expected');
-    data = JSON.parse('' + this[0]);
+    const data = JSON.parse(this[0]);
     if (Array.isArray(data)) return data;
     else if (data._data_cube) {
       const z = data.array;
       z._data_cube = true;
       z._s = data._s;
       if (data._k) {
-        ensureKey(z);
         for (let d=0; d<3; d++) {
-          if (data_k[d]) z.$key(d, data._k[d]);
+          if (data._k[d]) z.$key(d, data._k[d]);
         }
       }
-      if (data._l) z._l = data._l; 
+      if (data._l) z._l = data._l.map(v => v || undefined); 
       return z;
     }
     else throw Error('serialized array or cube expected');
   });
-  
+
     
   //--------------- export dc function ---------------//
       
