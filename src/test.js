@@ -2289,7 +2289,9 @@
                     () => ['3,4,3\n5,6,7'].matrix(',') );
       assert.throw( 'throw-matrix-from-dsv-not-string',
                     () => [3.4].matrix(',', false) );  //strip-bom throws
-
+      assert.throw( 'throw-matrix-from-dsv-not-1-entry',
+                    () => ['3,4\n5,6',null].matrix(',', false) );
+      
     }
 
     //from array of arrays
@@ -2447,6 +2449,109 @@
 
   }
   
+  console.log('--- arAr');
+  {
+    
+    assert('arAr-empty-0', 
+           () => _isEqual([].arAr(), []), true); 
+    assert('arAr-empty-1',
+           () => _isEqual([0,1].cube().arAr(), []), true); 
+    assert('arAr-empty-2',
+           () => _isEqual([0,2].cube().arAr(), []), true); 
+    assert( 'arAr-empty-3',
+           () => _isEqual([1,0].cube().arAr(), [[]]), true); 
+    assert( 'arAr-empty-4',
+           () => _isEqual([2,0].cube().arAr(), [[], []]), true);
+    
+    const obj = {a:5},
+          arr = [6,7],
+          v = [5, undefined, 'a', false, obj, null, arr],
+          m = [3,4,5,6,7,8,9,10,11,12,13,14]
+                .$shape(3)
+                .$label(0, 'rows')
+                .$label(1, 'cols')
+                .$label(2, 'pages')
+                .$key(0, ['a','b','c'])
+                .$key(1, ['A','B','C','D'])
+                .$key(2, 'P');
+    
+    assert( 'arAr-single-entry-0',
+           () => _isEqual([5].arAr(), [[5]]), true);
+    assert( 'arAr-single-entry-1',
+           () => _isEqual([arr].arAr(), [[arr]]), true);
+    assert( 'arAr-vector',
+           () => _isEqual(v.arAr(), [[5],[undefined],['a'],[false],[obj],[null],[arr]]), true);
+    assert( 'arAr-single-row',
+           () => _isEqual(dc.arAr(v.tp()), [[5,undefined,'a',false,obj,null,arr]]), true);
+    assert( 'arAr-multiple-rows-and columns-0',
+           () => _isEqual(m.arAr(),
+                          [ [3,6,9,12], [4,7,10,13], [5,8,11,14] ]), true );
+    assert( 'arAr-multiple-rows-and columns-1',
+           () => m.arAr()._data_cube, undefined);
+    
+    assert.throw( 'throw-arAr-not-1-page',
+                  () => [2,3,2].cube().arAr() );
+  
+  }
+  
+  console.log('--- arObj');
+  {
+        
+    assert('arObj-empty-0', 
+           () => _isEqual([].$key(1, 'A').arObj(), []), true); 
+    assert('arObj-empty-1',
+           () => _isEqual([0,1].cube().$key(1, 'A').arObj(), []), true); 
+    assert('arObj-empty-2',
+           () => _isEqual([0,2].cube().$key(1, ['A','B']).arObj(), []), true); 
+    assert( 'arObj-empty-3',
+           () => _isEqual([1,0].cube().$key(1, []).arObj(), [{}]), true); 
+    assert( 'arObj-empty-4',
+           () => _isEqual([2,0].cube().$key(1, []).arObj(), [{}, {}]), true);
+    
+    const obj = {a:5},
+          arr = [6,7],
+          v = [5, undefined, 'a', false, obj, null, arr]
+                .$key(1, 'A'),
+          rv = [5, undefined, 'a', false, obj, null, arr]
+                .tp()
+                .$key(1, ['A','B','C','D','E','F','G']),
+          m = [3,4,5,6,7,8,9,10,11,12,13,14]
+                .$shape(3)
+                .$label(0, 'rows')
+                .$label(1, 'cols')
+                .$label(2, 'pages')
+                .$key(0, ['a','b','c'])
+                .$key(1, ['A','B','C','D'])
+                .$key(2, 'P');
+    
+    assert( 'arObj-single-entry-0',
+           () => _isEqual([5].$key(1, 'A').arObj(), [{A:5}]), true);
+    assert( 'arObj-single-entry-1',
+           () => _isEqual([arr].$key(1, 'A').arObj(), [{A:arr}]), true);
+    assert( 'arObj-vector',
+           () => _isEqual(v.arObj(), [ {A:5}, {A:undefined}, {A:'a'}, {A:false},
+                                       {A:obj}, {A:null}, {A:arr} ] ), true);
+    assert( 'arObj-single-row',
+           () => _isEqual(dc.arObj(rv), [ {A:5, B:undefined, C:'a', D:false,
+                                           E:obj, F:null, G:arr} ]), true);
+    assert( 'arObj-multiple-rows-and columns-0',
+           () => _isEqual(m.arObj(),
+                          [ 
+                            {A:3, B:6, C:9,  D:12},
+                            {A:4, B:7, C:10, D:13},
+                            {A:5, B:8, C:11, D:14}
+                          ]), true );
+    assert( 'arObj-multiple-rows-and columns-1',
+           () => m.arObj()._data_cube, undefined);
+    
+    assert.throw( 'throw-arObj-not-1-page',
+                  () => [2,3,2].cube().arObj() );
+    assert.throw( 'throw-arObj-no-column-keys',
+                  () => [2,3].cube().arObj() );
+    assert.throw( 'throw-arObj-duplicate-column-keys',
+                  () => [2,3].cube().$key(1, ['5','6',5]).arObj() );
+    
+  }
   
   
   console.log('\nTests finished');
