@@ -2619,8 +2619,95 @@
   console.log('--- stringify, parse');
   {
     
-    //TO DO!!!!!!!
-    
+    const stem = 'stringify-parse-';
+
+    //name: name of test
+    //orig: array to stringify
+    //resCube: should parsed result be a cube?
+    //use_dc: call stringify and parse as methods of the dc object
+    //trgt: expected result (according to compare), default: orig
+    const stringifyParse = (name, orig, resCube, use_dc, trgt) => {
+      const recon = use_dc
+        ? dc.parse(dc.stringify(orig))
+        : [orig.stringify()].parse();
+      trgt = trgt || orig;        
+      assert(stem + name + '-array-or-cube',
+             () => recon._data_cube, resCube ? true : undefined);
+      test(stem + name, recon, trgt);  //trgt (which may be orig) last arg so not converted to cube   
+    }
+
+    stringifyParse('empty-no-extras', [], false);
+    stringifyParse('empty-extras',
+               [1,0,2].cube().$label(0,'rows').$key(0,'a').$key(1,[]),
+               true);
+    stringifyParse('holes', new Array(3), false, false, [null, null, null]);
+    stringifyParse('non-array', 5, false, true, [5]);
+    stringifyParse('single-entry-no-extras', [5], false);
+    stringifyParse('single-entry-extras', [5].$key(0,'a'), true);
+    stringifyParse('vector-array', [6,7], false, true);
+    stringifyParse('vector-cube-no-extras', [6,7].toCube(), true);
+    stringifyParse('single-row-no-extras', [6,7].tp(), true, true);
+    stringifyParse('matrix-no-extras', [3,4,5,6,7,8].$shape(3), true);
+    stringifyParse('matrix-extras', 
+               [3,4,5,6,7,8]
+                  .$shape(3)
+                  .$label(0, 'rows')
+                  .$label(1, 'cols')
+                  .$label(2, 'pages')
+                  .$key(0, ['a','b','c'])
+                  .$key(1, ['A','B'])
+                  .$key(2, 'P'),
+               true);
+    stringifyParse('book-no-extras', [3,4,5].rand(100), true);
+    stringifyParse('book-extras',
+               [3,4,5].rand(100).$key(2, ['u','v','w','x','y']),
+               true);
+
+    //types
+    const obj = {a:5},
+          arr = [6,7],
+          f = () => 8,
+          dt = new Date(),
+          types =       [ 5, ' a b', false, undefined,    f,               dt,  NaN, Infinity, -Infinity ],
+          parsedTypes = [ 5, ' a b', false,      null, null, dt.toISOString(), null,     null,      null ];
+
+    stringifyParse('types-no-extras', types, false, false, parsedTypes);
+    stringifyParse('types-extras',
+                types.$shape(3).$key(1,['A','B','C']).$label(0,'rows').$label(2, 'the pages!'),
+                true,
+                false,
+                parsedTypes.$shape(3).$key(1,['A','B','C']).$label(0,'rows').$label(2, 'the pages!'));
+    types[1] = obj;
+    types[5] = arr;
+    types.$key(0,[obj,'b',arr]);
+    parsedTypes[1] = obj;
+    parsedTypes[5] = arr;
+    parsedTypes.$key(0,[obj,'b',arr]);
+    {
+      const res = [types.stringify()].parse(),
+            trgt = parsedTypes;
+
+      //use _isEqual since res will not reference obj and arr;
+      //test cube properties explicitly since _isEqual will not see these properties
+      assert(stem + 'complex-types-0', () => _isEqual(res, trgt), true);
+      assert(stem + 'complex-types-1', () => _isEqual(res._data_cube, trgt._data_cube), true);
+      assert(stem + 'complex-types-2', () => _isEqual(res._s, trgt._s), true);
+      assert(stem + 'complex-types-3', () => _isEqual(res._k, trgt._k), true);
+      assert(stem + 'complex-types-4', () => _isEqual(res._l, trgt._l), true);
+    }
+
+    //errors
+    assert.throw( 'throw-parse-neither-array-nor-object',
+                  () => dc.parse('5') );
+    assert.throw( 'throw-parse-not-1-entry',
+                  () => ['[5,6]', '[7,8]'].parse() );
+    assert.throw( 'throw-parse-null-key',
+                   () => [[5,6].$key(0, ['a', ()=>5]).stringify()].parse() );
+    const date_1 = new Date('Jan 2025'),
+          date_2 = new Date('Jan 2025');
+    assert.throw( 'throw-parse-duplicate-key',
+                  () => [[5,6].$key(0, [date_1, date_2]).stringify()].parse() );
+
   }
   
   console.log('\nTests finished');
