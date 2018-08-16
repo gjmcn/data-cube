@@ -2,7 +2,7 @@
 	'use strict';
 	    
   const _isEqual = require('lodash.isequal');
-  const assert = require('data-cube-assert');
+  const assert = require('@gjmcn/data-cube-assert');
   
   let dc;
   try {
