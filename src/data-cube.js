@@ -2521,10 +2521,24 @@
     //assertion functions for tests
     dc._assert = require('./assert.js');
     
-    //assertion functions that depend on the data-cube method compare
+    //assertion functions that depend on the data-cube methods
     dc._assert.test = (name, a, b) => {
       try { 
         a.compare(b);
+      }
+      catch (err) {
+        dc._assert.fail(name, err.message);
+      }
+    };
+    dc._assert.test.approx = (name, a, b) => {
+      try { 
+        a.copy('shell').compare(b.copy('shell'));
+        const n = a.length;
+        for (let i=0; i<n; i++) {
+          if (!(Math.abs(a[i] - b[i]) < 1e-12)) {  //use < and ! rather than >= so catch NaN
+            throw Error(`entries at vector index ${i} not approximately equal`);
+          }
+        }
       }
       catch (err) {
         dc._assert.fail(name, err.message);
