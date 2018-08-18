@@ -2517,6 +2517,28 @@
      'matrix','arAr','arObj','dsv','stringify','parse'].forEach( nm => {
       dc[nm] = (x,...args) => toArray(x)[nm](...args);
     });
+    
+    //assertion functions for tests
+    dc._assert = require('./assert.js');
+    
+    //assertion functions that depend on the data-cube method compare
+    dc._assert.test = (name, a, b) => {
+      try { 
+        a.compare(b);
+      }
+      catch (err) {
+        dc._assert.fail(name, err.message);
+      }
+    };
+    dc._assert.test.throw = (name, a, b) => {
+      try { 
+        a.compare(b);
+      }
+      catch (err) {
+        return;
+      }
+      dc._assert.fail(name, 'expected error but none thrown');
+    };
                                          
     module.exports = dc;
   }

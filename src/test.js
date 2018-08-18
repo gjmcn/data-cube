@@ -1,9 +1,6 @@
 {
 	'use strict';
-	    
-  const _isEqual = require('lodash.isequal');
-  const assert = require('@gjmcn/data-cube-assert');
-  
+	      
   let dc;
   try {
     dc = require('../dist/data-cube.js');
@@ -13,30 +10,13 @@
     dc = require( './data-cube.js');
     testing = './src/data-cube.js\n(dist/data-cube.js does not exist)';
   }
-  const h = Array.prototype._helper;
-    
-  //test a.compare(b)
-  const test = (name, a, b) => {
-    try { 
-      a.compare(b);
-    }
-    catch (err) {
-      assert.fail(name, err.message);
-    }
-  };
   
-  //test a.compare(b), catch expected error, throw if no error
-  test.throw = (name, a, b) => {
-		try { 
-      a.compare(b);
-    }
-		catch (err) {
-      return;
-    }
-		assert.fail(name, 'expected error but none thrown');
-	};
+  const assert = dc._assert,
+        test = assert.test,
+        h = Array.prototype._helper,
+        _isEqual = require('lodash.isequal');
   
-  console.log(`Testing: ${testing}\n`);
+  console.log(`\nTesting: ${testing}\n`);
   
   
   //--------------- tests ---------------//
@@ -2710,7 +2690,7 @@
 
   }
   
-  console.log('\nTests finished');
+  console.log('\nTests finished\n');
 }
 
 
