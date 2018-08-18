@@ -2521,7 +2521,7 @@
     //assertion functions for tests
     dc._assert = require('./assert.js');
     
-    //assertion functions that depend on the data-cube methods
+    //assertion functions that depend on data-cube methods
     dc._assert.test = (name, a, b) => {
       try { 
         a.compare(b);
