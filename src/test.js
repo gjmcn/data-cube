@@ -2171,6 +2171,42 @@
   
   }
   
+  console.log('--- cond');
+  {
+    const s = [2].$key(1, 'a'),
+          v = [1, 0, undefined, 's'],
+          m = [10,20,30,40].$shape([2,2]).$key(0,['u','v']).$label(2,'p'),
+          b = [0, 1, null, true].$shape([1,2,2]),
+          e = [].$shape([0,100]).$key(2,'b');
+    
+    test('cond-0', [true].cond(s, 3), [2]);
+    test('cond-1', [false].cond(s, 3), [3]);
+    test('cond-2', s.cond(4,5), [4].$key(1, 'a'));
+    test('cond-3', v.cond(b, 55), [0, 55, 55, true]);
+    test('cond-4',
+         b.cond(m, v),
+         [1, 20, undefined, 40].$shape([1,2,2]));
+    test('cond-5',
+         m.cond(null, 66),
+         [4].cube(null).$shape([2,2]).$key(0,['u','v']).$label(2,'p'));
+    
+    test('cond-empties-0', [].cond([], []), []);
+    test('cond-empties-1', e.cond(5, [].$shape([0,0,0])), e);
+    
+    let i = 0;
+    test('cond-no-short-circuit-0', [true].cond(5, ++i), [5]);
+    assert('cond-no-short-circuit-1', () => i, 1);
+    test('cond-no-short-circuit-2', v.cond(5, ++i), [5,2,2,5]);
+    assert('cond-no-short-circuit-3', () => i, 2);
+    
+    assert.throwEach('throw-cond', [
+      () => v.cond([2,3], 4),
+      () => v.cond([2], [3,4]),
+      () => s.cond(v, m),
+    ]);
+    
+  }
+  
   console.log('--- matrix');
   {
     
