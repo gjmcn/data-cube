@@ -1166,6 +1166,7 @@
     const methodOrCall = (x, nm, isMethod, argsArray) => {
       x.toCube();
       nm = assert.single(nm);
+      if (!isMethod) assert.func(nm); 
       const n = x.length,
             na = argsArray.length,
             z = x.copy('shell');
