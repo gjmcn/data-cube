@@ -2171,7 +2171,7 @@
   
   }
   
-  console.log('--- cond');
+  console.log('--- entrywise: cond');
   {
     const s = [2].$key(1, 'a'),
           v = [1, 0, undefined, 's'],
@@ -2207,6 +2207,110 @@
     
   }
   
+  console.log('--- entrywise: call');
+  {
+    
+    const s = [2].$key(1, 'a'),
+          v = [1, 0, undefined, 's'],
+          m = [10,20,30,40].$shape([2,2]).$key(0,['u','v']).$label(2,'p'),
+          b = [0, 1, null, true].$shape([1,2,2]),
+          e = [].$shape([0,100]).$key(2,'b'),
+          f1  = a            => a + 10,
+          f2  = (a, b)       => a + b,
+          f2s = (a, b)       => '' + a + b,
+          f3  = (a, b, c)    => (a + b) * c,
+          f4  = (a, b, c, d) => (a + b) * c - d,
+          f4s = (a, b, c, d) => '' + a + b + c + d;
+    
+    test('call-0', s.call(f1), [12].$key(1, 'a'));
+    test('call-1', [3,4,5,6].call(f2,[7,8,9,10]), [10,12,14,16]);
+    test('call-2', m.call(f2, s), m.copy('shell').$vec(null, [12,22,32,42]));
+    test('call-3',
+         m.call(f2s),
+         m.copy('shell').$vec(null, ['10undefined','20undefined','30undefined','40undefined']));
+    test('call-4', m.call(f2s, b), m.copy('shell').$vec(null, ['100','201','30null','40true']));
+    test('call-5',
+         m.call(f3, 3, [4,5,6,7]),
+         m.copy('shell').$vec(null, [52,115,198,301]));
+    test('call-6',
+         m.call([f4], 3, [4,5,6,7], [1,2,3,4]),
+         m.copy('shell').$vec(null, [51,113,195,297]));
+    test('call-7',
+         m.call(f4s, 2, [3]),
+         m.copy('shell').$vec(null, ['1023undefined','2023undefined','3023undefined','4023undefined'])); 
+    
+    test('call-empty-0', [].call(f1), []);
+    test('call-empty-1', e.call(f1), e.copy());
+    test('call-empty-2', e.call(f2,5), e.copy());
+    test('call-empty-3', e.call(f3,[],5), e.copy());
+    test('call-empty-4', e.call(f4,[],5,6), e.copy());
+    
+    assert.throwEach('throw-call', [
+      () => m.call(f1, [5,5]),
+      () => m.call(f1, []),
+      () => m.call(f1, 5, [6,6]),
+      () => m.call(f1, 5, []),
+      () => m.call(f1, 5, 6, [7,7]),
+      () => m.call(f1, 5, 6, []),
+      () => m.call([f1,5])
+    ]);
+    
+  }
+  
+  console.log('--- entrywise: method');
+  {
+    
+    const s = ['z'].$key(1, 'a'),
+          v = ['abc','defg','hijkl','mnopqrstu'],
+          m = ['a','bc','def','ghij'].$shape([2,2]).$key(0,['u','v']).$label(2,'p'),
+          b = [1,0,3,2].$shape([1,2,2]),
+          e = [].$shape([0,100]).$key(2,'b');
+
+    test('method-0', s.method('toUpperCase'), ['Z'].$key(1, 'a'));
+    test('method-1', 
+         m.method('toUpperCase'),
+         m.copy('shell').$vec(null, ['A','BC','DEF','GHIJ']));
+    test('method-2',
+         v.method('charAt',[1,2,3,4]),
+         ['b','f','k','q']);
+    test('method-3',
+         m.method('charAt', [1]),
+         m.copy('shell').$vec(null, ['','c','e','h']));
+    test('method-4',
+         m.method('charAt'),
+         m.copy('shell').$vec(null, ['a','b','d','g']));
+    test('method-5',
+         v.method('slice', 0, b),
+         ['a','','hij','mn']);
+    test('method-6',
+         v.method('slice', b, 6),
+         ['bc','defg','kl','opqr']);
+    test('method-7',
+         m.method(['concat'], v, s, b),
+         m.copy('shell').$vec(null, ['aabcz1','bcdefgz0','defhijklz3','ghijmnopqrstuz2']));
+    test('method-8',
+         m.method(['concat'], 'q', undefined, [5]),
+         m.copy('shell').$vec(null, ['aqundefined5','bcqundefined5','defqundefined5','ghijqundefined5']));
+  
+    test('method-empty-0', [].method('toUpperCase'), []);
+    test('method-empty-1', e.method('toUpperCase'), e.copy());
+    test('method-empty-2', e.method('charAt',5), e.copy());
+    test('method-empty-3', e.method('slice',[],5), e.copy());
+    test('method-empty-4', e.method('slice',[],[5]), e.copy());
+    test('method-empty-5', e.method('concat',[],'q','w'), e.copy());
+    
+    assert.throwEach('throw-method', [
+      () => m.method('toUpperCase', [5,5]),
+      () => m.method('toUpperCase', []),
+      () => m.method('toUpperCase', 5, [6,6]),
+      () => m.method('toUpperCase', 5, []),
+      () => m.method('toUpperCase', 5, 6, [7,7]),
+      () => m.method('toUpperCase', 5, 6, []),
+      () => m.method(['toUpperCase',5])
+    ]);
+
+  }
+    
   console.log('--- matrix');
   {
     
@@ -2568,7 +2672,7 @@
                   () => [2,3].cube().$key(1, ['5','6',5]).arObj() );
     
   }
-  
+    
   console.log('--- dsv');
   {
     
