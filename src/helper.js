@@ -141,7 +141,7 @@
       return x;
     },
     
-    //array/cube ,array/cube -> array/cube, fill entrywise: set
+    //array/cube, array/cube -> array/cube, fill entrywise: set
     //entries of x to corresp entries of y
     fillEW: (x,y) => {
       const n = x.length;
@@ -406,8 +406,15 @@
       f();
       const t = process.hrtime(start);
       return Math.round((t[0]*1e9 + t[1])/1e6);
+    },
+
+    //cube, str -> cube, call update functions of x if prop exists
+    callUpdate: (x, prop) => {
+      if (x[prop]) {
+        for (let f of x[prop]) f(x);
+      }
     }
-          
+   
   }
   
   //letters map

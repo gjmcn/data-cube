@@ -10,7 +10,8 @@
     assert, fill, fillEW, addArrayMethod, keyMap,
     isSingle, polarize, def, toArray, copyArray, copyMap,
     ensureKey, ensureLabel, nni, copyKey, copyLabel, skeleton,
-    sortInPlace, sortIndex, sortRank, rangeInd, keyInd, indInd
+    sortInPlace, sortIndex, sortRank, rangeInd, keyInd, indInd,
+    callUpdate
   } = helper;
   
   //helper is an object, but can use addArrayMethod for any property
@@ -595,7 +596,9 @@
   //num, * -> cube
   addArrayMethod('$ent', function(ind, val) {
     this.toCube();
+    callUpdate(this, '_b');
     this[ nni(assert.single(ind), this.length) ] = assert.single(val);
+    callUpdate(this, '_a');
     return this;
   });
   
@@ -2541,6 +2544,36 @@
     else throw Error('serialized array or cube expected');
   });
 
+  //--------------- dependents ---------------//
+
+  {
+    //-> cube
+    addArrayMethod('before', function() {
+      this.toCube();
+      return callUpdate(this, '_b');
+    });
+    addArrayMethod('after',  function() {
+      this.toCube();
+      return callUpdate(this, '_a');
+    });
+    
+    //array/cube, *, str -> cube
+    const setUpdate = (x, val, prop) => {
+      x.toCube();
+      val = toArray(val);
+      if (val.length === 1 && (val[0] === undefined || val[0] === null)) delete x[prop];
+      else {
+        for (let v of val) assert.func(v);
+        x[prop] = val;
+      }
+      return x;
+    };
+
+    //[*, func/undef/null] -> cube
+    addArrayMethod('$before', function (val) { return setUpdate(this, val, '_b') });
+    addArrayMethod('$after',  function (val) { return setUpdate(this, val, '_a') });
+
+  }
     
   //--------------- export dc function ---------------//
       
