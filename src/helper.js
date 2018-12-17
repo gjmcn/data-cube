@@ -408,11 +408,10 @@
       return Math.round((t[0]*1e9 + t[1])/1e6);
     },
 
-    //cube, str -> cube, call update functions of x if prop exists
-    callUpdate: (x, prop) => {
-      if (x[prop]) {
-        for (let f of x[prop]) f(x);
-      }
+    //cube, str, str, array -> cube, call update functions, assume
+    //prop exists
+    callUpdate: (x, prop, setter, args) => {
+      for (let f of x[prop]) f(x, setter, args);
     }
    
   }

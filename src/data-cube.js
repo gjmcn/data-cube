@@ -596,9 +596,9 @@
   //num, * -> cube
   addArrayMethod('$ent', function(ind, val) {
     this.toCube();
-    callUpdate(this, '_b');
+    if (this._b) callUpdate(this, '_b', '$ent', [ind, val]);
     this[ nni(assert.single(ind), this.length) ] = assert.single(val);
-    callUpdate(this, '_a');
+    if (this._a) callUpdate(this, '_a', '$ent', [ind, val]);
     return this;
   });
   
@@ -2401,7 +2401,7 @@
   });
   
   
-  //--------------- matrix, arAr, arObj, dsv ---------------//
+  //--------------- matrix, arAr, arObj, dsv, dict ---------------//
   
   {
     
@@ -2504,10 +2504,25 @@
       }
       return d3.dsvFormat(delim).formatRows(data);
     });
+  
+    //array/cube -> cube
+    addArrayMethod('dict', function(dim) {
+      dim = assert.dim(dim);
+      const n = this.length / 2;
+      if (!Number.isInteger(n)) throw Error('even number of entries expected');
+      const k = new Array(n),
+            x = new Array(n);
+      for (let i=0; i<n; i++) {
+        k[i] = this[2*i];
+        x[i] = this[2*i + 1];
+      }
+      const shp = [1,1,1];
+      shp[dim] = n;
+      return x.$shape(shp).$key(dim, k);
+    });
 
   }
-  
-    
+
   //--------------- stringify, parse ---------------//
   
   //-> string
@@ -2550,11 +2565,11 @@
     //-> cube
     addArrayMethod('before', function() {
       this.toCube();
-      return callUpdate(this, '_b');
+      return callUpdate(this, '_b', undefined, []);
     });
     addArrayMethod('after',  function() {
       this.toCube();
-      return callUpdate(this, '_a');
+      return callUpdate(this, '_a', undefined, []);
     });
     
     //array/cube, *, str -> cube
@@ -2582,7 +2597,8 @@
       
     ['cube','rand','normal',
      'seq','lin','grid','copy','toArray',
-     'matrix','arAr','arObj','dsv','stringify','parse'].forEach( nm => {
+     'matrix','arAr','arObj','dsv','dict',
+     'stringify','parse'].forEach( nm => {
       dc[nm] = (x,...args) => toArray(x)[nm](...args);
     });
     
