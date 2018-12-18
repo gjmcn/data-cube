@@ -1283,6 +1283,61 @@
   });
 
 
+  //--------------- entrywise: loop ---------------//
+
+  addArrayMethod('loop', function(...args) {
+    this.toCube();
+    let nLoop = this.length;
+    const nArg = args.length,
+          prop = new Array(nArg),
+          getter = new Array(nArg);
+    
+    //check args valid before apply anything
+    for (let i=0; i<nArg; i++) {
+      args[i] = toArray(args[i]);
+      const nai = args[i].length;
+      if (nai === 0) throw Error('non-empty array expected'); 
+      const name = '' + assert.single(args[i][0]);
+      prop[i] = name[0] === '_' ? name.slice(1) : false;
+      if (prop[i] && nai !== 2) throw Error('2-entry array expected: property name and new value(s)');
+      if (nai > 1) {
+        getter[i] = new Array(nai - 1);
+        for (let j=1; j<nai; j++) {
+          const [aij, aijSingle] = polarize(args[i][j]);
+          if (aijSingle) getter[i][j - 1] = () => aij;
+          else {
+            if (aij.length !== nLoop) {
+              if (nLoop === 1) nLoop = aij.length; 
+              else throw Error('shape mismatch');
+            }
+            getter[i][j - 1] = k => aij[k];
+          } 
+        }
+      }
+    }
+
+    //apply methods and 'property methods'
+    for (let i=0; i<nLoop; i++) {
+      const me = this.length === 1 ? this[0] : this[i];
+      for (let j=0; j<nArg; j++) {
+        if (prop[j]) me[prop[j]] = getter[j][0](i);
+        else {
+          const name = args[j][0],
+                nj = args[j].length;
+          if      (nj === 1) me[name]();
+          else if (nj === 2) me[name](getter[j][0](i));
+          else if (nj === 3) me[name](getter[j][0](i), getter[j][1](i));
+          else if (nj === 4) me[name](getter[j][0](i), getter[j][1](i), getter[j][2](i));
+          else if (nj === 5) me[name](getter[j][0](i), getter[j][1](i), getter[j][2](i), getter[j][3](i));
+          else               me[name](...getter[j].map(f => f(i)));
+        }
+      }
+    }
+
+    return this;
+  });
+
+
   //--------------- entrywise: cmap ---------------//
 
   addArrayMethod('cmap', function(f, asThis) {
