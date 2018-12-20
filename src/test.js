@@ -2739,6 +2739,48 @@
     assert.throw( 'throw-dsv-duplicate-column-keys',
                   () => [2,3].cube().$key(1, ['5','6',5]).dsv() );
   }
+
+  console.log('--- dict');
+  {
+    test( 'dict-empty',
+      [].dict(),
+      [].$key(0, [])
+    );
+    test('dict-1-entry',
+      ['a', 5].dict(),
+      [5].$key(0, 'a')
+    );
+    test('dict-2-entry',
+      ['a', 5, 'b', 6].dict(),
+      [5, 6].$key(0, ['a', 'b'])
+    );
+    test('dict-3-entry',
+      ['a', 5, 'b', 6, 'c', 7].dict(),
+      [5, 6, 7].$key(0, ['a', 'b' , 'c'])
+    );
+    test('dict-dim-0',
+      ['a', 5, 'b', 6].dict(0),
+      [5, 6].$key(0, ['a', 'b'])
+    );
+    test('dict-dim-1',
+      ['a', 5, 'b', 6].dict(1),
+      [5, 6].$shape([1, 2]).$key(1, ['a', 'b'])
+    );
+    test('dict-dim-2',
+      ['a', 5, 'b', 6].dict([2]),
+      [5, 6].$shape([1, 1, 2]).$key(2, ['a', 'b'])
+    );
+    const arr = [5, 6],
+          obj = {q: 7};
+    test('dict-complex-key-and-entry',
+      [arr, 8, 'b', obj].dict(undefined),
+      [8, obj].$key(0, [arr, 'b'])
+    );
+    test('dict-from-cube',
+      ['a', 5, 'b', 6].$shape(2).dict(),
+      [5, 6].$key(0, ['a', 'b'])
+    );
+  }
   
   console.log('--- stringify, parse');
   {

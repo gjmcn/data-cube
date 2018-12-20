@@ -2571,7 +2571,7 @@
         k[i] = this[2*i];
         x[i] = this[2*i + 1];
       }
-      const shp = [1,1,1];
+      const shp = [1, 1, 1];
       shp[dim] = n;
       return x.$shape(shp).$key(dim, k);
     });
