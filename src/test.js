@@ -109,6 +109,19 @@
         () => h.assert.number([0])
       ]);
 
+      assert.each('assert-string', [
+        [() => h.assert.string(''), ''],
+        [() => h.assert.string('a'), 'a'],
+        [() => h.assert.string('abc defg'), 'abc defg']
+      ]);
+      assert.throwEach('invalid-assert-string', [
+        () => h.assert.string(2),
+        () => h.assert.string(false),
+        () => h.assert.string([]),
+        () => h.assert.string(['a']),
+        () => h.assert.string([''])
+      ]);
+
       {
         const obj = {a:5};
         const a0 = [];
@@ -2779,6 +2792,14 @@
     test('dict-from-cube',
       ['a', 5, 'b', 6].$shape(2).dict(),
       [5, 6].$key(0, ['a', 'b'])
+    );
+    test('dict-dc-0',
+      dc.dict(['a', 5, 'b', 6]),
+      [5, 6].$key(0, ['a', 'b'])
+    );
+    test('dict-dc-1',
+      dc.dict(['a', 5, 'b', 6], 1),
+      [5, 6].$shape([1, 2]).$key(1, ['a', 'b'])
     );
   }
   

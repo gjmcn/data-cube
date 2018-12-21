@@ -492,6 +492,12 @@
       return s;
     },
     
+    //* -> str, assert s a string, return s
+    string: s => {
+      if (typeof s !== 'string') throw Error('string expected');
+      return s;
+    },
+
     //* -> func, assert f a function, return f
     func: f => { 
       if (typeof f !== 'function') throw Error('function expected');

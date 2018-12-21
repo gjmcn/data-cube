@@ -1290,16 +1290,24 @@
     let nLoop = this.length;
     const nArg = args.length,
           prop = new Array(nArg),
+          name = new Array(nArg),
           getter = new Array(nArg);
     
-    //check args valid before apply anything
+    //check all arguments valid before do anything
     for (let i=0; i<nArg; i++) {
       args[i] = toArray(args[i]);
       const nai = args[i].length;
-      if (nai === 0) throw Error('non-empty array expected'); 
-      const name = '' + assert.single(args[i][0]);
-      prop[i] = name[0] === '_' ? name.slice(1) : false;
-      if (prop[i] && nai !== 2) throw Error('2-entry array expected: property name and new value(s)');
+      if (nai === 0) throw Error('non-empty array expected');
+      let nm = assert.single(args[i][0]);
+      assert.string(nm);
+      if (nm[0] === '_') {
+        prop[i] = true;
+        nm = nm.slice(1);
+      }
+      name[i] = nm;
+      if (prop[i] && nai !== 2) {
+        throw Error('2-entry array expected: property name and new value(s)');
+      }
       if (nai > 1) {
         getter[i] = new Array(nai - 1);
         for (let j=1; j<nai; j++) {
@@ -1311,25 +1319,25 @@
               else throw Error('shape mismatch');
             }
             getter[i][j - 1] = k => aij[k];
-          } 
+          }
         }
       }
     }
 
-    //apply methods and 'property methods'
+    //apply methods and set properties
     for (let i=0; i<nLoop; i++) {
       const me = this.length === 1 ? this[0] : this[i];
       for (let j=0; j<nArg; j++) {
-        if (prop[j]) me[prop[j]] = getter[j][0](i);
+        const nm = name[j];
+        if (prop[j]) me[nm] = getter[j][0](i);
         else {
-          const name = args[j][0],
-                nj = args[j].length;
-          if      (nj === 1) me[name]();
-          else if (nj === 2) me[name](getter[j][0](i));
-          else if (nj === 3) me[name](getter[j][0](i), getter[j][1](i));
-          else if (nj === 4) me[name](getter[j][0](i), getter[j][1](i), getter[j][2](i));
-          else if (nj === 5) me[name](getter[j][0](i), getter[j][1](i), getter[j][2](i), getter[j][3](i));
-          else               me[name](...getter[j].map(f => f(i)));
+          const nj = args[j].length;
+          if      (nj === 1) me[nm]();
+          else if (nj === 2) me[nm](getter[j][0](i));
+          else if (nj === 3) me[nm](getter[j][0](i), getter[j][1](i));
+          else if (nj === 4) me[nm](getter[j][0](i), getter[j][1](i), getter[j][2](i));
+          else if (nj === 5) me[nm](getter[j][0](i), getter[j][1](i), getter[j][2](i), getter[j][3](i));
+          else               me[nm](...getter[j].map(f => f(i)));
         }
       }
     }
