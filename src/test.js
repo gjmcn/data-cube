@@ -2801,6 +2801,16 @@
       dc.dict(['a', 5, 'b', 6], 1),
       [5, 6].$shape([1, 2]).$key(1, ['a', 'b'])
     );
+    assert.throw('throw-dict-invalid-dim',
+      () => ['a', 5, 'b', 6].dict('1'),
+    );
+    assert.throw('throw-dict-odd-length-0',
+      () => ['a'].dict()
+    );
+    assert.throw('throw-dict-odd-length-1',
+      () => ['a', 5, 'b'].dict()
+    );
+
   }
   
   console.log('--- stringify, parse');
