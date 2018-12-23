@@ -2327,7 +2327,178 @@
     ]);
 
   }
+
+  console.log('--- entrywise: loop');
+  {
+
+    let x, u, v, w;
+    const init = (n = 2) => {
+      const obj = () => {
+        const o = {};
+        o.prop1 = '';
+        o.prop2 = '';
+        o.meth1 = () => u++;
+        o.meth2 = (a) => v += a;
+        o.meth3 = (a, b) => w += a + b;
+        return o;
+      };
+      x = [];
+      for (let i=0; i<n; i++) x.push(obj());
+      u = v = w = 0;
+    }
+
+    init();
+    x.loop(
+      ['_prop1', 5]
+    );
+    test('loop-1-property-0', x.map(e => e.prop1), [5, 5]);
     
+    init();
+    x.loop(
+      ['_prop1', [5,6]]
+    );
+    test('loop-1-property-1', x.map(e => e.prop1), [5, 6]);
+    
+    init();
+    x.loop(
+      ['_prop1', [5, 6]],
+      ['_prop2', [7, 8]]
+    );
+    test('loop-2-property-0-a', x.map(e => e.prop1), [5, 6]);
+    test('loop-2-property-0-b', x.map(e => e.prop2), [7, 8]);
+
+    init();
+    x.loop(
+      ['meth1']
+    );
+    assert('loop-1-method-no-arg', () => u === 2, true);
+
+    init();
+    x.loop(
+      ['meth2', [5,6]]
+    );
+    assert('loop-1-method-1-arg', () => v === 11, true);
+
+    init();
+    x.loop(
+      ['meth3', [5, 6], 7]
+    );
+    assert('loop-1-method-2-arg', () => w === 25, true);
+
+    init();
+    x.loop(
+      ['meth3', [5, 6], 7],
+      ['meth1']
+    );
+    assert('loop-2-methods-a', () => u === 2, true);
+    assert('loop-2-methods-b', () => w === 25, true);
+
+    init();
+    x.loop(
+      ['meth1'],
+      ['meth2', [5, 6]],
+      ['meth3', [7], [9, 10]]
+    );
+    assert('loop-3-methods-a', () => u === 2, true);
+    assert('loop-3-methods-b', () => v === 11, true);
+    assert('loop-3-methods-c', () => w === 33, true);
+
+    init();
+    x.loop(
+      ['meth1'],
+      [['_prop2'], [5, 6]],
+      ['meth3', [7], [9, 10]]
+    );
+    assert('loop-mix-a', () => u === 2, true);
+    test('loop-mix-b', x.map(e => e.prop2), [5, 6]);
+    assert('loop-mix-c', () => w === 33, true);
+    
+    init();
+    x.loop();
+    assert('loop-no-args', 
+      () => {
+        return u === 0 && v === 0 && w === 0 &&
+        x[0].prop1 === '' && x[0].prop2 === '' &&
+        x[1].prop1 === '' && x[1].prop2 === ''
+      }, true);
+
+    init(0);
+    x.loop(
+      ['meth1'],
+      ['_prop1', 'a'],
+      ['_prop2', []],
+      ['meth3', 7, []]
+    );
+    assert('loop-empty-calling-a', () => u === 0, true);
+    test('loop-empty-calling-b', x.map(e => e.prop1), []);
+    test('loop-empty-calling-c', x.map(e => e.prop2), []);
+    assert('loop-empty-calling-d', () => w === 0, true);
+
+    init(1);
+    x.loop(
+      ['meth1'],
+      ['_prop1', 5],
+      ['_prop2', [10, 15, 20]],
+      ['meth2', ['a', 'b', 'c']],
+      ['meth3', 70, [80, 90, 100]]
+    );
+    assert('loop-singleton-calling-a', () => u === 3, true);
+    test('loop-singleton-calling-b', x.map(e => e.prop1), [5]);
+    test('loop-singleton-calling-c', x.map(e => e.prop2), [20]);
+    assert('loop-singleton-calling-d', () => v === '0abc', true);
+    assert('loop-singleton-calling-e', () => w === 480, true);
+
+    init();
+    assert.throw('throw-loop-shape-mismatch-0',
+      () => x.loop(['_prop1', [5, 6, 7]])
+    );
+
+    init(0);
+    assert.throw('throw-loop-shape-mismatch-1',
+      () => x.loop(['_prop1', [5, 6, 7]])
+    );
+
+    init();
+    assert.throw('throw-loop-shape-mismatch-2',
+      () => x.loop(['_meth2', [5, 6, 7]])
+    );
+
+    init(0);
+    assert.throw('throw-loop-shape-mismatch-3',
+      () => x.loop(['_meth2', [5, 6, 7]])
+    );
+
+    init();
+    assert.throw('throw-loop-shape-mismatch-4',
+      () => x.loop(['_meth2', []])
+    );
+
+    init();
+    assert.throw('throw-loop-empty-arg',
+      () => x.loop([])
+    );
+
+    init();
+    assert.throw('throw-loop-property-arguments-0',
+      () => x.loop(['_prop_1'])
+    );
+
+    init();
+    assert.throw('throw-loop-property-arguments-1',
+      () => x.loop(['_prop_1', 5, 6])
+    );
+
+    init();
+    assert.throw('throw-loop-non-singleton-name',
+      () => x.loop([['meth1', 'meth2']])
+    );
+
+    init();
+    assert.throw('throw-loop-name-string',
+      () => x.loop([5])
+    );
+  }
+
   console.log('--- matrix');
   {
     
