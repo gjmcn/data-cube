@@ -1300,7 +1300,7 @@
       if (nai === 0) throw Error('non-empty array expected');
       let nm = assert.single(args[i][0]);
       assert.string(nm);
-      if (nm[0] === '_') {
+      if (nm[0] === '$') {
         prop[i] = true;
         nm = nm.slice(1);
       }
