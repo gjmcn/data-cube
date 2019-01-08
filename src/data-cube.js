@@ -2622,18 +2622,17 @@
     else throw Error('serialized array or cube expected');
   });
 
-  //--------------- dependents ---------------//
+  //--------------- updates ---------------//
 
   {
     //-> cube
-    addArrayMethod('before', function() {
-      this.toCube();
-      return callUpdate(this, '_b', undefined, []);
-    });
-    addArrayMethod('after',  function() {
-      this.toCube();
-      return callUpdate(this, '_a', undefined, []);
-    });
+    for (let [nm, prop] of [['before', '_b'], ['after', '_a']]) {
+      addArrayMethod(nm, function() {
+        this.toCube();
+        if (this[prop]) return this[prop].copy();
+        else return [0].cube();
+      });
+    }
     
     //array/cube, *, str -> cube
     const setUpdate = (x, val, prop) => {
@@ -2642,7 +2641,7 @@
       if (val.length === 1 && (val[0] === undefined || val[0] === null)) delete x[prop];
       else {
         for (let v of val) assert.func(v);
-        x[prop] = val;
+        x[prop] = val.copy();
       }
       return x;
     };
