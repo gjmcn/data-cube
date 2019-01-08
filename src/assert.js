@@ -1,4 +1,4 @@
-{
+(() => {
 	'use strict';
 
 	//action if assertion fails
@@ -102,4 +102,4 @@
 
   assert.fail = fail;
 	module.exports = assert;
-}
+})();

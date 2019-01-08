@@ -1,23 +1,21 @@
-{
+(() => {
 	'use strict';
 	      
-  let dc;
+  let dc, testing;
   try {
     dc = require('../dist/data-cube.js');
-    testing = './dist/data-cube.js\n(delete dist to test ./src/data-cube.js)';
+    console.log('\nTesting: ./dist/data-cube.js\n');
   }
   catch (e) {
     dc = require( './data-cube.js');
-    testing = './src/data-cube.js\n(dist/data-cube.js does not exist)';
+    console.log('\nTesting: ./src/data-cube.js\n');
   }
   
   const assert = dc._assert,
         test = assert.test,
         h = Array.prototype._helper,
         _isEqual = require('lodash.isequal');
-  
-  console.log(`\nTesting: ${testing}\n`);
-  
+    
   
   //--------------- tests ---------------//
     
@@ -240,7 +238,7 @@
 
     //copyArray
     {
-      obj = {a:5};
+      const obj = {a:5};
       assert.each('copy-array', [
         [() => h.equalArray(h.copyArray([]), []), true],
         [() => h.equalArray(h.copyArray([5]), [5]), true],
@@ -2008,7 +2006,7 @@
     test('vec-book-5', b.vec([4,-1,-2,-1,4]), [15,34,33,34,15]);
     test('vec-book-6', b.vec([]), []);
     
-    b1 = b.copy();
+    const b1 = b.copy();
     b1.$vec(null,50);
     b1.$vec(0,51);
     b1.$vec(-1,52);
@@ -3085,14 +3083,4 @@
   }
   
   console.log('\nTests finished\n');
-}
-
-
-
-
-
-
-
-
-
-
+})();

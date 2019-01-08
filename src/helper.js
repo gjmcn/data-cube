@@ -1,4 +1,4 @@
-{
+(() => {
 	'use strict';
       
   const helper = {
@@ -517,4 +517,4 @@
 
   helper.assert = assert;
   module.exports = helper;
-}
+})();
