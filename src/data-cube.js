@@ -2270,7 +2270,7 @@
     });
 
     //[num, *, *] -> cube 
-    addArrayMethod('order', function(dim, val, how) {   
+    addArrayMethod('order', function(dim, val, how) { 
       this.toCube();
       dim = assert.dim(dim);
       var [val, valSingle] = polarize(val);
