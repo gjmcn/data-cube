@@ -2638,7 +2638,10 @@
     const setUpdate = (x, val, prop) => {
       x.toCube();
       val = toArray(val);
-      if (val.length === 1 && (val[0] === undefined || val[0] === null)) delete x[prop];
+      if (val.length === 0 ||
+           (val.length === 1 && (val[0] === undefined || val[0] === null))) {
+        delete x[prop];
+      }
       else {
         for (let v of val) assert.func(v);
         x[prop] = val.copy();
@@ -2646,7 +2649,7 @@
       return x;
     };
 
-    //[*, func/undef/null] -> cube
+    //[*] -> cube
     addArrayMethod('$before', function (val) { return setUpdate(this, val, '_b') });
     addArrayMethod('$after',  function (val) { return setUpdate(this, val, '_a') });
 
