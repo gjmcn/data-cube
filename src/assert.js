@@ -84,6 +84,16 @@
         else if (xl[i] !== undefined) throw Error(`_l[${i}] neither a string nor undefined`);
       }
     }
+    for (let _prop of ['_b', '_a']) {
+      if (_prop in x) {
+        const _val = x[_prop]; 
+        if (!Array.isArray(_val)) throw Error(`${_prop} is not an array`);
+        if (_val.length === 0) throw Error(`${_prop} is an empty array`);
+        for (let f of _val) {
+          if (typeof f !== 'function') throw Error(`an entry of ${_prop} is not a function`);
+        }
+      }
+    }
   };
     
   //1 arg: assert a is a cube
