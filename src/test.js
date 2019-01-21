@@ -3081,6 +3081,35 @@
                   () => [[5,6].$key(0, [date_1, date_2]).stringify()].parse() );
 
   }
-  
+
+  console.log('--- updates');
+  {
+    
+    {
+      //compare (via test)
+      let x, y;
+
+      x = [3, 4].$after(() => {});
+      y = [3, 4];
+      test('updates-compare-0', x, y);
+      test('updates-compare-1', y, x);
+
+      x = [3, 4, 5, 6]
+        .$shape(2)
+        .$key(0, ['a', 'b'])
+        .$label(1, 'columns')
+        .$after([()=>10, ()=>20]);
+      y = [3, 4, 5, 6]
+        .$shape(2)
+        .$key(0, ['a', 'b'])
+        .$label(1, 'columns')
+        .$before(()=>30)
+        .$after(()=>40);
+      test('updates-compare-2', x, y);
+      test('updates-compare-3', y, x);
+    }
+
+  }
+
   console.log('\nTests finished\n');
 })();

@@ -20,7 +20,7 @@
   //methods use standard accessors for these properties; if an 
   //absent property is on the prototype chain, methods will
   //incorrectly treat it as instance-level 
-  ['_data_cube', '_s', '_k', '_l'].forEach(prop => {
+  ['_data_cube', '_s', '_k', '_l', '_b', '_a'].forEach(prop => {
     if (prop in Array.prototype) {
       throw Error(prop + ' is a property of Array.prototype'); 
     }
@@ -60,6 +60,8 @@
       delete this._s;
       if (this._k) delete this._k;
       if (this._l) delete this._l;
+      if (this._b) delete this._b;
+      if (this._a) delete this._a;
     }
     return this;
   });
