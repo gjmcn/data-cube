@@ -331,6 +331,8 @@
   //[number/array] -> cube
   addArrayMethod('$shape', function(shp) {
     this.toCube();
+    const origShp = shp;
+    if (this._b) callUpdate(this, '_b', '$shape', [origShp]);
     var [shp,shpSingle] = polarize(shp);
     let r = 1;
     let c = 1;
@@ -366,6 +368,7 @@
     this._s[2] = p;
     if (this._k) delete this._k;
     if (this._l) delete this._l;
+    if (this._a) callUpdate(this, '_a', '$shape', [origShp]);
     return this;
   });
   

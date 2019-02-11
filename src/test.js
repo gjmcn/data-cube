@@ -3097,8 +3097,7 @@
       x = [3, 4, 5, 6]
         .$shape(2)
         .$key(0, ['a', 'b'])
-        .$label(1, 'columns')
-        .$after([()=>10, ()=>20]);
+        .$label(1, 'columns') .$after([()=>10, ()=>20]);
       y = [3, 4, 5, 6]
         .$shape(2)
         .$key(0, ['a', 'b'])
@@ -3107,6 +3106,125 @@
         .$after(()=>40);
       test('updates-compare-2', x, y);
       test('updates-compare-3', y, x);
+    }
+
+    //use same test function for all $-setters
+    {
+      const new_x = () => {
+        return [4, 5, 6, 7, 8, 9]
+          .$shape([3,2])
+          .$key(0, ['a','b','c']);
+      };
+
+      const testUpdateFunctions = f => {
+                
+        //variables updated by update functions
+        let x, bu_1, bu_2, au_1, au_2;
+        
+        //simple update functions
+        const b = () => bu_1 = 1,
+              a = () => au_1 = 2;
+        
+        //arrays of update functions
+        const checkArgs = (arr, setter, args) => {
+          assert(`${setter}-update-passed-name`, () => {
+            return typeof setter === 'string' && setter[0] === '$' && typeof x[setter] === 'function';
+          }, true);
+          assert(`${setter}-update-passed-array`, () => {
+            return arr === x;
+          }, true);
+          assert(`${setter}-update-passed-args-array`, () => {
+            return Array.isArray(args);
+          }, true);
+        };
+        const B = [ 
+          (arr, setter, args) => { checkArgs(arr, setter, args); bu_1 = 3; },
+          (arr, setter, args) => { checkArgs(arr, setter, args); bu_2 = 4; }
+        ];
+        const A = [
+          (arr, setter, args) => { checkArgs(arr, setter, args); au_1 = 5; },
+          (arr, setter, args) => { checkArgs(arr, setter, args); au_2 = 6; }
+        ];
+
+        //set 1 before and 1 after function, call f to apply the setter 
+        x = new_x().$before(b).$after(a);
+        test('get-single-before-function-0', x.before(), [b]);
+        test('get-single-after-function-0', x.after(), [a]);
+        f(x);
+        test('single-update-function-result', x, f(new_x()));
+        assert('single-update-functions-applied', () => bu_1 === 1 && au_1 === 2, true);
+        test('get-single-before-function-1', x.before(), [b]);
+        test('get-single-after-function-1', x.after(), [a]);
+
+        //remove updates
+        x.$before().$after(null);
+        test('no-before-functions-0', x.before(), []);
+        test('no-after-functions-0', x.after(), []);
+
+        //set 2 before and 2 after functions
+        x = new_x().$before(B).$after(A);
+        test('get-multiple-before-functions-0', x.before(), B);
+        test('get-multiple-after-functions-0', x.after(), A);
+        f(x);
+        test('multiple-update-functions-result', x, f(new_x()));
+        assert('multiple-update-functions-applied', () => {
+          bu_1 === 3 && bu_2 === 4 && au_1 === 5 && au_2 === 6;
+        });
+        test('get-multiple-before-functions-1', x.before(), B);
+        test('get-multiple-after-functions-1', x.after(), A);
+
+        //check variety of methods that produce new cube have no updates
+        assert('copy-has-no-updates', () => {
+          const y = x.copy();
+          return !y.hasOwnProperty('_a') && !y.hasOwnProperty('_b');
+        }, true);
+        assert('add-has-no-updates', () => {
+          const y = x.add(5);
+          return !y.hasOwnProperty('_a') && !y.hasOwnProperty('_b');
+        }, true);
+        assert('sum-has-no-updates', () => {
+          const y = x.sum();
+          return !y.hasOwnProperty('_a') && !y.hasOwnProperty('_b');
+        }, true);
+        assert('vert-has-no-updates', () => {
+          const y = x.vert(x);
+          return !y.hasOwnProperty('_a') && !y.hasOwnProperty('_b');
+        }, true);
+
+        //remove updates
+        x.$before(undefined).$after([undefined]);
+        test('no-before-functions-1', x.before(), []);
+        test('no-after-functions-1', x.after(), []);
+
+      };
+
+      //setters
+      testUpdateFunctions(y => y.$shape(1)); 
+      // !!!!!!!!!!!! ADD IN OTHER SETTERS AS UPDATED
+
+    }
+
+    //ad-hoc tests not covered above:
+
+    //after and before return a cube
+    assert('before-returns-cube-0', () => [].before()._data_cube, true);
+    assert('before-returns-cube-1', () => [].$before(() => {}).before()._data_cube, true);
+    assert('after-returns-cube-0', () => [].after()._data_cube, true);
+    assert('after-returns-cube-1', () => [].$after([()=>{}, ()=>{}]).after()._data_cube, true);
+    
+    //check args passed to update functions in detail
+    {
+      const x = [4,5,6,7,8,9];
+      const s = [2,3]             
+      const f = (ar, setter, args) => {
+        assert('update-callback-arg-0', () => ar === x, true);
+        assert('update-callback-arg-1', () => setter === '$shape', true);
+        assert('update-callback-arg-2', () => {
+          return Array.isArray(args) && args.length === 1 && args[0] === s;
+        }, true);
+      };
+      x.$before(f).$after(f);
+      x.$shape(s);
     }
 
   }
