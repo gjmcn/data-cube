@@ -3170,8 +3170,6 @@
         assert('multiple-update-functions-applied', () => {
           bu_1 === 3 && bu_2 === 4 && au_1 === 5 && au_2 === 6;
         });
-        test('get-multiple-before-functions-1', x.before(), B);
-        test('get-multiple-after-functions-1', x.after(), A);
 
         //check variety of methods that produce new cube have no updates
         assert('copy-has-no-updates', () => {
@@ -3190,6 +3188,10 @@
           const y = x.vert(x);
           return !y.hasOwnProperty('_a') && !y.hasOwnProperty('_b');
         }, true);
+
+        //x still has expected update functions
+        test('get-multiple-before-functions-1', x.before(), B);
+        test('get-multiple-after-functions-1', x.after(), A);
 
         //remove updates
         x.$before(undefined).$after([undefined]);
