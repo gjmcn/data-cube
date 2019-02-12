@@ -3084,7 +3084,40 @@
 
   console.log('--- updates:');
   {
-    
+
+    //ad-hoc tests not covered above:
+    {
+      console.log('      misc');
+
+      //after and before return a cube
+      assert('before-returns-cube-0', () => [].before()._data_cube, true);
+      assert('before-returns-cube-1', () => [].$before(() => { }).before()._data_cube, true);
+      assert('after-returns-cube-0', () => [].after()._data_cube, true);
+      assert('after-returns-cube-1', () => [].$after([() => { }, () => { }]).after()._data_cube, true);
+      {
+        const x = []
+          .$before([() => 5, () => 10].$key(0, ['a', 'b']))
+          .$after([() => 15, () => 20].tp().$key(1, ['c', 'd']));
+        assert('before-with-key', () => x.before().at('b')(), 10);
+        assert('after-with-key', () => x.after().at(0, 'c')(), 15);
+      }
+
+      //check args passed to update functions in detail
+      {
+        const x = [4, 5, 6, 7, 8, 9];
+        const s = [2, 3]
+        const f = (ar, setter, args) => {
+          assert('update-callback-arg-0', () => ar === x, true);
+          assert('update-callback-arg-1', () => setter === '$shape', true);
+          assert('update-callback-arg-2', () => {
+            return Array.isArray(args) && args.length === 1 && args[0] === s;
+          }, true);
+        };
+        x.$before(f).$after(f);
+        x.$shape(s);
+      }
+    }
+
     {
       //compare (via test)
       console.log('      compare');
@@ -3199,39 +3232,11 @@
       console.log('      $squeeze');
       testUpdateFunctions(y => y.$squeeze());
       console.log('      $label');
-      testUpdateFunctions(y => y.$label(0, 'rows')); 
+      testUpdateFunctions(y => y.$label(0, 'rows'));
+      console.log('      $key');
+      testUpdateFunctions(y => y.$key(0, ['d','e','f']));
       // !!!!!!!! ADD IN OTHER SETTERS HERE AS UPDATED
 
-    }
-
-    //ad-hoc tests not covered above:
-
-    //after and before return a cube
-    assert('before-returns-cube-0', () => [].before()._data_cube, true);
-    assert('before-returns-cube-1', () => [].$before(() => {}).before()._data_cube, true);
-    assert('after-returns-cube-0', () => [].after()._data_cube, true);
-    assert('after-returns-cube-1', () => [].$after([()=>{}, ()=>{}]).after()._data_cube, true);
-    {
-      const x = []
-        .$before([() => 5, () => 10].$key(0, ['a', 'b']))
-        .$after([() => 15, () => 20].tp().$key(1, ['c', 'd']));
-      assert('before-with-key', () => x.before().at('b')(), 10);
-      assert('after-with-key', () => x.after().at(0, 'c')(), 15);
-    }
-
-    //check args passed to update functions in detail
-    {
-      const x = [4,5,6,7,8,9];
-      const s = [2,3]             
-      const f = (ar, setter, args) => {
-        assert('update-callback-arg-0', () => ar === x, true);
-        assert('update-callback-arg-1', () => setter === '$shape', true);
-        assert('update-callback-arg-2', () => {
-          return Array.isArray(args) && args.length === 1 && args[0] === s;
-        }, true);
-      };
-      x.$before(f).$after(f);
-      x.$shape(s);
     }
 
   }

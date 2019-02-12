@@ -501,8 +501,11 @@
   });
     
   //[num, *] -> cube
-  addArrayMethod('$key', function(dim,val) {
+  addArrayMethod('$key', function(dim, val) {
     this.toCube();
+    const origDim = dim,
+          origVal = val;
+    if (this._b) callUpdate(this, '_b', '$key', [origDim, origVal]);
     dim = assert.dim(dim);
     val = toArray(val);
     if (val.length === 1 && (val[0] === undefined || val[0] === null)) {
@@ -518,6 +521,7 @@
       ensureKey(this);
       this._k[dim] = mp;
     }
+    if (this._a) callUpdate(this, '_a', '$key', [origDim, origVal]);
     return this;
   });
   
