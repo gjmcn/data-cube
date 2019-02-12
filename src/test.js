@@ -3082,11 +3082,12 @@
 
   }
 
-  console.log('--- updates');
+  console.log('--- updates:');
   {
     
     {
       //compare (via test)
+      console.log('      compare');
       let x, y;
 
       x = [3, 4].$after(() => {});
@@ -3097,7 +3098,8 @@
       x = [3, 4, 5, 6]
         .$shape(2)
         .$key(0, ['a', 'b'])
-        .$label(1, 'columns') .$after([()=>10, ()=>20]);
+        .$label(1, 'columns')
+        .$after([()=>10, ()=>20]);
       y = [3, 4, 5, 6]
         .$shape(2)
         .$key(0, ['a', 'b'])
@@ -3118,8 +3120,8 @@
 
       const testUpdateFunctions = f => {
                 
-        //variables updated by update functions
-        let x, bu_1, bu_2, au_1, au_2;
+        let x;
+        let bu_1, bu_2, au_1, au_2;  //variables updated by update functions
         
         //simple update functions
         const b = () => bu_1 = 1,
@@ -3127,15 +3129,11 @@
         
         //arrays of update functions
         const checkArgs = (arr, setter, args) => {
-          assert(`${setter}-update-passed-name`, () => {
+          assert('update-passed-array', () => arr === x, true);
+          assert('update-passed-name', () => {
             return typeof setter === 'string' && setter[0] === '$' && typeof x[setter] === 'function';
           }, true);
-          assert(`${setter}-update-passed-array`, () => {
-            return arr === x;
-          }, true);
-          assert(`${setter}-update-passed-args-array`, () => {
-            return Array.isArray(args);
-          }, true);
+          assert('update-passed-args-array', () => Array.isArray(args), true);
         };
         const B = [ 
           (arr, setter, args) => { checkArgs(arr, setter, args); bu_1 = 3; },
@@ -3168,41 +3166,37 @@
         f(x);
         test('multiple-update-functions-result', x, f(new_x()));
         assert('multiple-update-functions-applied', () => {
-          bu_1 === 3 && bu_2 === 4 && au_1 === 5 && au_2 === 6;
-        });
+          return bu_1 === 3 && bu_2 === 4 && au_1 === 5 && au_2 === 6;
+        }, true);
 
-        //check variety of methods that produce new cube have no updates
-        assert('copy-has-no-updates', () => {
-          const y = x.copy();
-          return !y.hasOwnProperty('_a') && !y.hasOwnProperty('_b');
-        }, true);
-        assert('add-has-no-updates', () => {
-          const y = x.add(5);
-          return !y.hasOwnProperty('_a') && !y.hasOwnProperty('_b');
-        }, true);
-        assert('sum-has-no-updates', () => {
-          const y = x.sum();
-          return !y.hasOwnProperty('_a') && !y.hasOwnProperty('_b');
-        }, true);
-        assert('vert-has-no-updates', () => {
-          const y = x.vert(x);
-          return !y.hasOwnProperty('_a') && !y.hasOwnProperty('_b');
-        }, true);
+        //check variety of methods produce new cube with no updates
+        {
+          const checkNoUpdates = (nm, res) => {
+            assert(`${nm}-has-no-updates`, () => {
+              return !res.hasOwnProperty('_a') && !res.hasOwnProperty('_b');
+            }, true);
+          };
+          checkNoUpdates('copy', x.copy());
+          checkNoUpdates('add', x.add(5));
+          checkNoUpdates('sum', x.sum());
+          checkNoUpdates('vert', x.vert(x));
+        }
 
         //x still has expected update functions
         test('get-multiple-before-functions-1', x.before(), B);
         test('get-multiple-after-functions-1', x.after(), A);
 
         //remove updates
-        x.$before(undefined).$after([undefined]);
+        x.$before(undefined).$after([]);
         test('no-before-functions-1', x.before(), []);
         test('no-after-functions-1', x.after(), []);
 
       };
 
       //setters
+      console.log('      $shape');
       testUpdateFunctions(y => y.$shape(1)); 
-      // !!!!!!!!!!!! ADD IN OTHER SETTERS AS UPDATED
+      // !!!!!!!! ADD IN OTHER SETTERS HERE AS UPDATED
 
     }
 
@@ -3213,7 +3207,14 @@
     assert('before-returns-cube-1', () => [].$before(() => {}).before()._data_cube, true);
     assert('after-returns-cube-0', () => [].after()._data_cube, true);
     assert('after-returns-cube-1', () => [].$after([()=>{}, ()=>{}]).after()._data_cube, true);
-    
+    {
+      const x = []
+        .$before([() => 5, () => 10].$key(0, ['a', 'b']))
+        .$after([() => 15, () => 20].tp().$key(1, ['c', 'd']));
+      assert('before-with-key', () => x.before().at('b')(), 10);
+      assert('after-with-key', () => x.after().at(0, 'c')(), 15);
+    }
+
     //check args passed to update functions in detail
     {
       const x = [4,5,6,7,8,9];
