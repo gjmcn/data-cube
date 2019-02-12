@@ -3179,7 +3179,7 @@
           checkNoUpdates('copy', x.copy());
           checkNoUpdates('add', x.add(5));
           checkNoUpdates('sum', x.sum());
-          checkNoUpdates('vert', x.vert(x));
+          checkNoUpdates('horiz', x.horiz(x));
         }
 
         //x still has expected update functions
@@ -3195,7 +3195,9 @@
 
       //setters
       console.log('      $shape');
-      testUpdateFunctions(y => y.$shape(1)); 
+      testUpdateFunctions(y => y.$shape(1));
+      console.log('      $squeeze');
+      testUpdateFunctions(y => y.$squeeze()); 
       // !!!!!!!! ADD IN OTHER SETTERS HERE AS UPDATED
 
     }

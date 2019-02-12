@@ -385,6 +385,7 @@
   //-> cube
   addArrayMethod('$squeeze', function() {
     this.toCube();
+    if (this._b) callUpdate(this, '_b', '$squeeze', []);
     const lenOne = this._s.map(v => v === 1 ? '1' : 'n').join('');
     let perm;
     const permute = nm => {
@@ -400,6 +401,7 @@
       if (this._k) permute('_k');
       if (this._l) permute('_l');
     }
+    if (this._a) callUpdate(this, '_a', '$squeeze', []);
     return this;
   });
     
