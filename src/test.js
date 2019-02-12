@@ -3197,7 +3197,9 @@
       console.log('      $shape');
       testUpdateFunctions(y => y.$shape(1));
       console.log('      $squeeze');
-      testUpdateFunctions(y => y.$squeeze()); 
+      testUpdateFunctions(y => y.$squeeze());
+      console.log('      $label');
+      testUpdateFunctions(y => y.$label(0, 'rows')); 
       // !!!!!!!! ADD IN OTHER SETTERS HERE AS UPDATED
 
     }

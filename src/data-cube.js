@@ -462,8 +462,11 @@
   });
     
   //[num, *] -> cube
-  addArrayMethod('$label', function(dim,val) {
+  addArrayMethod('$label', function(dim, val) {
     this.toCube();
+    const origDim = dim,
+          origVal = val;
+    if (this._b) callUpdate(this, '_b', '$label', [origDim, origVal]);
     dim = assert.dim(dim);
     val = assert.single(val);
     if (val === undefined || val === null) {
@@ -475,10 +478,11 @@
     }
     else {
       val = '' + val;
-      if (val === '') throw Error('label cannot be empty string');    
+      if (val === '') throw Error('label cannot be empty string');
       ensureLabel(this);
       this._l[dim] = val;
     }
+    if (this._a) callUpdate(this, '_a', '$label', [origDim, origVal]);
     return this;
   });
   
