@@ -3236,6 +3236,7 @@
       testUpdateFunctions('$strip', y => y.$strip());
       testUpdateFunctions('$ent', y => y.$ent(3, 10));
       testUpdateFunctions('$at', y => y.$at('b', 1, 0, 10));
+      testUpdateFunctions('$vec', y => y.$vec(null, 10));
       // !!!!!!!! ADD IN OTHER SETTERS HERE AS UPDATED
 
     }

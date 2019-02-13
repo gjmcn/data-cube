@@ -661,7 +661,7 @@
   
   //* -> array
   addArrayMethod('vec', function(i) {
-    this.toCube();    
+    this.toCube();
     var [i,iSingle] = polarize(i);
     const n = this.length;
     if (iSingle) {
@@ -677,11 +677,14 @@
   //*, * -> cube
   addArrayMethod('$vec', function(i, val) {
     this.toCube();
+    const origI = i,
+          origVal = val;
+    if (this._b) callUpdate(this, '_b', '$vec', [origI, origVal]);
     const n = this.length;
     var [i, iSingle] = polarize(i);
     var [val, valSingle] = polarize(val);
     if (iSingle) {
-      if (i === undefined || i === null) (valSingle ? fill : fillEW)(this,val);
+      if (i === undefined || i === null) (valSingle ? fill : fillEW)(this, val);
       else {
         if (!valSingle) throw Error('shape mismatch');
         this[nni(i,n)] = val;
@@ -699,6 +702,7 @@
         for (let j=0; j<ni; j++) this[ind[j]] = val[j];
       }
     }
+    if (this._a) callUpdate(this, '_a', '$vec', [origI, origVal]);
     return this;
   });
 
