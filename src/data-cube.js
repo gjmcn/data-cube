@@ -539,7 +539,7 @@
   });
   
   
-  //--------------- ind, indOrKey ---------------//
+  //--------------- ind, indOrKey, hasKey ---------------//
   
   //[num] -> array
   addArrayMethod('ind', function(dim) {
@@ -551,6 +551,16 @@
   //[num] -> array
   addArrayMethod('indOrKey', function(dim) {
     return this.key(dim) || helper.simpleRange(this._s[assert.dim(dim)]);
+  });
+
+  //[num, *] -> bool
+  addArrayMethod('hasKey', function (dim, k) {
+    this.toCube();
+    dim = assert.dim(dim);
+    k = assert.single(k);
+    const _k = this._k;
+    const keysOnDim = !!(_k && _k[dim]);
+    return k === undefined ? keysOnDim : keysOnDim && _k[dim].has(k);
   });
   
   
@@ -588,20 +598,6 @@
   });
   
 
-  //--------------- basic ---------------//
-  
-  
-  //[num, *] -> bool
-  addArrayMethod('hasKey', function(dim, k) {
-    this.toCube();
-    dim = assert.dim(dim);
-    k = assert.single(k);
-    const _k = this._k;
-    const keysOnDim = !!(_k && _k[dim]);
-    return k === undefined ? keysOnDim : keysOnDim && _k[dim].has(k);
-  });
-  
-  
   //--------------- ent, $ent ---------------//
   
   //num -> *
@@ -652,8 +648,10 @@
     //*, *, *, * -> cube
     addArrayMethod('$at', function(r, c, p, val) {
       this.toCube();
+      if (this._b) callUpdate(this, '_b', '$at', [r, c, p, val]);
       if (this.length === 0) throw Error('cube has no entries');
       this[ rcpToVec(this, r, c, p) ] = assert.single(val);
+      if (this._a) callUpdate(this, '_a', '$at', [r, c, p, val]);
       return this;
     });
 

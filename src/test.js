@@ -3151,7 +3151,9 @@
           .$key(0, ['a','b','c']);
       };
 
-      const testUpdateFunctions = f => {
+      const testUpdateFunctions = (methodName, f) => {
+
+        console.log(`      ${methodName}`);
                 
         let x;
         let bu_1, bu_2, au_1, au_2;  //variables updated by update functions
@@ -3227,16 +3229,13 @@
       };
 
       //setters
-      console.log('      $shape');
-      testUpdateFunctions(y => y.$shape(1));
-      console.log('      $squeeze');
-      testUpdateFunctions(y => y.$squeeze());
-      console.log('      $label');
-      testUpdateFunctions(y => y.$label(0, 'rows'));
-      console.log('      $key');
-      testUpdateFunctions(y => y.$key(0, ['d','e','f']));
-      console.log('      $strip');
-      testUpdateFunctions(y => y.$strip());
+      testUpdateFunctions('$shape', y => y.$shape(1));
+      testUpdateFunctions('$squeeze', y => y.$squeeze());
+      testUpdateFunctions('$label', y => y.$label(0, 'rows'));
+      testUpdateFunctions('$key', y => y.$key(0, ['d','e','f']));
+      testUpdateFunctions('$strip', y => y.$strip());
+      testUpdateFunctions('$ent', y => y.$ent(3, 10));
+      testUpdateFunctions('$at', y => y.$at('b', 1, 0, 10));
       // !!!!!!!! ADD IN OTHER SETTERS HERE AS UPDATED
 
     }
