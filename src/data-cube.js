@@ -530,9 +530,11 @@
   
   //-> cube
   addArrayMethod('$strip', function() {
-    this.toCube();   
+    this.toCube();
+    if (this._b) callUpdate(this, '_b', '$strip', []);
     delete this._k;
     delete this._l;
+    if (this._a) callUpdate(this, '_a', '$strip', []);
     return this;
   });
   

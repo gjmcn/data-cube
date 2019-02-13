@@ -3235,6 +3235,8 @@
       testUpdateFunctions(y => y.$label(0, 'rows'));
       console.log('      $key');
       testUpdateFunctions(y => y.$key(0, ['d','e','f']));
+      console.log('      $strip');
+      testUpdateFunctions(y => y.$strip());
       // !!!!!!!! ADD IN OTHER SETTERS HERE AS UPDATED
 
     }
