@@ -3250,6 +3250,14 @@
       testUpdateFunctions('$at', y => y.$at('b', 1, 0, 10));
       testUpdateFunctions('$vec', y => y.$vec(null, 10));
       testUpdateFunctions('$rcp', y => y.$rcp(['a', 'c'], 1, null, [10, 11]));
+      testUpdateFunctions('$subcube', y => y.$subcube(['a', 'c'], 1, null, [10, 11]));
+      testUpdateFunctions('$row', y => y.$row(['a', 'c'], [10, 11, 12, 13]));
+      testUpdateFunctions('$col', y => y.$col(1, [10, 11, 12]));
+      testUpdateFunctions('$page', y => y.$page(0, 10));
+      testUpdateFunctions('$rowSlice', y => y.$rowSlice('b', 'c', 10));
+      testUpdateFunctions('$colSlice', y => y.$colSlice(0, 1, [10, 11, 12, 13, 14, 15]));
+      testUpdateFunctions('$pageSlice', y => y.$pageSlice(0, 0, 10));
+
       // !!!!!!!! ADD IN OTHER SETTERS HERE AS UPDATED
 
     }

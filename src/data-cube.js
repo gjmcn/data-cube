@@ -867,67 +867,101 @@
       return z;      
     });
     
-    //*, *, *, *, * -> cube
-    addArrayMethod('$subcube', function(row, col, page, val) {
-      this.toCube();
-      const [nr, nc] = this._s;
-      const rInd = getInd(this,0,row)[0],
-            cInd = getInd(this,1,col)[0],
-            pInd = getInd(this,2,page)[0];
+    //cube, *, *, *, * -> undefined
+    const setSubcube = (x, row, col, page, val) => {
+      const [nr, nc] = x._s;
+      const rInd = getInd(x, 0, row)[0],
+            cInd = getInd(x, 1, col)[0],
+            pInd = getInd(x, 2, page)[0];
       const nrz = rInd.length,  ncz = cInd.length,  npz = pInd.length;
-      var [val,valSingle] = polarize(val);
+      var [val, valSingle] = polarize(val);
       if (!valSingle && val.length !== nrz * ncz * npz) throw Error('shape mismatch');
       let j = 0;
-      for (let p=0; p<npz; p++) {
+      for (let p = 0; p < npz; p++) {
         let pp = nr * nc * pInd[p];
-        for (let c=0; c<ncz; c++) {
+        for (let c = 0; c < ncz; c++) {
           let cc = nr * cInd[c];
-          for (let r=0; r<nrz; r++) {
-            this[rInd[r] + cc + pp] = valSingle ? val : val[j++];
+          for (let r = 0; r < nrz; r++) {
+            x[rInd[r] + cc + pp] = valSingle ? val : val[j++];
           }
         }
       }
+    };
+
+    //*, *, *, *, * -> cube
+    addArrayMethod('$subcube', function (row, col, page, val) {
+      this.toCube();
+      if (this._b) callUpdate(this, '_b', '$subcube', [row, col, page, val]);
+      setSubcube(this, row, col, page, val);
+      if (this._a) callUpdate(this, '_a', '$subcube', [row, col, page, val]);
       return this;
     });
     
     //row, col, page getters and setters
     {
-      addArrayMethod('row',    function(j, ret) { return this.subcube(   j, null, null, ret) });
-      addArrayMethod('col',    function(j, ret) { return this.subcube(null,    j, null, ret) });
-      addArrayMethod('page',   function(j, ret) { return this.subcube(null, null,    j, ret) });
-      
-      addArrayMethod('$row',  function(j, val) { return this.$subcube(   j, null, null, val) });
-      addArrayMethod('$col',  function(j, val) { return this.$subcube(null,    j, null, val) });
-      addArrayMethod('$page', function(j, val) { return this.$subcube(null, null,    j, val) });
-    }
-      
-    //bool, array/cube, num, *, *, * -> *
-    const downAlongBack = function(setter, x, dim, s, e, retVal) {
-      x.toCube();
-      const mthd = setter ? '$subcube' : 'subcube';
-      s = assert.single(s);
-      e = assert.single(e);
-      let q;
-      if (x._k && x._k[dim]) q = helper.rangeKey(s, e, x._k[dim]); 
-      else {
-        const nd = x._s[dim];
-        s = (s === null || s === undefined) ? 0    : nni(s,nd);
-        e = (e === null || e === undefined) ? nd-1 : nni(e,nd);
-        q = (nd === 0) ? [] : rangeInd(s, e);   //if nd===0, using defaults (nni would have thrown)
-      }
-      switch (dim) {
-        case 0:  return x[mthd](   q, null, null, retVal); 
-        case 1:  return x[mthd](null,    q, null, retVal); 
-        case 2:  return x[mthd](null, null,    q, retVal); 
-      }
-    };
-    
-    [ 'rowSlice',  'colSlice',  'pageSlice',
-     '$rowSlice', '$colSlice', '$pageSlice'].forEach( (name, i) => {
-      addArrayMethod( name, function(s, e, retVal) {
-        return downAlongBack(i > 2, this, i % 3, s, e, retVal);
+      //*, *[, str] -> cube
+      const oneDimGetter = [
+        (x, j, ret) => x.subcube(   j, null, null, ret),
+        (x, j, ret) => x.subcube(null,    j, null, ret),
+        (x, j, ret) => x.subcube(null, null,    j, ret)
+      ];
+
+      //cube, *, * -> undefined
+      const oneDimSetter = [
+        (x, j, val) => setSubcube(x,    j, null, null, val),
+        (x, j, val) => setSubcube(x, null,    j, null, val),
+        (x, j, val) => setSubcube(x, null, null,    j, val),
+      ];
+
+
+      ['row', 'col', 'page'].forEach((name, i) => {
+        addArrayMethod(name, function (j, val) {
+          return oneDimGetter[i](this, j, val);
+        });
       });
-    });
+
+      ['$row', '$col', '$page'].forEach( (name, i) => {
+        addArrayMethod(name, function (j, val) {
+          this.toCube();
+          if (this._b) callUpdate(this, '_b', name, [j, val]);
+          oneDimSetter[i](this, j, val); 
+          if (this._a) callUpdate(this, '_a', name, [j, val]);
+          return this;
+        });
+      });
+        
+      //bool, cube, num, *, *, * -> *
+      const downAlongBack = function(setter, x, dim, s, e, retVal) {
+        x.toCube();
+        s = assert.single(s);
+        e = assert.single(e);
+        let q;
+        if (x._k && x._k[dim]) q = helper.rangeKey(s, e, x._k[dim]); 
+        else {
+          const nd = x._s[dim];
+          s = (s === null || s === undefined) ? 0    : nni(s,nd);
+          e = (e === null || e === undefined) ? nd-1 : nni(e,nd);
+          q = (nd === 0) ? [] : rangeInd(s, e);   //if nd===0, using defaults (nni would have thrown)
+        }
+        return (setter ? oneDimSetter : oneDimGetter)[dim](x, q, retVal);
+      };
+      
+      ['rowSlice', 'colSlice', 'pageSlice'].forEach( (name, i) => {
+        addArrayMethod(name, function (s, e, ret) {
+          return downAlongBack(false, this, i, s, e, ret);
+        });
+      });
+
+      ['$rowSlice', '$colSlice', '$pageSlice'].forEach((name, i) => {
+        addArrayMethod(name, function (s, e, val) {
+          this.toCube();
+          if (this._b) callUpdate(this, '_b', name, [s, e, val]);
+          downAlongBack(true, this, i, s, e, val);
+          if (this._a) callUpdate(this, '_a', name, [s, e, val]);
+          return this;
+        });
+      });
+    }
 
     //[num, num, num, str] -> cube
     addArrayMethod('head', function(nr, nc, np, ret) {
