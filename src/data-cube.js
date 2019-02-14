@@ -766,6 +766,8 @@
   //*, [*, *, *] -> cube
   addArrayMethod('$rcp', function(r, c, p, val) {
     this.toCube();
+    const origVal = val;
+    if (this._b) callUpdate(this, '_b', '$rcp', [r, c, p, origVal]);
     const v = this.vecInd(r, c, p),  //vecInd checks r, c and p
           n = v.length;
     var [val, valSingle] = polarize(val);
@@ -776,6 +778,7 @@
       if (val.length !== n) throw Error('shape mismatch');
       for (let i=0; i<n; i++) this[v[i]] = val[i];
     }
+    if (this._a) callUpdate(this, '_a', '$rcp', [r, c, p, origVal]);
     return this;
   });
 

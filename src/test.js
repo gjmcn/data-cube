@@ -3102,20 +3102,34 @@
         assert('after-with-key', () => x.after().at(0, 'c')(), 15);
       }
 
-      //check args passed to update functions in detail
+      //check passed args array in detail
       {
-        const x = [4, 5, 6, 7, 8, 9];
-        const s = [2, 3]
+        const x = [4, 5, 6, 7, 8, 9],
+              s = [2, 3];      
         const f = (ar, setter, args) => {
-          assert('update-callback-arg-0', () => ar === x, true);
-          assert('update-callback-arg-1', () => setter === '$shape', true);
-          assert('update-callback-arg-2', () => {
+          assert('update-callback-args-array-0', () => {
             return Array.isArray(args) && args.length === 1 && args[0] === s;
           }, true);
         };
         x.$before(f).$after(f);
         x.$shape(s);
       }
+      {
+        const x = [4, 5, 6, 7, 8, 9].$shape([2, 3]),
+              r = 1,
+              c = [0, 2],
+              p = null,
+              v = [10, 11]; 
+        const f = (ar, setter, args) => {
+          assert('update-callback-args-array-1', () => {
+            return Array.isArray(args) && args.length === 4 &&
+                   args[0] === r && args[1] === c && args[2] === p && args[3] === v;
+          }, true);
+        };
+        x.$before(f).$after(f);
+        x.$rcp(r, c, p, v);
+      }
+ 
     }
 
     {
@@ -3165,9 +3179,7 @@
         //arrays of update functions
         const checkArgs = (arr, setter, args) => {
           assert('update-passed-array', () => arr === x, true);
-          assert('update-passed-name', () => {
-            return typeof setter === 'string' && setter[0] === '$' && typeof x[setter] === 'function';
-          }, true);
+          assert('update-passed-name', () => setter === methodName, true);
           assert('update-passed-args-array', () => Array.isArray(args), true);
         };
         const B = [ 
@@ -3237,6 +3249,7 @@
       testUpdateFunctions('$ent', y => y.$ent(3, 10));
       testUpdateFunctions('$at', y => y.$at('b', 1, 0, 10));
       testUpdateFunctions('$vec', y => y.$vec(null, 10));
+      testUpdateFunctions('$rcp', y => y.$rcp(['a', 'c'], 1, null, [10, 11]));
       // !!!!!!!! ADD IN OTHER SETTERS HERE AS UPDATED
 
     }
