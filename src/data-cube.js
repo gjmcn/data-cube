@@ -888,7 +888,7 @@
       }
     };
 
-    //*, *, *, *, * -> cube
+    //*, *, *, * -> cube
     addArrayMethod('$subcube', function (row, col, page, val) {
       this.toCube();
       if (this._b) callUpdate(this, '_b', '$subcube', [row, col, page, val]);
@@ -915,8 +915,8 @@
 
 
       ['row', 'col', 'page'].forEach((name, i) => {
-        addArrayMethod(name, function (j, val) {
-          return oneDimGetter[i](this, j, val);
+        addArrayMethod(name, function (j, ret) {
+          return oneDimGetter[i](this, j, ret);
         });
       });
 
@@ -930,7 +930,7 @@
         });
       });
         
-      //bool, cube, num, *, *, * -> *
+      //bool, array/cube, num, *, *, * -> *
       const downAlongBack = function(setter, x, dim, s, e, retVal) {
         x.toCube();
         s = assert.single(s);
@@ -947,13 +947,13 @@
       };
       
       ['rowSlice', 'colSlice', 'pageSlice'].forEach( (name, i) => {
-        addArrayMethod(name, function (s, e, ret) {
+        addArrayMethod(name, function(s, e, ret) {
           return downAlongBack(false, this, i, s, e, ret);
         });
       });
 
-      ['$rowSlice', '$colSlice', '$pageSlice'].forEach((name, i) => {
-        addArrayMethod(name, function (s, e, val) {
+      ['$rowSlice', '$colSlice', '$pageSlice'].forEach( (name, i) => {
+        addArrayMethod(name, function(s, e, val) {
           this.toCube();
           if (this._b) callUpdate(this, '_b', name, [s, e, val]);
           downAlongBack(true, this, i, s, e, val);
