@@ -1218,32 +1218,38 @@
   });
   
   
-  //--------------- entrywise: method, call ---------------//
+  //--------------- entrywise: method, call, apply ---------------//
 
   {
-    //array/cube, str/func, bool, arr -> cube
-    const methodOrCall = (x, nm, isMethod, argsArray) => {
+    //array/cube, str/func, str, arr -> cube
+    const methodCallApply = (x, nm, mcp, argsArray) => {
       x.toCube();
       nm = assert.single(nm);
-      if (!isMethod) assert.func(nm); 
+      if (mcp === 'call') assert.func(nm);
+      else if (mcp === 'apply') {
+        for (let f of x) assert.func(f);
+      } 
       const n = x.length,
             na = argsArray.length,
             z = x.copy('shell');
       if (na === 0) {
-        if (isMethod) { for (let i=0; i<n; i++) z[i] = x[i][nm]() }
-        else          { for (let i=0; i<n; i++) z[i] = nm(x[i])   }
+        if (mcp === 'method')    { for (let i=0; i<n; i++) z[i] = x[i][nm]() }
+        else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = nm(x[i])   }
+        else                     { for (let i=0; i<n; i++) z[i] = x[i]()     }
       }
       else if (na < 3) {
         const [a_0, aSingle_0] = polarize(argsArray[0]);
         if (!aSingle_0 && a_0.length !== n) throw Error('shape mismatch');
         if (na === 1) {
           if (aSingle_0) {
-            if (isMethod) { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0) }
-            else          { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0) }
+            if (mcp === 'method')    { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0) }
+            else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0) }
+            else                     { for (let i=0; i<n; i++) z[i] = x[i](a_0) }
           }
           else {
-            if (isMethod) { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0[i]) }
-            else          { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0[i]) }
+            if (mcp === 'method')    { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0[i]) }
+            else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0[i]) }
+            else                     { for (let i=0; i<n; i++) z[i] = x[i](a_0[i]) }
           }
         }
         else {
@@ -1251,22 +1257,26 @@
           if (!aSingle_1 && a_1.length !== n) throw Error('shape mismatch');
           if (aSingle_0) {
             if (aSingle_1) {
-              if (isMethod) { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0, a_1) }
-              else          { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0, a_1) }
+              if (mcp === 'method')    { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0, a_1) }
+              else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0, a_1) }
+              else                     { for (let i=0; i<n; i++) z[i] = x[i](a_0, a_1) }
             }
             else {
-              if (isMethod) { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0, a_1[i]) }
-              else          { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0, a_1[i]) }
+              if (mcp === 'method')    { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0, a_1[i]) }
+              else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0, a_1[i]) }
+              else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = x[i](a_0, a_1[i]) }
             }
           }
           else {
             if (aSingle_1) {
-              if (isMethod) { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0[i], a_1) }
-              else          { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0[i], a_1) }
+              if (mcp === 'method')    { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0[i], a_1) }
+              else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0[i], a_1) }
+              else                     { for (let i=0; i<n; i++) z[i] = x[i](a_0[i], a_1) }
             }
             else {
-              if (isMethod) { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0[i], a_1[i]) }
-              else          { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0[i], a_1[i]) }
+              if (mcp === 'method')    { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0[i], a_1[i]) }
+              else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0[i], a_1[i]) }
+              else                     { for (let i=0; i<n; i++) z[i] = x[i](a_0[i], a_1[i]) }
             }
           }
         }
@@ -1286,20 +1296,26 @@
           for (let i=0; i<na; i++) arg[i] = getArg[i](j);
           return arg;
         };
-        if (isMethod) { for (let i=0; i<n; i++) z[i] = x[i][nm](...getAllArg(i)) }
-        else          { for (let i=0; i<n; i++) z[i] = nm(x[i], ...getAllArg(i)) }
+        if (mcp === 'method')    { for (let i=0; i<n; i++) z[i] = x[i][nm](...getAllArg(i)) }
+        else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = nm(x[i], ...getAllArg(i)) }
+        else                     { for (let i=0; i<n; i++) z[i] = x[i](...getAllArg(i)) }
       }
       return z;
     };
     
     //str[, *, *, *, ...] -> cube
     addArrayMethod('method', function(nm, ...argsArray) {
-      return methodOrCall(this, nm, true, argsArray);
+      return methodCallApply(this, nm, 'method', argsArray);
     });
     
     //func[, *, *, *, ...] -> cube
     addArrayMethod('call', function(f, ...argsArray) {
-      return methodOrCall(this, f, false, argsArray);
+      return methodCallApply(this, f, 'call', argsArray);
+    });
+
+    //func[, *, *, *, ...] -> cube
+    addArrayMethod('apply', function (...argsArray) {
+      return methodCallApply(this, null, 'apply', argsArray);
     });
   
   }
