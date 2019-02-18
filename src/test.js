@@ -2326,6 +2326,78 @@
 
   }
 
+  console.log('--- entrywise: apply');
+  {
+    const fs_0 = () => 5,
+          f_0 = [
+            () => 6,
+            () => 7
+          ],
+          f_1 = [
+            a => 2 * a,
+            a => 3 * a,
+            a => 4 * a
+          ],
+          f_2 = [
+            (a, b) => a + b,
+            (a, b) => a - b,
+          ],
+          f_3 = [
+            (a, b, c) => a + b + c,
+            (a, b)    => a + b,
+            (a, b, c) => a - b - c,
+            ()        => 'xyz'
+          ].$shape(2)
+           .$key(1, ['u', 'v'])
+           .$label(0, 'rows');
+    
+    test('apply-empty-0', [].apply(), []);
+    test('apply-empty-1', [].apply([]), []);
+    test('apply-empty-2', [].apply(5, []), []);
+    test('apply-empty-3', [].$key(0, []).apply(5, [], [6]), [].$key(0, []));
+    
+    test('apply-single-function', [fs_0].apply(), [5]);
+
+    test('apply-no-args-0', f_0.apply(), [6,7]);
+    test('apply-no-args-1', f_0.apply(1, [2, 3]), [6,7]);
+
+    test('apply-1-arg-0', f_1.apply(10), [20, 30, 40]);
+    test('apply-1-arg-1', f_1.apply([3,4,5]), [6, 12, 20]);
+    test('apply-1-arg-2', f_1.apply([3,4,5], 100, 200), [6, 12, 20]);
+        
+    test('apply-2-arg-0', f_2.apply(15, 8), [23, 7]);
+    test('apply-2-arg-1', f_2.apply([15, 20], 8), [23, 12]);
+    test('apply-2-arg-2', f_2.apply(15, [8,4]), [23, 11]);
+    test('apply-2-arg-3', f_2.apply([15, 20], [8,4]), [23, 16]);
+
+    test('apply-3-arg-0', f_3.apply(5, 6, 7), 
+      [18, 11, -8, 'xyz'].$shape(2).$key(1, ['u', 'v']).$label(0, 'rows'));
+    test('apply-3-arg-1', f_3.apply(5, [6, 7, 8, 9].tp(), 10),
+      [21, 12, -13, 'xyz'].$shape(2).$key(1, ['u', 'v']).$label(0, 'rows'));
+    test('apply-3-arg-2', f_3.apply([5, 6, 7, 8], 9, [10, 11, 12, 13]),
+      [24, 15, -14, 'xyz'].$shape(2).$key(1, ['u', 'v']).$label(0, 'rows'));
+    test('apply-3-arg-3', f_3.apply([5, 6, 7, 8], [8, 9, 10, 11], [12, 13, 14, 15]),
+      [25, 15, -17, 'xyz'].$shape(2).$key(1, ['u', 'v']).$label(0, 'rows'));
+
+    assert.throw('throw-apply-empty-shape-mismatch-0',
+      () => [].apply([2,3]));
+    assert.throw('throw-apply-empty-shape-mismatch-1',
+      () => [].apply(null, [2, 3]));
+    assert.throw('throw-apply-empty-shape-mismatch-2',
+      () => [].apply(null, null, [2, 3]));
+    assert.throw('throw-apply-shape-mismatch-0',
+      () => f_1.apply([2, 3]));
+    assert.throw('throw-apply-shape-mismatch-1',
+      () => f_1.apply([]));
+    assert.throw('throw-apply-shape-mismatch-2',
+      () => f_3.apply(1,2,[3,4,5]));
+    assert.throw('throw-apply-not-a-function-0',
+      () => [5].apply());
+    assert.throw('throw-apply-not-a-function-1',
+      () => [()=>5, 6].apply());
+
+  }
+
   console.log('--- entrywise: loop');
   {
 

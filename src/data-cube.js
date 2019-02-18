@@ -1221,14 +1221,14 @@
   //--------------- entrywise: method, call, apply ---------------//
 
   {
-    //array/cube, str/func, str, arr -> cube
+    //array/cube, str/func/null, str, arr -> cube
     const methodCallApply = (x, nm, mcp, argsArray) => {
       x.toCube();
       nm = assert.single(nm);
       if (mcp === 'call') assert.func(nm);
       else if (mcp === 'apply') {
         for (let f of x) assert.func(f);
-      } 
+      }
       const n = x.length,
             na = argsArray.length,
             z = x.copy('shell');
@@ -1264,7 +1264,7 @@
             else {
               if (mcp === 'method')    { for (let i=0; i<n; i++) z[i] = x[i][nm](a_0, a_1[i]) }
               else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = nm(x[i], a_0, a_1[i]) }
-              else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = x[i](a_0, a_1[i]) }
+              else                     { for (let i=0; i<n; i++) z[i] = x[i](a_0, a_1[i]) }
             }
           }
           else {
@@ -1303,17 +1303,14 @@
       return z;
     };
     
-    //str[, *, *, *, ...] -> cube
     addArrayMethod('method', function(nm, ...argsArray) {
       return methodCallApply(this, nm, 'method', argsArray);
     });
     
-    //func[, *, *, *, ...] -> cube
     addArrayMethod('call', function(f, ...argsArray) {
       return methodCallApply(this, f, 'call', argsArray);
     });
 
-    //func[, *, *, *, ...] -> cube
     addArrayMethod('apply', function (...argsArray) {
       return methodCallApply(this, null, 'apply', argsArray);
     });
