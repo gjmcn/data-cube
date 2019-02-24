@@ -3329,8 +3329,12 @@
       testUpdateFunctions('$rowSlice', y => y.$rowSlice('b', 'c', 10));
       testUpdateFunctions('$colSlice', y => y.$colSlice(0, 1, [10, 11, 12, 13, 14, 15]));
       testUpdateFunctions('$pageSlice', y => y.$pageSlice(0, 0, 10));
-
-      // !!!!!!!! ADD IN OTHER SETTERS HERE AS UPDATED
+      testUpdateFunctions('$prop', y => {
+        y.forEach((u, i) => y[i] = {a:5});
+        y.$prop('a', 10);
+        y.forEach((u, i) => y[i] = 20);
+        return y;
+      });
 
     }
 

@@ -1333,6 +1333,9 @@
   //str, * -> cube
   addArrayMethod('$prop', function(nm, val) {
     this.toCube();
+    const origNm = nm,
+          origVal = val;
+    if (this._b) callUpdate(this, '_b', '$prop', [origNm, origVal]);
     nm = assert.single(nm);
     var [val, valSingle] = polarize(val);
     const n = this.length;
@@ -1348,6 +1351,7 @@
       if (val.length !== n) throw Error('shape mismatch');
       for (let j=0; j<n; j++) this[j][nm] = val[j];
     }
+    if (this._a) callUpdate(this, '_a', '$prop', [origNm, origVal]);
     return this;
   });
 
