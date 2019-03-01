@@ -598,6 +598,32 @@
   });
   
 
+  //--------------- $autoType ---------------//
+
+  //array/cube -> cube
+  //rules and most code from d3-dsv autoType
+  addArrayMethod('$autoType', function() {
+    this.toCube();
+    if (this._b) callUpdate(this, '_b', '$autoType', []);
+    for (let i=0, n=this.length; i<n; i++) {
+      let v = this[i];
+      let num;
+      if (typeof v === 'string') {
+        if (!v) v = null;
+        else if (v === "true") v = true;
+        else if (v === "false") v = false;
+        else if (v === "NaN") v = NaN;
+        else if (!isNaN(num = +v)) v = num;
+        else if (/^([-+]\d{2})?\d{4}(-\d{2}(-\d{2})?)?(T\d{2}:\d{2}(:\d{2}(\.\d{3})?)?(Z|[-+]\d{2}:\d{2})?)?$/.test(v)) v = new Date(v);
+        else continue;
+        this[i] = v;
+      }
+    }
+    if (this._a) callUpdate(this, '_a', '$autoType', []);
+    return this;
+  });
+
+
   //--------------- ent, $ent ---------------//
   
   //num -> *
