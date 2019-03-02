@@ -601,25 +601,28 @@
   //--------------- $autoType ---------------//
 
   //array/cube -> cube
-  //rules and most code from d3-dsv autoType
-  addArrayMethod('$autoType', function() {
+  //based on d3.autoType, but conversion rules not identical
+  addArrayMethod('$autoType', function(empty) {
     this.toCube();
-    if (this._b) callUpdate(this, '_b', '$autoType', []);
+    const origEmpty = empty;
+    if (this._b) callUpdate(this, '_b', '$autoType', [origEmpty]);
+    empty = assert.single(empty);
     for (let i=0, n=this.length; i<n; i++) {
       let v = this[i];
       let num;
       if (typeof v === 'string') {
-        if (!v) v = null;
-        else if (v === "true") v = true;
-        else if (v === "false") v = false;
-        else if (v === "NaN") v = NaN;
+        if (!v) v = empty;
+        else if (v === 'undefined') v = undefined;
+        else if (v === 'null') v = null;
+        else if (v === 'true') v = true;
+        else if (v === 'false') v = false;
+        else if (v === 'NaN') v = NaN;
         else if (!isNaN(num = +v)) v = num;
-        else if (/^([-+]\d{2})?\d{4}(-\d{2}(-\d{2})?)?(T\d{2}:\d{2}(:\d{2}(\.\d{3})?)?(Z|[-+]\d{2}:\d{2})?)?$/.test(v)) v = new Date(v);
         else continue;
         this[i] = v;
-      }
+      } 
     }
-    if (this._a) callUpdate(this, '_a', '$autoType', []);
+    if (this._a) callUpdate(this, '_a', '$autoType', [origEmpty]);
     return this;
   });
 

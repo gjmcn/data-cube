@@ -3318,6 +3318,7 @@
       testUpdateFunctions('$label', y => y.$label(0, 'rows'));
       testUpdateFunctions('$key', y => y.$key(0, ['d','e','f']));
       testUpdateFunctions('$strip', y => y.$strip());
+      testUpdateFunctions('$autoType', y => y.$autoType());
       testUpdateFunctions('$ent', y => y.$ent(3, 10));
       testUpdateFunctions('$at', y => y.$at('b', 1, 0, 10));
       testUpdateFunctions('$vec', y => y.$vec(null, 10));
