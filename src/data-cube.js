@@ -2156,6 +2156,41 @@
     }
   });
 
+
+  //--------------- unpack ---------------//
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  addArrayMethod('unpack', function() {
+    this.toCube();
+    const n = this.length;
+    let z;
+    for (let i=0; i<n; i++) {
+      if (!Array.isArray(this[i])) throw Error('all entries must be arrays');
+    }
+    if (n === 1) z = this[0].copy();
+    else {
+      let dim;
+      for (let d=0; d<3; d++) {
+        if (this._s[d] !== 1) {
+          if (dim !== undefined) throw Error('at least 2 dimensions must have length 1');
+          dim = d;
+        }
+      }
+      if (n === 0) z = [1, 1, 1].$ent(dim, 0).cube();
+      else {
+        const mthd = dim === 0 ? 'vert' : (dim === 1 ? 'horiz' : 'depth');
+        if (this[0]._data_cube) {  //call cube concat method from first entry to use extras 
+          z = this[0][mthd](...this.slice(1));
+        }
+        else {  //first entry has no extras, but do not call cube method on it will convert it
+          z = [this[0].length, 1, 1].$ent(dim, 0).cube()[mthd](...this);
+        }
+      }
+    }
+    return z;
+  });
     
   //--------------- which ---------------//
   
