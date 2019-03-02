@@ -371,6 +371,13 @@
     if (this._a) callUpdate(this, '_a', '$shape', [origShp]);
     return this;
   });
+
+  //func -> cube
+  addArrayMethod('$$shape', function(f) {
+    this.toCube();
+    this.$shape((assert.single(f))(this.shape()));
+    return this;
+  });
   
   //[num] -> bool
   addArrayMethod('n', function(dim) {
@@ -485,6 +492,13 @@
     if (this._a) callUpdate(this, '_a', '$label', [origDim, origVal]);
     return this;
   });
+
+  //num, func -> cube
+  addArrayMethod('$$label', function(dim, f) {
+    this.toCube();
+    this.$label(dim, (assert.single(f))(this.label(dim)));
+    return this;
+  });
   
   
   //--------------- keys ---------------//
@@ -524,6 +538,17 @@
     if (this._a) callUpdate(this, '_a', '$key', [origDim, origVal]);
     return this;
   });
+
+  //num, func -> cube
+  addArrayMethod('$$key', function(dim, f) {
+    this.toCube();
+    f = assert.single(f);
+    const keys = this.key(dim);
+    for (let j=0, n=keys.length; j<n; j++) keys[j] = f(keys[j]);
+    this.$key(dim, keys);
+    return this;
+  });
+
   
 
   //--------------- $strip ---------------//
