@@ -600,7 +600,7 @@
 
   //--------------- $autoType ---------------//
 
-  //array/cube -> cube
+  //* -> cube
   //based on d3.autoType, but conversion rules not identical
   addArrayMethod('$autoType', function(empty) {
     this.toCube();
@@ -643,7 +643,13 @@
     if (this._a) callUpdate(this, '_a', '$ent', [ind, val]);
     return this;
   });
-  
+
+  //num, func -> cube
+  addArrayMethod('$$ent', function(ind, f) {
+    this.toCube();
+    this.$ent(ind, (assert.single(f))(this.ent(ind)));
+    return this;
+  });
   
   //--------------- at, $at ---------------//
   
@@ -681,6 +687,13 @@
       if (this.length === 0) throw Error('cube has no entries');
       this[ rcpToVec(this, r, c, p) ] = assert.single(val);
       if (this._a) callUpdate(this, '_a', '$at', [r, c, p, val]);
+      return this;
+    });
+
+    //*, *, *, func -> cube
+    addArrayMethod('$$at', function (r, c, p, f) {
+      this.toCube();
+      this.$at(r, c, p, (assert.single(f))(this.at(r, c, p)));
       return this;
     });
 
@@ -732,6 +745,16 @@
       }
     }
     if (this._a) callUpdate(this, '_a', '$vec', [origI, origVal]);
+    return this;
+  });
+
+  //*, func -> cube
+  addArrayMethod('$$vec', function (i, f) {
+    this.toCube();
+    f = assert.single(f);
+    const val = this.vec(i);
+    for (let j=0, n=val.length; j<n; j++) val[j] = f(val[j]);
+    this.$vec(i, val);
     return this;
   });
 
@@ -792,7 +815,7 @@
     return z;
   });
 
-  //*, [*, *, *] -> cube
+  //*, *, *, * -> cube
   addArrayMethod('$rcp', function(r, c, p, val) {
     this.toCube();
     const origVal = val;
@@ -808,6 +831,16 @@
       for (let i=0; i<n; i++) this[v[i]] = val[i];
     }
     if (this._a) callUpdate(this, '_a', '$rcp', [r, c, p, origVal]);
+    return this;
+  });
+
+  //*, *, *, func -> cube
+  addArrayMethod('$$rcp', function (r, c, p, f) {
+    this.toCube();
+    f = assert.single(f);
+    const val = this.rcp(r, c, p);
+    for (let j=0, n=val.length; j<n; j++) val[j] = f(val[j]);
+    this.$rcp(i, val);
     return this;
   });
 
@@ -925,6 +958,13 @@
       if (this._a) callUpdate(this, '_a', '$subcube', [row, col, page, val]);
       return this;
     });
+
+    //*, *, *, func -> cube
+    addArrayMethod('$$subcube', function (r, c, p, f) {
+      this.toCube();
+      this.$subcube(r, c, p, (assert.single(f))(this.subcube(r, c, p)));
+      return this;
+    });
     
     //row, col, page getters and setters
     {
@@ -947,6 +987,11 @@
         addArrayMethod(name, function (j, ret) {
           return oneDimGetter[i](this, j, ret);
         });
+        addArrayMethod('$$' + name, function (j, f) {
+          this.toCube();
+          this['$' + name](j, (assert.single(f))(this[name](j)));
+          return this;
+        });
       });
 
       ['$row', '$col', '$page'].forEach( (name, i) => {
@@ -958,7 +1003,7 @@
           return this;
         });
       });
-        
+
       //bool, array/cube, num, *, *, * -> *
       const downAlongBack = function(setter, x, dim, s, e, retVal) {
         x.toCube();
@@ -979,6 +1024,12 @@
         addArrayMethod(name, function(s, e, ret) {
           return downAlongBack(false, this, i, s, e, ret);
         });
+        addArrayMethod('$$' + name, function(s, e, f) {
+          this.toCube();
+          this['$' + name](s, e, (assert.single(f))(this[name](s, e)));
+          return this;
+        });
+
       });
 
       ['$rowSlice', '$colSlice', '$pageSlice'].forEach( (name, i) => {
@@ -1369,18 +1420,23 @@
     var [val, valSingle] = polarize(val);
     const n = this.length;
     if (valSingle) {
-      if (typeof val === 'function') {
-        for (let j=0; j<n; j++) this[j][nm] = val(this[j], j, this);
-      }
-      else {
-        for (let j=0; j<n; j++) this[j][nm] = val;
-      }
+      for (let j=0; j<n; j++) this[j][nm] = val;
     }
     else {
       if (val.length !== n) throw Error('shape mismatch');
       for (let j=0; j<n; j++) this[j][nm] = val[j];
     }
     if (this._a) callUpdate(this, '_a', '$prop', [origNm, origVal]);
+    return this;
+  });
+
+  //str, func -> cube
+  addArrayMethod('$$prop', function(nm, f) {
+    this.toCube();
+    f = assert.single(f);
+    const val = this.prop(nm);
+    for (let j=0, n=val.length; j<n; j++) val[j] = f(val[j]);
+    this.$prop(nm, val);
     return this;
   });
 
