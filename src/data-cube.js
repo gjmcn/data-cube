@@ -2159,9 +2159,6 @@
 
   //--------------- unpack ---------------//
 
-
-!!!!!!!!!!!!!!!!!!!!!!!!HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
   addArrayMethod('unpack', function() {
     this.toCube();
     const n = this.length;
@@ -2178,14 +2175,20 @@
           dim = d;
         }
       }
-      if (n === 0) z = [1, 1, 1].$ent(dim, 0).cube();
+      if (n === 0) {
+        const zShp = [1, 1, 1];
+        zShp[dim] = 0;
+        z = zShp.cube();
+      }
       else {
         const mthd = dim === 0 ? 'vert' : (dim === 1 ? 'horiz' : 'depth');
-        if (this[0]._data_cube) {  //call cube concat method from first entry to use extras 
+        if (this[0]._data_cube) {  //call cube concat method on entry 0 so use extras 
           z = this[0][mthd](...this.slice(1));
         }
-        else {  //first entry has no extras, but do not call cube method on it will convert it
-          z = [this[0].length, 1, 1].$ent(dim, 0).cube()[mthd](...this);
+        else {  //entry 0 has no extras, but calling cube method would convert it to a cube
+          const zShp = [this[0].length, 1, 1];
+          zShp[dim] = 0;
+          z = zShp.cube()[mthd](...this);
         }
       }
     }
