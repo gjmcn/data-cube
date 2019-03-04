@@ -2067,6 +2067,23 @@
     ]);
     
   }
+
+  console.log('--- $autoType');
+  {
+    const obj = {a:5},
+          x = ['5', 'uv', 'false', 'true', 'undefined',
+               'null', 'Infinity', obj, '', ' true']
+            .$shape(2)
+            .$key(0, ['a','b']);
+    test('$autoType-0', x.$autoType(), 
+      [5, 'uv', false, true, undefined, null, Infinity, obj, undefined, ' true']
+        .$shape(2)
+        .$key(0, ['a', 'b']));
+    test('$autoType-1', ['', ' '].$autoType(), [undefined, 0]);
+    test('$autoType-2', ['', 3, true, null, undefined].$autoType(''), 
+      ['', 3, true, null, undefined]);
+    test('$autoType-3', [''].$autoType(5), [5]);
+  }
   
   console.log('--- which');
   {  
