@@ -1216,8 +1216,8 @@
       ['trim',    x => x.trim()],
       ['toLowerCase', x => x.toLowerCase()],
       ['toUpperCase', x => x.toUpperCase()],
-      ['box', x => Array.isArray(x) ? x : [x]],
-      ['unbox', x => Array.isArray(x) ? x[0] : x]
+      ['box',   x => Array.isArray(x) ? x    : [x]],
+      ['unbox', x => Array.isArray(x) ? x[0] :  x ]
     ];
     
     //-> cube

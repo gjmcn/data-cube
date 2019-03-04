@@ -2154,6 +2154,8 @@
     test('ew-trim',        [' a ','b '].trim(), ['a','b']);
     test('ew-not',         [true,null].not(), [false,true]);
     test('ew-typeof',      [-2,'a'].typeof(), ['number','string']);
+    assert('ew-box',       () => _isEqual([-2,['a']].box(), [[-2],['a']]), true);
+    assert('ew-unbox',     () => _isEqual([-2,['a','b'],[]].unbox(), [-2,'a',undefined]), true);
     
     const dt = ['Dec 2020', 'July 15 2030'].date();
     assert('ew-date-0', () => dt[0].getMonth(), 11);
