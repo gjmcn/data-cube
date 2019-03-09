@@ -2569,6 +2569,16 @@
     );
 
     init();
+    assert.throw('throw-loop-shape-mismatch-5',
+      () => x.loop([()=>5, []])
+    );
+
+    init();
+    assert.throw('throw-loop-shape-mismatch-6',
+      () => x.loop([()=>5, [6,7], [8,9,10]])
+    );
+
+    init();
     assert.throw('throw-loop-empty-arg',
       () => x.loop([])
     );
@@ -2589,9 +2599,59 @@
     );
 
     init();
-    assert.throw('throw-loop-non-string-name',
+    assert.throw('throw-loop-non-string-or-function',
       () => x.loop([5])
     );
+
+    let f0 = () => u++,
+        f1 = a => v += a.prop1,
+        f2 = (a, b) => w = w += a.prop1 + b, 
+        f3 = (a, b, c) => w += b + c,
+        f4 = (a0, a1, a2, a3) => u += a3,
+        f5 = (a0, a1, a2, a3, a4) => v += a4,
+        f6 = (a0, a1, a2, a3, a4, a5) => w += a0.prop2 + a1 + a2 + a3 + a4 + a5;
+
+    init();
+    x[0].prop1 = 100;
+    x[1].prop1 = 200;
+    x.loop(
+      [f0],
+      [f1],
+      [f2, 5],
+      [f3, [10,20], 30]
+    );
+    assert('loop-function-0-a', () => u, 2);
+    assert('loop-function-0-b', () => v, 300);
+    assert('loop-function-0-c', () => w, 400);
+
+    init();
+    x.loop(
+      ['$prop1', [100, 200]],
+      ['$prop2', 500],
+      [f1],
+      [f6, 7, 8, [9,10], 11, [12,13]],
+      f0
+    );
+    assert('loop-function-1-a', () => u, 2);
+    assert('loop-function-1-b', () => v, 300);
+    assert('loop-function-1-c', () => w, 1096);
+
+    init(1);
+    x.loop(
+      [f4, 5, 6, 7],
+      [f5, 8, 9, 10, 11]
+    );
+    assert('loop-function-2-a', () => u, 7);
+    assert('loop-function-2-b', () => v, 11);
+    
+    init(1);
+    x.loop(
+      ['$prop1', [100, 200, 300]],
+      [f2, [10, 20, 30]],
+      [f4, 5, 6, [7, 8, 9]],
+    );
+    assert('loop-function-3-a', () => w, 660);
+    assert('loop-function-3-b', () => u, 24);
   }
 
   console.log('--- matrix');
