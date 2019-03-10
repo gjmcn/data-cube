@@ -2164,6 +2164,9 @@
   addArrayMethod('unpack', function() {
     this.toCube();
     const n = this.length;
+    if (n > 65536) {
+      throw Error('exceeds unpack limit of 65536 entries in outer array');
+    }
     let z;
     for (let i=0; i<n; i++) {
       if (!Array.isArray(this[i])) throw Error('all entries must be arrays');
