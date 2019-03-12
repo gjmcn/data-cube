@@ -2666,6 +2666,7 @@
     test('unpack-1-entry-2', [[5,6].tp()].unpack(), [5,6].tp());
     test('unpack-1-entry-3', [[5,6].tp([1,2,0])].unpack(), [5,6].tp([1,2,0]));
     test('unpack-1-entry-4', [[]].unpack(), []);
+    test('unpack-1-entry-5', [[5,6].$key(0, ['a','b'])].unpack(), [5,6].$key(0, ['a','b']));
 
     let x;
     
@@ -2688,7 +2689,7 @@
       [5,6].$key(0, ['a','b']).$key(1, 'i').$key(2, 'I')
         .$label(0, 'rows').$label(1, 'cols').$label(2, 'pages'), 
       [7,8,9,10].$shape(2).$key(1, ['ii','iii']),
-      [].$shape([2,0,1]).$key(1, []),
+      [2,0,1].cube().$key(1, []),
       [11,12,13,14,15,16].$shape(2).$key(1, ['iv','v','vi'])
     ].tp();
     test('unpack-4-entry', x.unpack(), [5,6,7,8,9,10,11,12,13,14,15,16].$shape(2)
@@ -2713,8 +2714,8 @@
     assert.throw('throw-unpack-non-vector',
       () => [[5], [6], [7], [8]].$shape(2).unpack()
     );
-    assert.throw('throw-unpack-non-vector',
-      () => [[5,6].$key(['a','b']), [7,8]].unpack()
+    assert.throw('throw-unpack-missing-keys',
+      () => [[5,6].$key(0, ['a','b']), [7,8]].unpack()
     );
     
   }
