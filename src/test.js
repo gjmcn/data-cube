@@ -2654,6 +2654,71 @@
     assert('loop-function-3-b', () => u, 24);
   }
 
+  console.log('--- unpack');
+  {
+
+    test('unpack-empty-0', [].unpack(), [0,1,1].cube());
+    test('unpack-empty-1', [1,0,1].cube().unpack(), [1,0,1].cube());
+    test('unpack-empty-2', [1,1,0].cube().unpack(), [1,1,0].cube());
+
+    test('unpack-1-entry-0', [[5]].unpack(), [5]);
+    test('unpack-1-entry-1', [[5,6]].unpack(), [5,6]);
+    test('unpack-1-entry-2', [[5,6].tp()].unpack(), [5,6].tp());
+    test('unpack-1-entry-3', [[5,6].tp([1,2,0])].unpack(), [5,6].tp([1,2,0]));
+    test('unpack-1-entry-4', [[]].unpack(), []);
+
+    let x;
+    
+    x = [[5,6], [7,8,9]];
+    test('unpack-2-entry-0', x.unpack(), [5,6,7,8,9]);
+
+    x = [[5,6,7].tp(), [11,12,13,14,15,16].$shape(2)]
+    test('unpack-2-entry-1', x.unpack(), [5,11,12,6,13,14,7,15,16].$shape(3));
+    
+    x = [[2, 1, 0].cube(), [5, 6]].$shape([1, 1, 2]);
+    x = test('unpack-2-entry-2', x.unpack(), [5,6]);
+
+    x = [[], [0,3,1].cube()].tp();
+    x = test('unpack-2-entry-3', x.unpack(), [0,4,1].cube());
+
+    x = [[5],[6],[7]];
+    x = test('unpack-3-entry', x.unpack(), [5,6,7]);
+
+    x = [
+      [5,6].$key(0, ['a','b']).$key(1, 'i').$key(2, 'I')
+        .$label(0, 'rows').$label(1, 'cols').$label(2, 'pages'), 
+      [7,8,9,10].$shape(2).$key(1, ['ii','iii']),
+      [].$shape([2,0,1]).$key(1, []),
+      [11,12,13,14,15,16].$shape(2).$key(1, ['iv','v','vi'])
+    ].tp();
+    test('unpack-4-entry', x.unpack(), [5,6,7,8,9,10,11,12,13,14,15,16].$shape(2)
+      .$key(0, ['a','b']).$key(1, ['i','ii','iii','iv','v','vi']).$key(2, 'I')
+      .$label(0, 'rows').$label(1, 'cols').$label(2, 'pages'));
+
+    assert.throw('throw-unpack-max-entries',
+      () => (new Array(65537)).fill([5]).unpack()
+    );
+    assert.throw('throw-unpack-shape-mismatch-0',
+      () => [[5,6], [7,8,9]].tp().unpack()
+    );
+    assert.throw('throw-unpack-shape-mismatch-1',
+      () => [[5, 6].tp(), [7, 8, 9].tp()].unpack()
+    );
+    assert.throw('throw-unpack-non-array-entry-0',
+      () => [5, [6,7]].unpack()
+    );
+    assert.throw('throw-unpack-non-array-entry-1',
+      () => [[6, 7], 5].unpack()
+    );
+    assert.throw('throw-unpack-non-vector',
+      () => [[5], [6], [7], [8]].$shape(2).unpack()
+    );
+    assert.throw('throw-unpack-non-vector',
+      () => [[5,6].$key(['a','b']), [7,8]].unpack()
+    );
+    
+  }
+
   console.log('--- matrix');
   {
     
@@ -3128,7 +3193,7 @@
       [5, 6].$shape([1, 2]).$key(1, ['a', 'b'])
     );
     assert.throw('throw-dict-invalid-dim',
-      () => ['a', 5, 'b', 6].dict('1'),
+      () => ['a', 5, 'b', 6].dict('1')
     );
     assert.throw('throw-dict-odd-length-0',
       () => ['a'].dict()
