@@ -2236,8 +2236,7 @@
 
     //-> bool
     addArrayMethod('isUnique', function() {
-      this.toCube();
-      return this.length === this.unique().length;
+      return this.unique().length === this.length;
     });
 
     //[*, *, *, ...] -> array
