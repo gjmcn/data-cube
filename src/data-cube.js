@@ -2257,9 +2257,8 @@
     
     //[*, *, *, ...] -> array
     addArrayMethod('inter', function(...args) {
-      this.toCube();
-      const nArg = args.length;
       let z = this.unique();
+      const nArg = args.length;
       for (let i=0; i<nArg; i++) {
         if (z.length === 0) break;
         let s = new Set(toArray(args[i]));
