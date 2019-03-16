@@ -2910,7 +2910,7 @@
     
     //assertion functions that depend on data-cube methods
     dc._assert.test = (name, a, b) => {
-      try { 
+      try {
         a.compare(b);
       }
       catch (err) {
