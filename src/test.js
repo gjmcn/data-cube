@@ -1022,6 +1022,31 @@
     assert('$shape-same-length-1', () => x.length, 12);
     assert('$shape-same-length-2', () => y.length, 0);
   }
+
+  console.log('--- $$shape');
+  {
+    test('$$shape-0',
+      [3,4,5,6,7,8].$$shape(s => s[0]/2),
+      [3,4,5,6,7,8].$shape(3)
+    );
+    test('$$shape-1',
+      [3,4,5,6,7,8].$$shape(s => 1),
+      [3,4,5,6,7,8].tp()
+    );
+
+    assert.throw('throw-$$shape-not-function',
+      () => [3,4,5,6].$$shape(2)
+    );
+
+    const x = [3,4,5,6,7,8];
+    assert.throw('throw-$$shape-not-singleton',
+      () => x.$$shape([2,3])
+    );
+    assert('$$shape-converts-to-cube-on-fail',
+      () => x._data_cube,
+      true
+    );
+  }
   
   console.log('--- label, $label')
   {

@@ -375,7 +375,7 @@
   //func -> cube
   addArrayMethod('$$shape', function(f) {
     this.toCube();
-    this.$shape((assert.single(f))(this.shape()));
+    this.$shape(assert.single(f)(this.shape()));
     return this;
   });
   
