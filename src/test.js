@@ -1211,6 +1211,48 @@
 
   }
 
+  console.log('--- $$key');
+  {
+    let x = [3,4].$key(0, ['a','b']);
+    test('$$key-0',
+      x.$$key(undefined, K => K.add('!')),
+      [3,4].$key(0, ['a!','b!'])
+    );
+
+    x = [3,4,5,6,7,8]
+      .$shape([2,1,3])
+      .$key(2, ['a','b','c'])
+      .$$key(2, K => K.flip());
+    test('$$key-1',
+      x.key(2),
+      ['c','b','a']
+    );
+
+    x = [3,4];
+    test('$$key-2',
+      x.$$key(0, K => K),  //K is null
+      [3,4]
+    );
+
+    x = [3,4].tp();
+    assert.throw('throw-$$key-function-error',
+      () => x.$$key(1, K => K.add('!'))  //add is not a property of null
+    );
+    test('$$key-unchanged-0',
+      x,
+      [3,4].tp()
+    );
+
+    x = [3,4].$key(0, ['u','v']);
+    assert.throw('throw-$$key-shape-mismatch',
+      () => x.$$key(0, () => ['a','b','c'])
+    );
+    test('$$key-unchanged-1',
+      x,
+      [3,4].$key(0, ['u','v'])
+    );
+  }
+
   console.log('--- n');
   {
     const b = [4,3,5].cube();

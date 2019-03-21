@@ -542,15 +542,11 @@
   //num, func -> cube
   addArrayMethod('$$key', function(dim, f) {
     this.toCube();
-    f = assert.single(f);
-    const keys = this.key(dim);
-    for (let j=0, n=keys.length; j<n; j++) keys[j] = f(keys[j]);
-    this.$key(dim, keys);
+    this.$key(dim, assert.single(f)(this.key(dim)));
     return this;
   });
 
   
-
   //--------------- $strip ---------------//
   
   //-> cube
