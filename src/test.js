@@ -1112,6 +1112,25 @@
     ]); 
     
   }
+
+  console.log('--- $$label');
+  {
+    const x = [3,4].$label(0, 'r');
+    test('$$label-0',
+      x.$$label(0, lab => lab + 'ows'),
+      [3,4].$label(0, 'rows')
+    );
+
+    const y = [3,4].$$label([1], lab => lab + '!');
+    assert('$$label-1',
+      () => y.label(1),
+      'null!'
+    );
+
+    assert.throw('throw-$$label-invalid-dim',
+      () => [3,4].$$label(3, () => 'the label')
+    );
+  }
     
   console.log('--- key, $key');
   {

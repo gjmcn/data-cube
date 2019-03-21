@@ -496,7 +496,7 @@
   //num, func -> cube
   addArrayMethod('$$label', function(dim, f) {
     this.toCube();
-    this.$label(dim, (assert.single(f))(this.label(dim)));
+    this.$label(dim, assert.single(f)(this.label(dim)));
     return this;
   });
   
