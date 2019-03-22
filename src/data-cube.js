@@ -668,7 +668,7 @@
   //num, func -> cube
   addArrayMethod('$$ent', function(ind, f) {
     this.toCube();
-    this.$ent(ind, (assert.single(f))(this.ent(ind)));
+    this.$ent(ind, assert.single(f)(this.ent(ind)));
     return this;
   });
   

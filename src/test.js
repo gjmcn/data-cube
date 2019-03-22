@@ -1886,6 +1886,28 @@
     ]);
 
   }
+
+  console.log('--- $$ent');
+  {
+    const x = [3,4];
+    test('$$ent-0',
+      x.$$ent(1, e => e + 10),
+      [3,14]
+    );
+
+    const y = [3,4,5,6,7,8]
+      .$shape(2)
+      .$key(1, ['a','b','c'])
+      .$$ent(-2, e => e + 10);
+      test('$$ent-1',
+        y,
+        [3,4,5,6,17,8].$shape(2).$key(1, ['a','b','c'])
+      );
+
+    assert.throw('throw-$$ent-invalid-index',
+      () => [3,4].$$ent(2, () => 10)
+    );
+  }
   
   console.log('--- at, $at');
   {
