@@ -770,12 +770,9 @@
   });
 
   //*, func -> cube
-  addArrayMethod('$$vec', function (i, f) {
+  addArrayMethod('$$vec', function(i, f) {
     this.toCube();
-    f = assert.single(f);
-    const val = this.vec(i);
-    for (let j=0, n=val.length; j<n; j++) val[j] = f(val[j]);
-    this.$vec(i, val);
+    this.$vec(i, assert.single(f)(this.vec(i)));
     return this;
   });
 
@@ -856,12 +853,9 @@
   });
 
   //*, *, *, func -> cube
-  addArrayMethod('$$rcp', function (r, c, p, f) {
+  addArrayMethod('$$rcp', function(r, c, p, f) {
     this.toCube();
-    f = assert.single(f);
-    const val = this.rcp(r, c, p);
-    for (let j=0, n=val.length; j<n; j++) val[j] = f(val[j]);
-    this.$rcp(i, val);
+    this.$rcp(r, c, p, assert.single(f)(this.rcp(r, c, p)));
     return this;
   });
 

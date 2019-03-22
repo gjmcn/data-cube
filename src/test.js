@@ -1026,7 +1026,7 @@
   console.log('--- $$shape');
   {
     test('$$shape-0',
-      [3,4,5,6,7,8].$$shape(s => s[0]/2),
+      [3,4,5,6,7,8].$key(1,'a').$$shape(s => s[0]/2),
       [3,4,5,6,7,8].$shape(3)
     );
     test('$$shape-1',
@@ -2201,6 +2201,78 @@
       () => v.$vec(['b','c'],[51,52]),
     ]);
     
+  }
+
+  console.log('--- $$vec');
+  {
+    const x = [3,4,5,6];
+    test('$$vec-0',
+      x.$$vec([-2,0], V => V.add(10)),
+      [13,4,15,6]
+    );
+
+    const y = [3,4,5,6,7,8]
+      .$shape(2)
+      .$key(1, ['a','b','c'])
+      .$$vec(null, V => V.add(10));
+    test('$$vec-1',
+      y,
+      [13,14,15,16,17,18].$shape(2).$key(1, ['a','b','c'])
+    );
+    y.$$vec(3, V => V.add(100));
+    test('$$vec-2',
+      y,
+      [13,14,15,116,17,18].$shape(2).$key(1, ['a','b','c'])
+    );
+
+    const z = [3,5,6,7,9].$$vec([0,1,3], V => V.mean());
+    test('$$vec-3',
+      z,
+      [5,5,6,5,9]
+    );
+
+    assert.throw('throw-$$vec-invalid-index',
+      () => [3,4].$$vec([0,2], () => [10,20])
+    );
+    assert.throw('throw-$$vec-not-function',
+      () => [3,4].$$vec(null, 10)
+    );
+  }
+
+  console.log('--- $$rcp');
+  {
+    const x = [3,4];
+    test('$$rcp-0',
+      x.$$rcp(1, null, undefined, V => V.add(10)),
+      [3,14]
+    );
+
+    const y = [3,4,5,6,7,8]
+      .$shape([2,1,3])
+      .$key(2, ['a','b','c'])
+      .$$rcp(-1, 0, ['a','c'], V => V.add(10));
+    test('$$rcp-1',
+      y,
+      [3,14,5,6,7,18].$shape([2,1,3]).$key(2, ['a','b','c'])
+    );
+    y.$$rcp(null, null, null, V => V.add(10));
+    test('$$rcp-2',
+      y,
+      [13,14,5,6,7,18].$shape([2,1,3]).$key(2, ['a','b','c'])
+    );
+
+    const z = [3,5,4,7,9,10]
+      .$shape([2,3])
+      .$key(0, ['a','b'])
+      .$$rcp(['b','a','a'], [0,2,1], null, V => V.mean());
+    test('$$rcp-3',
+      z,
+      [3,6,6,7,6,10].$shape([2,3]).$key(0, ['a','b'])
+    );
+
+    assert.throw('throw-$$rcp-invalid-index',
+      () => [3,4].$$rcp(2, 0, 0, () => 10)
+    );
   }
 
   console.log('--- $autoType');
