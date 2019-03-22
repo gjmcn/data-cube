@@ -1899,10 +1899,10 @@
       .$shape(2)
       .$key(1, ['a','b','c'])
       .$$ent(-2, e => e + 10);
-      test('$$ent-1',
-        y,
-        [3,4,5,6,17,8].$shape(2).$key(1, ['a','b','c'])
-      );
+    test('$$ent-1',
+      y,
+      [3,4,5,6,17,8].$shape(2).$key(1, ['a','b','c'])
+    );
 
     assert.throw('throw-$$ent-invalid-index',
       () => [3,4].$$ent(2, () => 10)
@@ -2048,6 +2048,33 @@
       () => m.$at(1,-4,0,5),
     ]);
     
+  }
+
+  console.log('--- $$at');
+  {
+    const x = [3,4];
+    test('$$at-0',
+      x.$$at(1, null, undefined, e => e + 10),
+      [3,14]
+    );
+
+    const y = [3,4,5,6,7,8]
+      .$shape([2,1,3])
+      .$key(2, ['a','b','c'])
+      .$$at(-1, 0, 'b', e => e + 10);
+    test('$$at-1',
+      y,
+      [3,4,5,16,7,8].$shape([2,1,3]).$key(2, ['a','b','c'])
+    );
+    y.$$at(null, null, null, e => e + 10);
+    test('$$at-2',
+      y,
+      [13,4,5,16,7,8].$shape([2,1,3]).$key(2, ['a','b','c'])
+    );
+
+    assert.throw('throw-$$at-invalid-index',
+      () => [3,4].$$at(2, 0, 0, () => 10)
+    );
   }
   
   console.log('--- vec, $vec');

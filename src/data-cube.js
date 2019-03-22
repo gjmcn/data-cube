@@ -712,9 +712,9 @@
     });
 
     //*, *, *, func -> cube
-    addArrayMethod('$$at', function (r, c, p, f) {
+    addArrayMethod('$$at', function(r, c, p, f) {
       this.toCube();
-      this.$at(r, c, p, (assert.single(f))(this.at(r, c, p)));
+      this.$at(r, c, p, assert.single(f)(this.at(r, c, p)));
       return this;
     });
 
