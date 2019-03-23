@@ -1658,7 +1658,58 @@
     ]);
     
   }
-    
+   
+  console.log('--- $$subcube');
+  {
+    let x = [3,4,5];
+    test('$$subcube-0',
+      x.$$subcube([0,2], null, undefined, V => V.add(10)),
+      [13,4,15]
+    );
+
+    x = [3,14].seq()
+      .$shape([2,3,2])
+      .$key(1, ['a','b','c'])
+      .$$subcube(-1, null, [0], V => V.add(10));
+    test('$$subcube-1',
+      x,
+      [3,14].seq()
+        .$vec([1,3,5], [14,16,18])
+        .$shape([2,3,2])
+        .$key(1, ['a','b','c'])
+    );
+    x.$$subcube(null, null, null, () => 55);
+    test('$$subcube-2',
+      x,
+      [2,3,2].cube(55).$key(1, ['a','b','c'])
+    );
+
+    x = [3,5,4,7,9,10]
+      .$shape([2,3])
+      .$key(0, ['a','b'])
+      .$$subcube('a', [0,2], null, V => V.mean(-1));
+    test('$$subcube-3',
+      x,
+      [6,5,4,7,6,10].$shape([2,3]).$key(0, ['a','b'])
+    );
+
+    x = [0,19].seq()
+      .$shape(4)
+      .$key(1, ['a','e'].seq())
+    x.$$subcube([2,0], ['e','b'], null, V => V.add(10));
+    test('$$subcube-4',
+      x,
+      [0,19].seq()
+        .$vec([4,6,16,18], [14,16,26,28])
+        .$shape(4)
+        .$key(1, ['a','e'].seq())
+    );
+
+    assert.throw('throw-$$subcube-invalid-index',
+      () => [3,4].$$subcube(2, 0, 0, () => 10)
+    );
+  }
+
   console.log('--- vble');
   {
     

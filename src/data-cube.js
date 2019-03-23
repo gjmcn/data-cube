@@ -977,7 +977,7 @@
     //*, *, *, func -> cube
     addArrayMethod('$$subcube', function (r, c, p, f) {
       this.toCube();
-      this.$subcube(r, c, p, (assert.single(f))(this.subcube(r, c, p)));
+      this.$subcube(r, c, p, assert.single(f)(this.subcube(r, c, p)));
       return this;
     });
     
