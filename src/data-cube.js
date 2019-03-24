@@ -1041,7 +1041,7 @@
         });
         addArrayMethod('$$' + name, function(s, e, f) {
           this.toCube();
-          this['$' + name](s, e, (assert.single(f))(this[name](s, e)));
+          this['$' + name](s, e, assert.single(f)(this[name](s, e)));
           return this;
         });
 
