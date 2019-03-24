@@ -1002,9 +1002,9 @@
         addArrayMethod(name, function (j, ret) {
           return oneDimGetter[i](this, j, ret);
         });
-        addArrayMethod('$$' + name, function (j, f) {
+        addArrayMethod('$$' + name, function(j, f) {
           this.toCube();
-          this['$' + name](j, (assert.single(f))(this[name](j)));
+          this['$' + name](j, assert.single(f)(this[name](j)));
           return this;
         });
       });

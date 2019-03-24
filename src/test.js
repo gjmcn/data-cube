@@ -1659,8 +1659,10 @@
     
   }
    
-  console.log('--- $$subcube');
+  console.log('--- $$-subcubes');
   {
+
+    //$$subcube
     let x = [3,4,5];
     test('$$subcube-0',
       x.$$subcube([0,2], null, undefined, V => V.add(10)),
@@ -1708,6 +1710,48 @@
     assert.throw('throw-$$subcube-invalid-index',
       () => [3,4].$$subcube(2, 0, 0, () => 10)
     );
+
+    //$$row, $$col, $$page
+    x = [3,4,5];
+    test('$$row-0',
+      x.$$row([0,-1], V => V.add(10)),
+      [13,4,15]
+    );
+    test('$$row-1',
+      x.$$row([2,1], V => V.add(100)),
+      [13,104,115]
+    );
+
+    x = [4,5,6,7,8,11]
+      .$shape([2,3])
+      .$key(1, ['a','b', 'c'])
+      .$$col(['b','c'], V => V.mean(-1));
+    test('$$col-1',
+      x,
+      [4,5,8,8,8,8].$shape([2,3]).$key(1, ['a','b','c'])
+    );
+    x.$$row(null, V => V.add(10));
+    test('$$row-2',
+      x,
+      [14,15,18,18,18,18].$shape([2,3]).$key(1, ['a','b','c'])
+    );
+
+    x = [3,14].seq()
+      .$shape([2,3,2])
+      .$key(1, ['a','b','c'])
+      .$$page(1, V => V.add(10));
+    test('$$page-0',
+      x,
+      [3,4,5,6,7,8, 19,20,21,22,23,24]
+        .$shape([2,3,2])
+        .$key(1, ['a','b','c'])
+    );
+
+    assert.throw('throw-$$col-invalid-index',
+      () => [3,4].tp().$$col(2, () => 10)
+    );
+
+    //$$rowSlice, $$colSlice, $$pageSlice
   }
 
   console.log('--- vble');
