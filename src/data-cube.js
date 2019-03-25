@@ -1450,10 +1450,7 @@
   //str, func -> cube
   addArrayMethod('$$prop', function(nm, f) {
     this.toCube();
-    f = assert.single(f);
-    const val = this.prop(nm);
-    for (let j=0, n=val.length; j<n; j++) val[j] = f(val[j]);
-    this.$prop(nm, val);
+    this.$prop(nm, assert.single(f)(this.prop(nm)));
     return this;
   });
 

@@ -1786,7 +1786,6 @@
       () => [3,4].tp().$$colSlice(1, 2, () => 10)
    );
 
-
   }
 
   console.log('--- vble');
@@ -2989,6 +2988,48 @@
     );
     assert('loop-function-3-a', () => w, 660);
     assert('loop-function-3-b', () => u, 24);
+  }
+
+  console.log('--- $$prop');
+  {
+    let x, obj0, obj1, obj2, obj3;
+    
+    obj0 = {a:5, b:6};
+    obj1 = {a:7};
+    x = [obj0, obj1];
+    x.$$prop('b', P => P.string().add('!'));
+    assert('$$prop-0', () => _isEqual(
+      x,
+      [{a:5, b:'6!'}, {a:7, b:'undefined!'}]
+    ), true);
+
+    obj0 = {a:5, b:6};
+    obj1 = {a:7};
+    obj2 = {a:8, b:9};
+    obj3 = {a:10, b:11};
+    x = [obj0, obj1, obj2, obj3]
+      .$shape(2)
+      .$key(1, ['u','v'])
+      .$$prop('a', P => P.add(10));
+    test('$$prop-1',
+      x,
+      [obj0, obj1, obj2, obj3]
+        .$shape(2)
+        .$key(1, ['u','v'])
+    );
+    assert('$$prop-2', () => _isEqual(
+      x,
+      [{a:15, b:6}, {a:17}, {a:18, b:9}, {a:20, b:11}]
+    ), true);
+
+    x = [{a:5}, undefined];
+    assert.throw('throw-$$prop-undefined',
+      () => x.$$prop('a', P => P.add(10))
+    );
+    assert('$$prop-unchanged', () => _isEqual(
+      x,
+      [{a:5}, undefined]
+    ),true);
   }
 
   console.log('--- unpack');
