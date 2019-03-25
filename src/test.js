@@ -3021,6 +3021,17 @@
       x,
       [{a:15, b:6}, {a:17}, {a:18, b:9}, {a:20, b:11}]
     ), true);
+    x.$$prop('a', P => P.sum(-1))
+    test('$$prop-3',
+      x,
+      [obj0, obj1, obj2, obj3]
+        .$shape(2)
+        .$key(1, ['u','v'])
+    );
+    assert('$$prop-4', () => _isEqual(
+      x,
+      [{a:70, b:6}, {a:70}, {a:70, b:9}, {a:70, b:11}]
+    ), true);
 
     x = [{a:5}, undefined];
     assert.throw('throw-$$prop-undefined',
