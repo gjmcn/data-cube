@@ -1044,7 +1044,6 @@
           this['$' + name](s, e, assert.single(f)(this[name](s, e)));
           return this;
         });
-
       });
 
       ['$rowSlice', '$colSlice', '$pageSlice'].forEach( (name, i) => {
