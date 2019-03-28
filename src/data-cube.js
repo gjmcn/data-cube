@@ -1318,7 +1318,7 @@
 
   {
     //array/cube, str/func/null, str, arr -> cube
-    const methodCallApply = (x, nm, mcp, argsArray) => {
+    const methodCallApply = (x, nm, mcp, argsArray, retArray) => {
       x.toCube();
       nm = assert.single(nm);
       if (mcp === 'call') assert.func(nm);
@@ -1327,7 +1327,7 @@
       }
       const n = x.length,
             na = argsArray.length,
-            z = x.copy('shell');
+            z = retArray ? new Array(n) : x.copy('shell');
       if (na === 0) {
         if (mcp === 'method')    { for (let i=0; i<n; i++) z[i] = x[i][nm]() }
         else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = nm(x[i])   }
@@ -1409,6 +1409,14 @@
 
     addArrayMethod('apply', function (...argsArray) {
       return methodCallApply(this, null, 'apply', argsArray);
+    });
+
+    addArrayMethod('$$call', function(f, ...argsArray) {
+      const vals = methodCallApply(this, f, 'call', argsArray, true);
+      if (this._b) callUpdate(this, '_b', '$call', [f, vals]);
+      for (let i=0, n=this.length; i<n; i++) this[i] = vals[i];
+      if (this._a) callUpdate(this, '_a', '$call', [f, vals]);
+      return this;
     });
   
   }
@@ -1543,6 +1551,15 @@
     copyKey(this,z);
     copyLabel(this,z);
     return z;
+  });
+
+  addArrayMethod('$$cmap', function(f, asThis) {
+    this.toCube();
+    const vals = this.map(assert.single(f), assert.single(asThis));
+    if (this._b) callUpdate(this, '_b', '$cmap', [f, asThis]);
+    for (let i=0, n=this.length; i<n; i++) this[i] = vals[i];
+    if (this._a) callUpdate(this, '_a', '$cmap', [f, asThis]);
+    return this;
   });
   
   
