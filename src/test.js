@@ -2626,6 +2626,45 @@
     ]);
     
   }
+
+  console.log('--- $$call');
+  {
+    let x = [3,4];
+    test('$$call-0',
+      x.$$call(v => v + 10),
+      [13, 14]
+    );
+
+    x = [2,3].cube()  //array of holes
+      .$key(1, ['a','b','c'])
+      .$$call((v,s) => v + s, ['!', '.',',','&','?','|']);
+    test('$$call-1',
+      x,
+      ['undefined!','undefined.','undefined,','undefined&','undefined?','undefined|']
+        .$shape(2)
+        .$key(1, ['a','b','c']),
+    );
+
+    let y = 0,
+        z = 0;
+    x = [3,4]
+      .$before((ar, setterName, args) => {
+        y = `${ar}, ${setterName}, ${args.join()}`;
+      })
+      .$after([() => z += 2, () => z *= 5]);
+    x.$$call((v, a, b) => v + a + b, 20, [500,600]);
+    test('$$call-update-0',
+      x,
+      [523, 624]
+    )
+    assert('$$call-update-1', () => y === '3,4, $call, 20,500,600', true);
+    assert('$$call-update-2', () => z === 10, true);
+
+    assert.throw('throw-$$call-not-a-function',
+      () => [3,4].$$call(5)
+    );
+
+  }
   
   console.log('--- entrywise: method');
   {

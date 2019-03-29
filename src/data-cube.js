@@ -1317,7 +1317,7 @@
   //--------------- entrywise: method, call, apply ---------------//
 
   {
-    //array/cube, str/func/null, str, arr -> cube
+    //array/cube, str/func/null, str, arr[, boolean] -> cube
     const methodCallApply = (x, nm, mcp, argsArray, retArray) => {
       x.toCube();
       nm = assert.single(nm);
@@ -1412,10 +1412,12 @@
     });
 
     addArrayMethod('$$call', function(f, ...argsArray) {
+      //f does not see argsArray (only individual entries) so
+      //no need to copy as origArgsArray
       const vals = methodCallApply(this, f, 'call', argsArray, true);
-      if (this._b) callUpdate(this, '_b', '$call', [f, vals]);
+      if (this._b) callUpdate(this, '_b', '$call', copyArray(argsArray));
       for (let i=0, n=this.length; i<n; i++) this[i] = vals[i];
-      if (this._a) callUpdate(this, '_a', '$call', [f, vals]);
+      if (this._a) callUpdate(this, '_a', '$call', argsArray);
       return this;
     });
   
@@ -1538,30 +1540,6 @@
     return this;
   });
 
-
-  //--------------- entrywise: cmap ---------------//
-
-  addArrayMethod('cmap', function(f, asThis) {
-    this.toCube();
-    const z = this.map(assert.single(f), assert.single(asThis));
-    z.toCube();
-    z._s[0] = this._s[0];
-    z._s[1] = this._s[1];
-    z._s[2] = this._s[2];
-    copyKey(this,z);
-    copyLabel(this,z);
-    return z;
-  });
-
-  addArrayMethod('$$cmap', function(f, asThis) {
-    this.toCube();
-    const vals = this.map(assert.single(f), assert.single(asThis));
-    if (this._b) callUpdate(this, '_b', '$cmap', [f, asThis]);
-    for (let i=0, n=this.length; i<n; i++) this[i] = vals[i];
-    if (this._a) callUpdate(this, '_a', '$cmap', [f, asThis]);
-    return this;
-  });
-  
   
   //--------------- all fold and cumulative ---------------//
   
