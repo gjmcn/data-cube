@@ -2645,11 +2645,11 @@
         .$key(1, ['a','b','c']),
     );
 
-    let y = 0,
+    let y,
         z = 0;
     x = [3,4]
       .$before((ar, setterName, args) => {
-        y = `${ar}, ${setterName}, ${args.join()}`;
+        y = `${ar.join()}, ${setterName}, ${args.join()}`;
       })
       .$after([() => z += 2, () => z *= 5]);
     x.$$call((v, a, b) => v + a + b, 20, [500,600]);
@@ -2657,7 +2657,7 @@
       x,
       [523, 624]
     )
-    assert('$$call-update-1', () => y === '3,4, $call, 20,500,600', true);
+    assert('$$call-update-1', () => y === '3,4, $call, 523,624', true);
     assert('$$call-update-2', () => z === 10, true);
 
     assert.throw('throw-$$call-not-a-function',

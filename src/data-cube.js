@@ -1317,8 +1317,8 @@
   //--------------- entrywise: method, call, apply ---------------//
 
   {
-    //array/cube, str/func/null, str, arr[, boolean] -> cube
-    const methodCallApply = (x, nm, mcp, argsArray, retArray) => {
+    //array/cube, str/func/null, str, arr -> cube
+    const methodCallApply = (x, nm, mcp, argsArray) => {
       x.toCube();
       nm = assert.single(nm);
       if (mcp === 'call') assert.func(nm);
@@ -1327,7 +1327,7 @@
       }
       const n = x.length,
             na = argsArray.length,
-            z = retArray ? new Array(n) : x.copy('shell');
+            z = x.copy('shell');
       if (na === 0) {
         if (mcp === 'method')    { for (let i=0; i<n; i++) z[i] = x[i][nm]() }
         else if (mcp === 'call') { for (let i=0; i<n; i++) z[i] = nm(x[i])   }
@@ -1412,12 +1412,10 @@
     });
 
     addArrayMethod('$$call', function(f, ...argsArray) {
-      //f does not see argsArray (only individual entries) so
-      //no need to copy as origArgsArray
-      const vals = methodCallApply(this, f, 'call', argsArray, true);
-      if (this._b) callUpdate(this, '_b', '$call', copyArray(argsArray));
-      for (let i=0, n=this.length; i<n; i++) this[i] = vals[i];
-      if (this._a) callUpdate(this, '_a', '$call', argsArray);
+      const result = methodCallApply(this, f, 'call', argsArray);
+      if (this._b) callUpdate(this, '_b', '$call', [result]);
+      for (let i=0, n=this.length; i<n; i++) this[i] = result[i];
+      if (this._a) callUpdate(this, '_a', '$call', [result]);
       return this;
     });
   
