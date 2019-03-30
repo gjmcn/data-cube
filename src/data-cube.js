@@ -2851,7 +2851,7 @@
       return [f, init];
     }
 
-    //[func, bool] -> *
+    //[func, str, obj] -> *
     addArrayMethod('fetch', function(f, type, init) {
       var [f, init] = procArgs(this, f, init);
       type = def(assert.single(type), 'text');
@@ -2862,7 +2862,7 @@
         }).then(result => f(result));
     });
 
-    //[func, bool] -> *
+    //[func, bool, obj] -> *
     addArrayMethod('fetchMatrix', function(f, name, init) {
       [f, init] = procArgs(this, f, init);
       name = def(assert.single(name), true);
@@ -2889,6 +2889,7 @@
         });
     });
 
+    //[func, obj] -> *
     addArrayMethod('fetchCube', function(f, init) {
       [f, init] = procArgs(this, f, init);
       return fetch(this[0], init)
@@ -2897,7 +2898,7 @@
           return response.json();
         }).then(result => {
           if (!Array.isArray(result)) throw Error('array expected');
-          return result.parse();
+          return f(result.parse());
         });
     });
   
@@ -2945,7 +2946,7 @@
      'seq','lin','grid','copy','toArray',
      'matrix','arAr','arObj','dsv','dict',
      'stringify','parse',
-     'fetch','fetchMatrix', 'fetchCube'].forEach( nm => {
+     'fetch','fetchMatrix','fetchCube'].forEach( nm => {
       dc[nm] = (x,...args) => toArray(x)[nm](...args);
     });
     
