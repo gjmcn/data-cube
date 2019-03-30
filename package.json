@@ -19,6 +19,7 @@
   "homepage": "https://github.com/gjmcn/data-cube#readme",
   "devDependencies": {
     "lodash.isequal": "^4.5.0",
+    "node-fetch": "^2.3.0",
     "rollup": "^0.59.1",
     "rollup-plugin-commonjs": "^9.1.0",
     "rollup-plugin-node-resolve": "^3.3.0",

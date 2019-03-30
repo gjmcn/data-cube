@@ -2839,6 +2839,70 @@
     else throw Error('serialized array or cube expected');
   });
 
+
+  //--------------- fetch ---------------//
+
+  {
+
+    const procArgs = (x, f, init) => {
+      if (x.length !== 1) throw Error('1-entry array expected');
+      f = assert.func(def(assert.single(f), x => x));
+      init = assert.single(init);
+      return [f, init];
+    }
+
+    //[func, bool] -> *
+    addArrayMethod('fetch', function(f, type, init) {
+      var [f, init] = procArgs(this, f, init);
+      type = def(assert.single(type), 'text');
+      return fetch(this[0], init)
+        .then(response => {
+          if (!response.ok) throw Error(response.statusText);
+          return response[type]();
+        }).then(result => f(result));
+    });
+
+    //[func, bool] -> *
+    addArrayMethod('fetchMatrix', function(f, name, init) {
+      [f, init] = procArgs(this, f, init);
+      name = def(assert.single(name), true);
+      let url;
+      if (typeof this[0] === 'string') url = this[0];
+      else if (this[0] instanceof Request)  url = this[0].url;
+      else throw Error('string or Request object expected');
+      const lastInd = url.lastIndexOf('.');
+      const ext = lastInd === -1
+        ? null
+        : url.slice(lastInd + 1).toLowerCase();
+      let delim;
+      if      (ext === 'csv') delim = ',';
+      else if (ext === 'tsv') delim = '\t';
+      return fetch(url, init)
+        .then(response => {
+          if (!response.ok) throw Error(response.statusText);
+          return response[delim ? 'text' : 'json']();
+        }).then(result => {
+          if (!ext && !Array.isArray(result)) {
+            throw Error('array expected');
+          }
+          return f(toArray(result).matrix(delim, name));
+        });
+    });
+
+    addArrayMethod('fetchCube', function(f, init) {
+      [f, init] = procArgs(this, f, init);
+      return fetch(this[0], init)
+        .then(response => {
+          if (!response.ok) throw Error(response.statusText);
+          return response.json();
+        }).then(result => {
+          if (!Array.isArray(result)) throw Error('array expected');
+          return result.parse();
+        });
+    });
+  
+  }
+
   //--------------- updates ---------------//
 
   {
@@ -2880,7 +2944,8 @@
     ['cube','rand','normal',
      'seq','lin','grid','copy','toArray',
      'matrix','arAr','arObj','dsv','dict',
-     'stringify','parse'].forEach( nm => {
+     'stringify','parse',
+     'fetch','fetchMatrix', 'fetchCube'].forEach( nm => {
       dc[nm] = (x,...args) => toArray(x)[nm](...args);
     });
     
