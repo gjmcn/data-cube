@@ -2852,13 +2852,13 @@
     }
 
     //[func, str, obj] -> *
-    addArrayMethod('fetch', function(f, type, init) {
+    addArrayMethod('fetch', function(f, method, init) {
       var [f, init] = procArgs(this, f, init);
-      type = def(assert.single(type), 'text');
+      method = def(assert.single(method), 'text');
       return fetch(this[0], init)
         .then(response => {
           if (!response.ok) throw Error(response.statusText);
-          return response[type]();
+          return response[method]();
         }).then(result => f(result));
     });
 
@@ -2895,11 +2895,8 @@
       return fetch(this[0], init)
         .then(response => {
           if (!response.ok) throw Error(response.statusText);
-          return response.json();
-        }).then(result => {
-          if (!Array.isArray(result)) throw Error('array expected');
-          return f(result.parse());
-        });
+          return response.text();
+        }).then(result => f([result].parse()));
     });
   
   }
