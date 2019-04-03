@@ -2844,31 +2844,34 @@
 
   {
 
-    const procArgs = (x, f, init) => {
+    const procArgs = (x, init) => {
       if (x.length !== 1) throw Error('1-entry array expected');
-      f = assert.func(def(assert.single(f), x => x));
-      init = assert.single(init);
-      return [f, init];
-    }
+      return assert.single(init);
+    };
 
-    //[func, str, obj] -> *
-    addArrayMethod('fetch', function(f, method, init) {
-      var [f, init] = procArgs(this, f, init);
+    const checkOk = response => {
+      if (!response.ok) {
+        throw Error(`HTTP error: ${response.status}, ${response.statusText}`);
+      }
+    };
+
+    //[str, obj] -> *
+    addArrayMethod('fetch', function(method, init) {
+      init = procArgs(this, init);
       method = def(assert.single(method), 'text');
       return fetch(this[0], init)
         .then(response => {
-          if (!response.ok) throw Error(response.statusText);
+          checkOk(response);
           return response[method]();
-        }).then(result => f(result));
+        });
     });
 
-    //[func, bool, obj] -> *
-    addArrayMethod('fetchMatrix', function(f, name, init) {
-      [f, init] = procArgs(this, f, init);
-      name = def(assert.single(name), true);
+    //[bool, obj] -> *
+    addArrayMethod('fetchMatrix', function(name, init) {
+      init = procArgs(this, init);
       let url;
       if (typeof this[0] === 'string') url = this[0];
-      else if (this[0] instanceof Request)  url = this[0].url;
+      else if (this[0] instanceof Request) url = this[0].url;
       else throw Error('string or Request object expected');
       const lastInd = url.lastIndexOf('.');
       const ext = lastInd === -1
@@ -2877,26 +2880,24 @@
       let delim;
       if      (ext === 'csv') delim = ',';
       else if (ext === 'tsv') delim = '\t';
+      if (delim) name = def(assert.single(name), true);
       return fetch(url, init)
         .then(response => {
-          if (!response.ok) throw Error(response.statusText);
+          checkOk(response);
           return response[delim ? 'text' : 'json']();
-        }).then(result => {
-          if (!ext && !Array.isArray(result)) {
-            throw Error('array expected');
-          }
-          return f(toArray(result).matrix(delim, name));
-        });
+        })
+        .then(result => toArray(result).matrix(delim, name));
     });
 
-    //[func, obj] -> *
-    addArrayMethod('fetchCube', function(f, init) {
-      [f, init] = procArgs(this, f, init);
+    //[obj] -> *
+    addArrayMethod('fetchParse', function(init) {
+      init = procArgs(this, init);
       return fetch(this[0], init)
         .then(response => {
-          if (!response.ok) throw Error(response.statusText);
+          checkOk(response);
           return response.text();
-        }).then(result => f([result].parse()));
+        })
+        .then(result => [result].parse());
     });
   
   }
