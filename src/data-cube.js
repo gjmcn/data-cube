@@ -2846,6 +2846,7 @@
 
     const procArgs = (x, init) => {
       if (x.length !== 1) throw Error('1-entry array expected');
+      assert.string(this[0]);
       return assert.single(init);
     };
 
@@ -2869,10 +2870,7 @@
     //[bool, obj] -> *
     addArrayMethod('fetchMatrix', function(name, init) {
       init = procArgs(this, init);
-      let url;
-      if (typeof this[0] === 'string') url = this[0];
-      else if (this[0] instanceof Request) url = this[0].url;
-      else throw Error('string or Request object expected');
+      let url = this[0];
       const lastInd = url.lastIndexOf('.');
       const ext = lastInd === -1
         ? null
