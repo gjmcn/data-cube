@@ -2944,7 +2944,7 @@
      'seq','lin','grid','copy','toArray',
      'matrix','arAr','arObj','dsv','dict',
      'stringify','parse',
-     'fetch','fetchMatrix','fetchCube'].forEach( nm => {
+     'fetch','fetchMatrix','fetchParse'].forEach( nm => {
       dc[nm] = (x,...args) => toArray(x)[nm](...args);
     });
     
