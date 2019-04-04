@@ -2846,7 +2846,7 @@
 
     const procArgs = (x, init) => {
       if (x.length !== 1) throw Error('1-entry array expected');
-      assert.string(this[0]);
+      assert.string(x[0]);
       return assert.single(init);
     };
 
