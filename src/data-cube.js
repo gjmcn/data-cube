@@ -375,7 +375,7 @@
   //func -> cube
   addArrayMethod('$$shape', function(f) {
     this.toCube();
-    this.$shape(assert.single(f)(this.shape()));
+    this.$shape(assert.single(f)(this.shape(), this));
     return this;
   });
   
@@ -496,7 +496,7 @@
   //num, func -> cube
   addArrayMethod('$$label', function(dim, f) {
     this.toCube();
-    this.$label(dim, assert.single(f)(this.label(dim)));
+    this.$label(dim, assert.single(f)(this.label(dim), this));
     return this;
   });
   
@@ -542,7 +542,7 @@
   //num, func -> cube
   addArrayMethod('$$key', function(dim, f) {
     this.toCube();
-    this.$key(dim, assert.single(f)(this.key(dim)));
+    this.$key(dim, assert.single(f)(this.key(dim), this));
     return this;
   });
 
@@ -668,7 +668,7 @@
   //num, func -> cube
   addArrayMethod('$$ent', function(ind, f) {
     this.toCube();
-    this.$ent(ind, assert.single(f)(this.ent(ind)));
+    this.$ent(ind, assert.single(f)(this.ent(ind), this));
     return this;
   });
   
@@ -714,7 +714,7 @@
     //*, *, *, func -> cube
     addArrayMethod('$$at', function(r, c, p, f) {
       this.toCube();
-      this.$at(r, c, p, assert.single(f)(this.at(r, c, p)));
+      this.$at(r, c, p, assert.single(f)(this.at(r, c, p), this));
       return this;
     });
 
@@ -772,7 +772,7 @@
   //*, func -> cube
   addArrayMethod('$$vec', function(i, f) {
     this.toCube();
-    this.$vec(i, assert.single(f)(this.vec(i)));
+    this.$vec(i, assert.single(f)(this.vec(i), this));
     return this;
   });
 
@@ -855,7 +855,7 @@
   //*, *, *, func -> cube
   addArrayMethod('$$rcp', function(r, c, p, f) {
     this.toCube();
-    this.$rcp(r, c, p, assert.single(f)(this.rcp(r, c, p)));
+    this.$rcp(r, c, p, assert.single(f)(this.rcp(r, c, p), this));
     return this;
   });
 
@@ -977,7 +977,7 @@
     //*, *, *, func -> cube
     addArrayMethod('$$subcube', function (r, c, p, f) {
       this.toCube();
-      this.$subcube(r, c, p, assert.single(f)(this.subcube(r, c, p)));
+      this.$subcube(r, c, p, assert.single(f)(this.subcube(r, c, p), this));
       return this;
     });
     
@@ -1004,7 +1004,7 @@
         });
         addArrayMethod('$$' + name, function(j, f) {
           this.toCube();
-          this['$' + name](j, assert.single(f)(this[name](j)));
+          this['$' + name](j, assert.single(f)(this[name](j), this));
           return this;
         });
       });
@@ -1041,7 +1041,7 @@
         });
         addArrayMethod('$$' + name, function(s, e, f) {
           this.toCube();
-          this['$' + name](s, e, assert.single(f)(this[name](s, e)));
+          this['$' + name](s, e, assert.single(f)(this[name](s, e), this));
           return this;
         });
       });
@@ -1460,7 +1460,7 @@
     f = assert.single(f);
     const n = this.length;
     const results = new Array(n);
-    for (let j=0; j<n; j++) results[j] = f(this[j]);
+    for (let j=0; j<n; j++) results[j] = f(this[j], this);
     this.$prop(nm, results);
     return this;
   });
