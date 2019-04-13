@@ -1457,6 +1457,7 @@
   //str, func -> cube
   addArrayMethod('$$prop', function(nm, f) {
     this.toCube();
+    assert.single(nm);  //not nm = ... since pass unchanged nm to $prop
     f = assert.single(f);
     const n = this.length;
     const results = new Array(n);
