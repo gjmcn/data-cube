@@ -2143,7 +2143,42 @@
   });
 
 
-  //--------------- unpack ---------------//
+  //--------------- pack and unpack ---------------//
+
+  addArrayMethod('pack', function(dim, sc) {
+    this.toCube();
+    dim = assert.single(dim);
+    sc = assert.single(sc);
+    let n, z;
+    if (dim === -1) {
+      n = this.length;
+      z = new Array(n);
+      for (let i=0; i<n; i++) z[i] = [this[i]];
+      z.toCube();
+    
+      !!!HERE: STILL CORRECT IF sC IS CORE OR ARRAY - I THINK SO
+    }
+
+    else {
+      if (dim === undefined) dim = 0;
+      else if (dim !== 0 && dim !== 1 && dim !== 2) throw Error('invalid dimension');
+      const dName = helper.shortDimName[dim];
+      n = this._s[dim];
+      z = new Array(n);
+      const keys = this.key(dim);
+      if (keys) {
+        for (let i=0; i<n; i++) z[i] = this[dName](keys[i], sc); 
+        this.$key(dim, keys);
+      }
+      else {
+        for (let i=0; i<n; i++) z[i] = this[dName](i, sc); 
+        z.toCube();
+      }
+      const label = this.label(dim);
+      if (label) z.$label(dim, label);
+    }
+    return z;
+  });
 
   addArrayMethod('unpack', function() {
     this.toCube();
