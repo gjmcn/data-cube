@@ -2147,36 +2147,24 @@
 
   addArrayMethod('pack', function(dim, sc) {
     this.toCube();
-    dim = assert.single(dim);
+    dim = assert.dim(dim);
     sc = assert.single(sc);
-    let n, z;
-    if (dim === -1) {
-      n = this.length;
-      z = new Array(n);
-      for (let i=0; i<n; i++) z[i] = [this[i]];
-      z.toCube();
-    
-      !!!HERE: STILL CORRECT IF sC IS CORE OR ARRAY - I THINK SO
+    const mthd = helper.shortDimName[dim],
+          keys = this.key(dim),
+          n = this._s[dim],
+          z = new Array(n);
+    let shp = [1, 1, 1];
+    shp[dim] = n;
+    z.$shape(shp);
+    if (keys) {
+      for (let i=0; i<n; i++) z[i] = this[mthd](keys[i], sc); 
+      z.$key(dim, keys);
     }
-
     else {
-      if (dim === undefined) dim = 0;
-      else if (dim !== 0 && dim !== 1 && dim !== 2) throw Error('invalid dimension');
-      const dName = helper.shortDimName[dim];
-      n = this._s[dim];
-      z = new Array(n);
-      const keys = this.key(dim);
-      if (keys) {
-        for (let i=0; i<n; i++) z[i] = this[dName](keys[i], sc); 
-        this.$key(dim, keys);
-      }
-      else {
-        for (let i=0; i<n; i++) z[i] = this[dName](i, sc); 
-        z.toCube();
-      }
-      const label = this.label(dim);
-      if (label) z.$label(dim, label);
+      for (let i=0; i<n; i++) z[i] = this[mthd](i, sc); 
     }
+    const label = this.label(dim);
+    if (label) z.$label(dim, label);
     return z;
   });
 
