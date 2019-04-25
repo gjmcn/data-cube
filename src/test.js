@@ -3072,6 +3072,8 @@
       [{a:70, b:6}, {a:70}, {a:70, b:9}, {a:70, b:11}]
     ), true);
 
+    test('$$prop-empty', [].$$prop('a', xi => xi.a + 10), []);
+
     x = [{a:5}, undefined];
     assert.throw('throw-$$prop-undefined',
       () => x.$$prop('a', xi => xi.a + 10)
@@ -3730,7 +3732,7 @@
   console.log('--- updates:');
   {
 
-    //ad-hoc tests not covered below:
+    //ad-hoc tests (not covered below):
     {
       console.log('      misc');
 
