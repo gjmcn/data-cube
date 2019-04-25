@@ -3036,7 +3036,7 @@
     obj0 = {a:5, b:6};
     obj1 = {a:7};
     x = [obj0, obj1];
-    x.$$prop('b', P => P.string().add('!'));
+    x.$$prop('b', xi => xi.b + '!');
     assert('$$prop-0', () => _isEqual(
       x,
       [{a:5, b:'6!'}, {a:7, b:'undefined!'}]
@@ -3049,7 +3049,7 @@
     x = [obj0, obj1, obj2, obj3]
       .$shape(2)
       .$key(1, ['u','v'])
-      .$$prop('a', P => P.add(10));
+      .$$prop('a', xi => xi.a + 10);
     test('$$prop-1',
       x,
       [obj0, obj1, obj2, obj3]
@@ -3060,21 +3060,21 @@
       x,
       [{a:15, b:6}, {a:17}, {a:18, b:9}, {a:20, b:11}]
     ), true);
-    x.$$prop('a', P => P.sum(-1))
-    test('$$prop-3',
+    x.$$prop('a', (ui, v) => v.prop('a').sum(-1)[0])
+    test('$$prop-calling-array-0',
       x,
       [obj0, obj1, obj2, obj3]
         .$shape(2)
         .$key(1, ['u','v'])
     );
-    assert('$$prop-4', () => _isEqual(
+    assert('$$prop-calling-array-1', () => _isEqual(
       x,
       [{a:70, b:6}, {a:70}, {a:70, b:9}, {a:70, b:11}]
     ), true);
 
     x = [{a:5}, undefined];
     assert.throw('throw-$$prop-undefined',
-      () => x.$$prop('a', P => P.add(10))
+      () => x.$$prop('a', xi => xi.a + 10)
     );
     assert('$$prop-unchanged', () => _isEqual(
       x,
@@ -3730,7 +3730,7 @@
   console.log('--- updates:');
   {
 
-    //ad-hoc tests not covered above:
+    //ad-hoc tests not covered below:
     {
       console.log('      misc');
 
