@@ -1034,11 +1034,17 @@
       [3,4,5,6,7,8].tp()
     );
 
+    let x = [5,6,7];
+    x.$$shape( (shp, y) => {
+      test('$$shape-calling-array', y, x);
+      return;
+    });
+
     assert.throw('throw-$$shape-not-function',
       () => [3,4,5,6].$$shape(2)
     );
 
-    const x = [3,4,5,6,7,8];
+    x = [3,4,5,6,7,8];
     assert.throw('throw-$$shape-not-singleton',
       () => x.$$shape([2,3])
     );
@@ -1126,6 +1132,12 @@
       () => y.label(1),
       'null!'
     );
+
+    const z = [5,6];
+    z.$$label(0, (lab, zz) => {
+      test('$$label-calling-array', zz, z);
+      return;
+    });
 
     assert.throw('throw-$$label-invalid-dim',
       () => [3,4].$$label(3, () => 'the label')
@@ -1233,6 +1245,12 @@
       x.$$key(0, K => K),  //K is null
       [3,4]
     );
+
+    x = [3,4];
+    x.$$key(0, (k, xx) => {
+      test('$$key-calling-array', xx, x);
+      return;
+    });
 
     x = [3,4].tp();
     assert.throw('throw-$$key-function-error',
@@ -1707,6 +1725,12 @@
         .$key(1, ['a','e'].seq())
     );
 
+    x = [3,4];
+    x.$$subcube(0, 0, 0, (v, xx) => {
+      test('$$subcube-calling-array', xx, x);
+      return;
+    });
+
     assert.throw('throw-$$subcube-invalid-index',
       () => [3,4].$$subcube(2, 0, 0, () => 10)
     );
@@ -1747,6 +1771,12 @@
         .$key(1, ['a','b','c'])
     );
 
+    x = [3,4];
+    x.$$col(0, (v, xx) => {
+      test('$$col-calling-array', xx, x);
+      return;
+    });
+
     assert.throw('throw-$$col-invalid-index',
       () => [3,4].tp().$$col(2, () => 10)
     );
@@ -1781,6 +1811,12 @@
         .$shape([2,3,2])
         .$key(1, ['a','b','c'])
     );
+
+    x = [3,4];
+    x.$$rowSlice(0, 0, (v, xx) => {
+      test('$$rowSlice-calling-array', xx, x);
+      return;
+    });
 
     assert.throw('throw-$$colSlice-invalid-index',
       () => [3,4].tp().$$colSlice(1, 2, () => 10)
@@ -2033,6 +2069,12 @@
       [3,4,5,6,17,8].$shape(2).$key(1, ['a','b','c'])
     );
 
+    const z = [3,4];
+    z.$$ent(0, (v, zz) => {
+      test('$$ent-calling-array', zz, z);
+      return;
+    });
+
     assert.throw('throw-$$ent-invalid-index',
       () => [3,4].$$ent(2, () => 10)
     );
@@ -2201,6 +2243,12 @@
       [13,4,5,16,7,8].$shape([2,1,3]).$key(2, ['a','b','c'])
     );
 
+    const z = [3,4];
+    z.$$at(0, 0, 0, (v, zz) => {
+      test('$$at-calling-array', zz, z);
+      return;
+    });
+
     assert.throw('throw-$$at-invalid-index',
       () => [3,4].$$at(2, 0, 0, () => 10)
     );
@@ -2360,6 +2408,12 @@
       [5,5,6,5,9]
     );
 
+    const a = [3,4];
+    a.$$vec(null, (v, aa) => {
+      test('$$vec-calling-array', aa, a);
+      return;
+    });
+
     assert.throw('throw-$$vec-invalid-index',
       () => [3,4].$$vec([0,2], () => [10,20])
     );
@@ -2398,6 +2452,12 @@
       z,
       [3,6,6,7,6,10].$shape([2,3]).$key(0, ['a','b'])
     );
+
+    const a = [3,4];
+    a.$$rcp(0, 0, 0, (v, aa) => {
+      test('$$rcp-calling-array', aa, a);
+      return;
+    });
 
     assert.throw('throw-$$rcp-invalid-index',
       () => [3,4].$$rcp(2, 0, 0, () => 10)
