@@ -3258,7 +3258,7 @@
 
     x = [0].cube();
     y = x.pack(0);
-    test('pack-empty-array-rows', y.copy('shell'), [0,1,1].cube());
+    test('pack-empty-array-rows-shell', y.copy('shell'), [0,1,1].cube());
     y = x.pack(1);
     test('pack-empty-array-cols-shell', y.copy('shell'), [1,1,1].cube()); 
     test('pack-empty-array-cols-0', y[0], [0,1,1].cube());
@@ -3278,18 +3278,18 @@
     test('pack-empty-matrix-cols-shell', y.copy('shell'), [1,0,1].cube().$key(1, []));
     y = x.pack(2);
     test('pack-empty-matrix-pages-shell', y.copy('shell'), [1,1,1].cube());
-    test('pack-empty-matrix-pages-0', y[0], [2,0,1].cube().$key(0, ['a','b']).$key(1, [])); 
+    test('pack-empty-matrix-pages-0', y[0], x); 
   
-    x = [5,6].$key(0, ['a','b']);
+    x = [5,6,7,8].$shape([2,2]).$key(0, ['a','b']);
     y = x.pack(0, 'array');
     test('pack-subcube-type-shell', y.copy('shell'), [2,1,1].cube().$key(0, ['a','b']));
-    test('pack-subcube-type-rows-0', y[0], [5]);
-    test('pack-subcube-type-rows-1', y[1], [6]);
+    test('pack-subcube-type-rows-0', y[0], [5,7]);
+    test('pack-subcube-type-rows-1', y[1], [6,8]);
 
-    assert.throw( 'throw-pack-dim-0', () => [3,4].pack(3));
-    assert.throw( 'throw-pack-dim-1', () => [3,4].pack([0,1]));
-    assert.throw( 'throw-pack-subcube-0', () => [3,4].pack(0, 'a'));
-    assert.throw( 'throw-pack-subcube-1', () => [3,4].pack(0, ['array', 'core']));
+    assert.throw('throw-pack-dim-0', () => [3,4].pack(3));
+    assert.throw('throw-pack-dim-1', () => [3,4].pack([0,1]));
+    assert.throw('throw-pack-subcube-0', () => [3,4].pack(0, 'a'));
+    assert.throw('throw-pack-subcube-1', () => [3,4].pack(0, ['array', 'core']));
   }
 
   console.log('--- matrix');
