@@ -8,7 +8,7 @@
   
   const { 
     assert, fill, fillEW, addArrayMethod, keyMap,
-    isSingle, polarize, def, toArray, copyArray, copyMap,
+    polarize, def, toArray, copyArray, copyMap,
     ensureKey, ensureLabel, nni, copyKey, copyLabel, skeleton,
     sortInPlace, sortIndex, sortRank, rangeInd, keyInd, indInd,
     callUpdate
