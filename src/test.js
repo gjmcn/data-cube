@@ -1,30 +1,37 @@
 (() => {
 	'use strict';
 	      
-  let dc, testing;
+  let dc;
   try {
     dc = require('../dist/data-cube.js');
-    console.log('\nTesting: ./dist/data-cube.js\n');
+    console.log('--- Testing ./dist/data-cube.js');
   }
   catch (e) {
     dc = require( './data-cube.js');
-    console.log('\nTesting: ./src/data-cube.js\n');
+    console.log('--- Testing ./src/data-cube.js');
   }
   
   const assert = dc._assert,
         test = assert.test,
         h = Array.prototype._helper,
         _isEqual = require('lodash.isequal');
-    
+  
+  const runTests = (name, f) => {
+    try { 
+      f();
+    }
+    catch (err) {
+      console.log(`Could not run tests for ${name + (err.stack ? `:\n  ${err.stack}` : '')}`);
+    }
+  };
+
   
   //--------------- tests ---------------//
     
-  console.log('--- helper functions');
-  {
+  runTests('helper functions', () => {
   
     //assert functions
     {
-      
       assert.each('assert-int', [
         [() => h.assert.int(5), 5],
         [() => h.assert.int(0), 0],
@@ -517,10 +524,9 @@
       assert.throw('throw-key-ind-1', () => h.keyInd(['b'], e));
     }
 
-  }
+  });
   
-  console.log('--- native mutators');
-  {
+  runTests('native mutators', () => {
    
     const a = [5,6,7];
     a.copyWithin(0,1);
@@ -581,10 +587,10 @@
     assert('native-unshift-1', () => h.equalArray(c, [10,9]), true);
     assert('native-unshift-2', () => c._data_cube, undefined);
       
-  }
+  });
   
-  console.log('--- compare');
-  {
+  runTests('compare', () => {
+  
     //these tests use cubes made 'from scratch' (i.e. no cube
     //methods) since compare is used to test all other cube methods
     const baseArray = [5, 'abc', false, {}, [6]];
@@ -695,10 +701,10 @@
     b._l[2] = 'pages';
     test('compare-book-book-1', b, be);
     test('compare-book-book-2', be, b);   
-  }
+  });
   
-  console.log('--- dc');
-  {
+  runTests('dc', () => {
+  
     const e = [];
     test('dc-1', dc(e), []);
     assert.cube('dc-2', e);
@@ -722,10 +728,11 @@
     const c = dc([2,3,4,5,6,7].$shape([2,3]).$key(0, ['a','b']));
     test('dc-11', c, [2,3,4,5,6,7].$shape([2,3]).$key(0, ['a','b']));
     assert.cube('dc-12', c);
-  }
+
+  });
   
-  console.log('--- cube');
-  {
+  runTests('cube', () => {
+  
     assert.throw('throw-cube-too-many-entries', () => [6,7,8,9].cube());
     assert.throw('throw-cube-neg', () => (-1).cube());
     assert.throw('throw-cube-non-int-1', () => [0,2.3].cube());
@@ -849,10 +856,10 @@
       [() => h.equalArray(b_1_dc, (new Array(12)).fill(true)), true],
       [() => h.equalArray(b_1_dc._s, [2,3,2]), true]
     ]);
-  }
+  });
   
-  console.log('--- rand');
-  {
+  runTests('rand', () => {
+
     //basic tests; most work handled by cube()
     const a = [10].rand();
     assert('rand-1', () => Math.min(...a) >= 0, true);
@@ -871,10 +878,10 @@
     assert('rand-dc-1', () => Math.min(...a_dc) >= 0, true);
     assert('rand-dc-2', () => Math.max(...a_dc) < 1, true);
     assert('rand-dc-3', () => h.equalArray(a_dc._s, [10,1,1]), true);
-  }
+  });
   
-  console.log('--- normal');
-  {
+  runTests('normal', () => {
+  
     //basic tests; most work handled by cube()
     const a = [20].normal();
     const b = [20].normal(500,'10');
@@ -889,10 +896,10 @@
     assert('normal-dc-1', () => Math.min(...b_dc) > 400, true);
     assert('normal-dc-2', () => Math.max(...b_dc) < 600, true);
     assert('normal-dc-3', () => h.equalArray(b_dc._s, [4,5,1]), true);
-  }
+  });
   
-  console.log('--- copy')
-  {
+  runTests('copy', () => {
+  
     const e = [];
     assert('copy-empty-0', () => e.copy('array')._data_cube, undefined);
     test('copy-empty-1', e.copy('array'), []);
@@ -968,10 +975,10 @@
     assert.throw('throw-copy-invalid-ret-0', () => [4,5].copy([['full']]));
     assert.throw('throw-copy-invalid-ret-1', () => [4,5].copy('ful'));
     assert.throw('throw-dc-copy-invalid-ret', () => dc.copy([4,5],'ful'));
-  }
+  });
   
-  console.log('--- shape');
-  {
+  runTests('shape', () => {
+
     assert('shape-array-1', () => h.equalArray([].shape(), [0,1,1]), true);
     assert('shape-array-2', () => h.equalArray([5].shape(), [1,1,1]), true);
     assert('shape-array-3', () => h.equalArray([5,6].shape(), [2,1,1]), true);
@@ -981,10 +988,11 @@
     assert('shape-vector', () => h.equalArray([3].cube().shape(), [3,1,1]), true);
     assert('shape-matrix', () => h.equalArray([2,4].cube().shape(), [2,4,1]), true);
     assert('shape-book', () => h.equalArray([4,3,2].cube().shape(), [4,3,2]), true);
-  }
   
-  console.log('--- $shape');
-  {
+  });
+  
+  runTests('$shape', () => {
+  
     const x = [12].cube();
     const y = [0].cube();
 
@@ -1021,10 +1029,10 @@
     test('$shape-17', y.$shape([2,0,3]), [2,0,3].cube());
     assert('$shape-same-length-1', () => x.length, 12);
     assert('$shape-same-length-2', () => y.length, 0);
-  }
+  });
 
-  console.log('--- $$shape');
-  {
+  runTests('$$shape', () => {
+  
     test('$$shape-0',
       [3,4,5,6,7,8].$key(1,'a').$$shape(s => s[0]/2),
       [3,4,5,6,7,8].$shape(3)
@@ -1052,10 +1060,10 @@
       () => x._data_cube,
       true
     );
-  }
+  });
   
-  console.log('--- label, $label')
-  {
+  runTests('label, $label', () => {
+
     const obj = {a:5};
     const e = [].$label(1,'columns');
     const m = [5,6].cube()
@@ -1117,10 +1125,10 @@
       [() => m.label(2), null],  
     ]); 
     
-  }
+  });
 
-  console.log('--- $$label');
-  {
+  runTests('$$label', () => {
+  
     const x = [3,4].$label(0, 'r');
     test('$$label-0',
       x.$$label(0, lab => lab + 'ows'),
@@ -1142,10 +1150,10 @@
     assert.throw('throw-$$label-invalid-dim',
       () => [3,4].$$label(3, () => 'the label')
     );
-  }
-    
-  console.log('--- key, $key');
-  {
+  });
+   
+  runTests('key, $key', () => {
+
     const obj = {a:5};
     const e = []
       .$key(0,[])
@@ -1221,10 +1229,10 @@
       [() => h.equalArray(b.key(2), ['a','b',true,false]), true]
     ]);
 
-  }
+  });
 
-  console.log('--- $$key');
-  {
+  runTests('$$key', () => {
+
     let x = [3,4].$key(0, ['a','b']);
     test('$$key-0',
       x.$$key(undefined, K => K.add('!')),
@@ -1269,12 +1277,10 @@
       x,
       [3,4].$key(0, ['u','v'])
     );
-  }
+  });
 
-  console.log('--- n');
-  {
+  runTests('n', () => {
     const b = [4,3,5].cube();
-  
     assert('n-1', () => [].n(),  0);
     assert('n-2', () => [].n(0), 0);
     assert('n-3', () => [].n(1), 1);
@@ -1283,10 +1289,10 @@
     assert('n-6', () => b.n(0), 4);
     assert('n-7', () => b.n(1), 3);
     assert('n-8', () => b.n(2), 5);
-  }
+  });
   
-  console.log('--- hasKey');
-  { 
+  runTests('hasKey', () => {
+ 
     assert.each('has-key-1', [
       [() => [].hasKey(), false],
       [() => [].hasKey(1), false],
@@ -1324,10 +1330,10 @@
       [() => e.hasKey(0,undefined), true],
       [() => e.hasKey(0,'a'), false],
     ]);
-  }
+  });
   
-  console.log('--- subcubes');
-  {
+  runTests('subcubes', () => {
+
     //empty array
     const e = [];
     test('subcube-empty-array-0', e.subcube(), []);
@@ -1675,10 +1681,9 @@
       () => b.$rowSlice('Alice','Bob',[10,11])
     ]);
     
-  }
+  });
    
-  console.log('--- $$ subcubes');
-  {
+  runTests('$$ subcubes', () => {
 
     //$$subcube
     let x = [3,4,5];
@@ -1822,10 +1827,9 @@
       () => [3,4].tp().$$colSlice(1, 2, () => 10)
    );
 
-  }
+  });
 
-  console.log('--- vble');
-  {
+  runTests('vble', () => {
     
     const e = [0,1,2].cube();
     assert('vble-empty-dim-0', () => _isEqual(e.vble(0),
@@ -1979,10 +1983,9 @@
       () => b.vble([1,2])
     ]);
     
-  }
+  });
 
-  console.log('--- ent, $ent');
-  {
+  runTests('ent, $ent', () => {
     
     const e = [];
     assert.throwEach('throw-ent-empty', [
@@ -2050,10 +2053,10 @@
       () => m.$ent(0, [24,25]),
     ]);
 
-  }
+  });
 
-  console.log('--- $$ent');
-  {
+  runTests('$$ent', () => {
+
     const x = [3,4];
     test('$$ent-0',
       x.$$ent(1, e => e + 10),
@@ -2078,10 +2081,9 @@
     assert.throw('throw-$$ent-invalid-index',
       () => [3,4].$$ent(2, () => 10)
     );
-  }
+  });
   
-  console.log('--- at, $at');
-  {
+  runTests('at, $at', () => {
     
     const s = [5];
     assert.each('at-singleton-0', [
@@ -2219,10 +2221,10 @@
       () => m.$at(1,-4,0,5),
     ]);
     
-  }
+  });
 
-  console.log('--- $$at');
-  {
+  runTests('$$at', () => {
+
     const x = [3,4];
     test('$$at-0',
       x.$$at(1, null, undefined, e => e + 10),
@@ -2252,10 +2254,9 @@
     assert.throw('throw-$$at-invalid-index',
       () => [3,4].$$at(2, 0, 0, () => 10)
     );
-  }
+  });
   
-  console.log('--- vec, $vec');
-  {
+  runTests('vec, $vec', () => {
 
     test('vec-empty-0', [].vec(), []);
     test('vec-empty-1', [].vec([]), []);
@@ -2378,10 +2379,10 @@
       () => v.$vec(['b','c'],[51,52]),
     ]);
     
-  }
+  });
 
-  console.log('--- $$vec');
-  {
+  runTests('$$vec', () => {
+
     const x = [3,4,5,6];
     test('$$vec-0',
       x.$$vec([-2,0], V => V.add(10)),
@@ -2420,10 +2421,10 @@
     assert.throw('throw-$$vec-not-function',
       () => [3,4].$$vec(null, 10)
     );
-  }
+  });
 
-  console.log('--- $$rcp');
-  {
+  runTests('$$rcp', () => {
+
     const x = [3,4];
     test('$$rcp-0',
       x.$$rcp(1, null, undefined, V => V.add(10)),
@@ -2462,10 +2463,10 @@
     assert.throw('throw-$$rcp-invalid-index',
       () => [3,4].$$rcp(2, 0, 0, () => 10)
     );
-  }
+  });
 
-  console.log('--- $autoType');
-  {
+  runTests('$autoType', () => {
+
     const obj = {a:5},
           x = ['5', 'uv', 'false', 'true', 'undefined',
                'null', 'Infinity', obj, '', ' true']
@@ -2479,10 +2480,10 @@
     test('$autoType-2', ['', 3, true, null, undefined].$autoType(''), 
       ['', 3, true, null, undefined]);
     test('$autoType-3', [''].$autoType(5), [5]);
-  }
+  });
   
-  console.log('--- which');
-  {  
+  runTests('which', () => {
+  
     test('which-empty-0', [].which(), []);
     test('which-empty-1', [].which(a => true), []);
     test('which-empty-2', [1,0].cube().which(), []);
@@ -2524,10 +2525,9 @@
       () => [1,0,2].which([[a => a]]),
     ]);
   
-  }
+  });
   
-  console.log('--- entrywise: 0 args');
-  {
+  runTests('entrywise: 0 args', () => {
     
     test('ew-neg',    [-2,3].neg(), [2,-3]);
     test('ew-sqrt',   [4,9].sqrt(), [2,3]);
@@ -2595,10 +2595,10 @@
       () => ['a',false].trim()
     ]);
   
-  }
+  });
   
-  console.log('--- entrywise: cond');
-  {
+  runTests('entrywise: cond', () => {
+
     const s = [2].$key(1, 'a'),
           v = [1, 0, undefined, 's'],
           m = [10,20,30,40].$shape([2,2]).$key(0,['u','v']).$label(2,'p'),
@@ -2631,10 +2631,9 @@
       () => s.cond(v, m),
     ]);
     
-  }
+  });
   
-  console.log('--- entrywise: call');
-  {
+  runTests('entrywise: call', () => {
     
     const s = [2].$key(1, 'a'),
           v = [1, 0, undefined, 's'],
@@ -2685,10 +2684,10 @@
       () => m.call()
     ]);
     
-  }
+  });
 
-  console.log('--- $$call');
-  {
+  runTests('$$call', () => {
+
     let x = [3,4];
     test('$$call-0',
       x.$$call(v => v + 10),
@@ -2724,10 +2723,9 @@
       () => [3,4].$$call(5)
     );
 
-  }
+  });
   
-  console.log('--- entrywise: method');
-  {
+  runTests('entrywise: method', () => {
     
     const s = ['z'].$key(1, 'a'),
           v = ['abc','defg','hijkl','mnopqrstu'],
@@ -2778,10 +2776,10 @@
       () => m.method(['toUpperCase',5])
     ]);
 
-  }
+  });
 
-  console.log('--- entrywise: apply');
-  {
+  runTests('entrywise: apply', () => {
+
     const fs_0 = () => 5,
           f_0 = [
             () => 6,
@@ -2850,10 +2848,9 @@
     assert.throw('throw-apply-not-a-function-1',
       () => [()=>5, 6].apply());
 
-  }
+  });
 
-  console.log('--- entrywise: loop');
-  {
+  runTests('entrywise: loop', () => {
 
     let x, u, v, w;
     const init = (n = 2) => {
@@ -3087,10 +3084,10 @@
     );
     assert('loop-function-3-a', () => w, 660);
     assert('loop-function-3-b', () => u, 24);
-  }
+  });
 
-  console.log('--- $$prop');
-  {
+  runTests('$$prop', () => {
+
     let x, obj0, obj1, obj2, obj3;
     
     obj0 = {a:5, b:6};
@@ -3142,10 +3139,9 @@
       x,
       [{a:5}, undefined]
     ),true);
-  }
+  });
 
-  console.log('--- unpack');
-  {
+  runTests('unpack', () => {
 
     test('unpack-empty-0', [].unpack(), [0,1,1].cube());
     test('unpack-empty-1', [1,0,1].cube().unpack(), [1,0,1].cube());
@@ -3208,10 +3204,10 @@
       () => [[5,6].$key(0, ['a','b']), [7,8]].unpack()
     );
     
-  }
+  });
 
-  console.log('--- pack');
-  {
+  runTests('pack', () => {
+
     let x, y;
 
     x = [4, 5, 6];
@@ -3290,10 +3286,9 @@
     assert.throw('throw-pack-dim-1', () => [3,4].pack([0,1]));
     assert.throw('throw-pack-subcube-0', () => [3,4].pack(0, 'a'));
     assert.throw('throw-pack-subcube-1', () => [3,4].pack(0, ['array', 'core']));
-  }
+  });
 
-  console.log('--- matrix');
-  {
+  runTests('matrix', () => {
     
     //from dsv
     {
@@ -3548,10 +3543,9 @@
                     () => [[3,4], undefined].matrix() );
     }
 
-  }
+  });
   
-  console.log('--- arAr');
-  {
+  runTests('arAr', () => {
     
     assert('arAr-empty-0', 
            () => _isEqual([].arAr(), []), true); 
@@ -3593,10 +3587,9 @@
     assert.throw( 'throw-arAr-not-1-page',
                   () => [2,3,2].cube().arAr() );
   
-  }
+  });
   
-  console.log('--- arObj');
-  {
+  runTests('arObj', () => {
         
     assert('arObj-empty-0', 
            () => _isEqual([].$key(1, 'A').arObj(), []), true); 
@@ -3652,10 +3645,9 @@
     assert.throw( 'throw-arObj-duplicate-column-keys',
                   () => [2,3].cube().$key(1, ['5','6',5]).arObj() );
     
-  }
+  });
     
-  console.log('--- dsv');
-  {
+  runTests('dsv', () => {
     
     assert( 'dsv-empty-0', 
             () => _isEqual([].dsv(), ''), true); 
@@ -3715,10 +3707,10 @@
                   () => [2,3,2].cube().dsv() );
     assert.throw( 'throw-dsv-duplicate-column-keys',
                   () => [2,3].cube().$key(1, ['5','6',5]).dsv() );
-  }
+  });
 
-  console.log('--- dict');
-  {
+  runTests('dict', () => {
+
     test( 'dict-empty',
       [].dict(),
       [].$key(0, [])
@@ -3775,10 +3767,9 @@
       () => ['a', 5, 'b'].dict()
     );
 
-  }
+  });
   
-  console.log('--- stringify, parse');
-  {
+  runTests('stringify, parse', () => {
     
     const stem = 'stringify-parse-';
 
@@ -3869,15 +3860,12 @@
     assert.throw( 'throw-parse-duplicate-key',
                   () => [[5,6].$key(0, [date_1, date_2]).stringify()].parse() );
 
-  }
+  });
 
-  console.log('--- updates:');
-  {
+  runTests('updates', () => {
 
     //ad-hoc tests (not covered below):
     {
-      console.log('      misc');
-
       //after and before return a cube
       assert('before-returns-cube-0', () => [].before()._data_cube, true);
       assert('before-returns-cube-1', () => [].$before(() => { }).before()._data_cube, true);
@@ -3923,7 +3911,6 @@
 
     {
       //compare (via test)
-      console.log('      compare');
       let x, y;
 
       x = [3, 4].$after(() => {});
@@ -3955,8 +3942,6 @@
       };
 
       const testUpdateFunctions = (methodName, f) => {
-
-        console.log(`      ${methodName}`);
                 
         let x;
         let bu_1, bu_2, au_1, au_2;  //variables updated by update functions
@@ -3967,9 +3952,9 @@
         
         //arrays of update functions
         const checkArgs = (arr, setter, args) => {
-          assert('update-passed-array', () => arr === x, true);
-          assert('update-passed-name', () => setter === methodName, true);
-          assert('update-passed-args-array', () => Array.isArray(args), true);
+          assert(`${methodName}-update-passed-array`, () => arr === x, true);
+          assert(`${methodName}-update-passed-name`, () => setter === methodName, true);
+          assert(`${methodName}-update-passed-args-array`, () => Array.isArray(args), true);
         };
         const B = [ 
           (arr, setter, args) => { checkArgs(arr, setter, args); bu_1 = 3; },
@@ -3982,33 +3967,33 @@
 
         //set 1 before and 1 after function, call f to apply the setter 
         x = new_x().$before(b).$after(a);
-        test('get-single-before-function-0', x.before(), [b]);
-        test('get-single-after-function-0', x.after(), [a]);
+        test(`${methodName}-get-single-before-function-0`, x.before(), [b]);
+        test(`${methodName}-get-single-after-function-0`, x.after(), [a]);
         f(x);
-        test('single-update-function-result', x, f(new_x()));
-        assert('single-update-functions-applied', () => bu_1 === 1 && au_1 === 2, true);
-        test('get-single-before-function-1', x.before(), [b]);
-        test('get-single-after-function-1', x.after(), [a]);
+        test(`${methodName}-single-update-function-result`, x, f(new_x()));
+        assert(`${methodName}-single-update-functions-applied`, () => bu_1 === 1 && au_1 === 2, true);
+        test(`${methodName}-get-single-before-function-1`, x.before(), [b]);
+        test(`${methodName}-get-single-after-function-1`, x.after(), [a]);
 
         //remove updates
         x.$before().$after(null);
-        test('no-before-functions-0', x.before(), []);
-        test('no-after-functions-0', x.after(), []);
+        test(`${methodName}-no-before-functions-0`, x.before(), []);
+        test(`${methodName}-no-after-functions-0`, x.after(), []);
 
         //set 2 before and 2 after functions
         x = new_x().$before(B).$after(A);
-        test('get-multiple-before-functions-0', x.before(), B);
-        test('get-multiple-after-functions-0', x.after(), A);
+        test(`${methodName}-get-multiple-before-functions-0`, x.before(), B);
+        test(`${methodName}-get-multiple-after-functions-0`, x.after(), A);
         f(x);
-        test('multiple-update-functions-result', x, f(new_x()));
-        assert('multiple-update-functions-applied', () => {
+        test(`${methodName}-multiple-update-functions-result`, x, f(new_x()));
+        assert(`${methodName}-multiple-update-functions-applied`, () => {
           return bu_1 === 3 && bu_2 === 4 && au_1 === 5 && au_2 === 6;
         }, true);
 
         //check variety of methods produce new cube with no updates
         {
           const checkNoUpdates = (nm, res) => {
-            assert(`${nm}-has-no-updates`, () => {
+            assert(`${methodName}-${nm}-has-no-updates`, () => {
               return !res.hasOwnProperty('_a') && !res.hasOwnProperty('_b');
             }, true);
           };
@@ -4019,14 +4004,13 @@
         }
 
         //x still has expected update functions
-        test('get-multiple-before-functions-1', x.before(), B);
-        test('get-multiple-after-functions-1', x.after(), A);
+        test(`${methodName}-get-multiple-before-functions-1`, x.before(), B);
+        test(`${methodName}-get-multiple-after-functions-1`, x.after(), A);
 
         //remove updates
         x.$before(undefined).$after([]);
-        test('no-before-functions-1', x.before(), []);
-        test('no-after-functions-1', x.after(), []);
-
+        test(`${methodName}-no-before-functions-1`, x.before(), []);
+        test(`${methodName}-no-after-functions-1`, x.after(), []);
       };
 
       //setters
@@ -4056,7 +4040,7 @@
 
     }
 
-  }
+  });
 
-  console.log('\nTests finished\n');
+  console.log('--- Tests finished');
 })();
