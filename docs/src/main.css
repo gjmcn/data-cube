@@ -1,0 +1,156 @@
+body {
+  overflow: hidden;
+}
+@media (max-width: 575.98px) {
+  body {
+    font-size: 14px;
+  }
+}
+
+.big {
+  font-size: 1.25em;
+}
+
+#navbar {
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 46px;
+  background-color: #0f2a64 !important;
+}
+
+#data-cube-link {
+  padding: 3px;
+  font-size: 19px;
+  cursor: pointer;
+}
+
+#data-cube-link img {
+  width: 25px;
+  height: 25px;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+#tagline {
+  font-size: 0.67em;
+}
+
+#content-wrap {
+  position: relative;
+  height: calc(100vh - 46px);
+}
+
+#sidebar {
+  position: fixed;
+  top: 46px;
+  bottom: 0;
+  width: 200px;
+  padding: 15px 15px 0 15px;
+  background-color: #f9f9f9;
+  overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  border-right: 0.5px solid #999;
+}
+#sidebar::-webkit-scrollbar { 
+  display: none;
+}
+@media (max-width: 575.98px) {
+  #sidebar {
+    width: 140px;
+    padding: 15px 10px 0 10px;
+  }
+}
+
+#sidebar span {
+  display: block;
+  padding: 4px 10px;
+  color: #222;
+  font-size: 1em;
+  cursor: pointer;
+}
+#sidebar span:hover {
+  background-color: #eee;
+  text-decoration: none;
+}
+#sidebar span.selected {
+  font-weight: 700;
+}
+#sidebar span.sub-option {
+  font-size: 0.85em;
+  padding-left: 20px;
+}
+
+#panel {
+  padding-top: 25px;
+  padding-right: 15px;
+  margin-left: 235px;
+  height: calc(100vh - 46px);
+  overflow-y: auto;
+}
+@media (max-width: 575.98px) {
+  #panel {
+    padding-top: 16px;
+    margin-left: 160px;
+  }
+}
+
+h1, h2, h3, h4, h5, h6, p, ul, ol, dl {
+  max-width: 680px;
+}
+
+#panel a {
+  color: #105fb8;
+}
+
+.output {
+  overflow: auto;
+  margin: 20px 0 20px 32px;
+}
+
+pre, code {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Source Code Pro', monospace;
+}
+
+pre {
+  overflow: auto;
+  border: 0.5px solid #c8c8c8;
+  border-radius: 5px;
+  margin-left: 25px;
+}
+
+.indent {
+  padding-left: 28px;
+}
+
+/*code not in pre - highlight.js seems to overwrite these
+styles when they are in pre, but be careful if add more styles*/
+code {  
+  color: #333;
+  padding: 2px 6px;
+  background-color: #f4f4f4;
+  border-radius: 3px;
+}
+
+.scalar {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Source Code Pro', monospace;
+  margin-bottom: 15px;
+}
+
+.scalar-number  { color: #986801 }
+.scalar-string  { color: #50a14f }
+.scalar-date    { color: #c6494d }
+.scalar-error   { color: #e00 }
+.scalar-boolean,
+.scalar-undefined,
+.scalar-null { 
+  color: #0184bb
+}
+.scalar-other {
+  font-style: italic;
+  color: #666;
+}

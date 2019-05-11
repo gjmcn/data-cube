@@ -1,0 +1,109 @@
+/*
+Add the following to the <head> of your .html file to use the Source Code Pro
+and Open Sans fonts rather than the fallback monospace and sans-serif.
+
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Code+Pro" rel="stylesheet">
+*/
+
+.data-cube-wrap {
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: 'Source Code Pro', monospace;
+}
+
+.data-cube-wrap .page-table,
+.data-cube-wrap .info-table {
+  border-collapse: collapse;
+  border-style: none;
+}
+
+.data-cube-wrap .page-table {
+  margin: 15px 0;
+}
+
+.data-cube-wrap .page-table:first-child {
+  margin-top: 0;
+}
+
+.data-cube-wrap .page-table:last-child {
+  margin-bottom: 0;
+}
+
+.data-cube-wrap caption {
+  text-align: left;
+  margin-bottom: 5px;
+  caption-side: top;
+  padding: 0;
+  color: #333;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 10.2px;
+}
+
+.data-cube-wrap .page-table td {
+  padding: 1px 8px;
+  border: 0.5px solid #999;
+}
+
+.data-cube-wrap .info-table td {
+  padding: 3px 4px;
+  border: 0 none;
+}
+
+.data-cube-wrap td.top-left {
+  border-top-style: none;
+  border-left-style: none;
+}
+
+.data-cube-wrap .ik,
+.data-cube-wrap .label,
+.data-cube-wrap .info-table {
+  font-family: 'Open Sans', sans-serif;
+  text-align: right;
+  color: #333;
+}
+
+/* 2nd column of info - or first column if only one (standard array) */
+.data-cube-wrap .info-table td:last-child {
+  text-align: left;
+}
+
+.data-cube-wrap .ik,
+.data-cube-wrap .label {
+  font-size: 10.2px;
+}
+
+.data-cube-wrap .info-table {
+  font-size: 11px;
+}
+
+.data-cube-wrap td.row-label,
+.data-cube-wrap td.row-ik,
+.data-cube-wrap td.col-label,
+.data-cube-wrap td.col-ik {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.data-cube-wrap .col-label {
+  text-align: center;
+}
+
+.data-cube-wrap .entry {
+  text-align: right;
+}
+
+.data-cube-wrap .number  { color: #986801 }
+.data-cube-wrap .string  { color: #50a14f }
+.data-cube-wrap .date    { color: #c6494d }
+.data-cube-wrap .boolean,
+.data-cube-wrap .undefined,
+.data-cube-wrap .null {
+  color: #0184bb
+}
+.data-cube-wrap .function,
+.data-cube-wrap .array,
+.data-cube-wrap .cube,
+.data-cube-wrap .other {
+  font-style: italic;
+  color: #666;
+}
