@@ -2,14 +2,16 @@
 
   'use strict';
 
+  //load data-cube and plugins
+  window.dc = require('@gjmcn/data-cube');
+  window.qa = require('@gjmcn/data-cube-html');
+  require('@gjmcn/data-cube-print-html');
+
+  //load markdown-it - individual local files until fix bundling issue
+  const md = require('./markdown-it-8.4.2.min.js')({ html: true })
+    .use(require('./markdown-it-attrs-2.3.2.min.js'));
+
   const panel = document.getElementById('panel');
-
-  const md = markdownit({ html: true })
-    .use(markdownItAttrs);
-
-  vz.Vizsla.prototype.plot = function() {
-    return this.prep();
-  };
 
   window.deleteVariables = (...names) => names.forEach(nm => delete window[nm]);
 
@@ -56,17 +58,7 @@
         }
         if (!elm.classList.contains('no-output')) {
           elm.parentNode.parentNode.insertBefore(wrapper, elm.parentNode.nextSibling);
-          if (elm.classList.contains('vl-plot')) {
-            const subWrapper = [wrapper].insert('div')[0];  //extra wrapper needed to get x-scrollbar if required
-            vegaEmbed(subWrapper, result, {
-              actions: false,
-              padding: {top: 1, right: 0, bottom: 0, left: 0}
-            }).catch(err => {
-              wrapper.classList.add('scalar', `scalar-error`);
-              wrapper.textContent = err;
-            });
-          }
-          else if (elm.classList.contains('custom-html')) {
+          if (elm.classList.contains('custom-html')) {
             [wrapper].insert(Array.isArray(result) ? result[0] : result);
           }
           else {
@@ -109,6 +101,5 @@
     window.onload = () => loadPanel();
 
   }
-
 
 })();

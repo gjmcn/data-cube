@@ -1,0 +1,16 @@
+{
+  "name": "data-cube-website",
+  "version": "0.1.0",
+  "description": "Data-cube website.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Graham McNeill",
+  "license": "MIT",
+  "dependencies": {
+    "@gjmcn/data-cube": "^0.1.9",
+    "@gjmcn/data-cube-html": "^0.1.2",
+    "@gjmcn/data-cube-print-html": "^0.1.2"
+  }
+}

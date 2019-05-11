@@ -11,18 +11,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.6/build/styles/atom-one-light.min.css">
   <link rel="stylesheet" href="src/data-cube.css">
   <link rel="stylesheet" href="src/main.css">
-  <!-- <script src="https://cdn.jsdelivr.net/npm/@gjmcn/data-cube/dist/data-cube.js"></script> -->
-  <!-- <script src="https://cdn.jsdelivr.net/npm/@gjmcn/data-cube-html/dist/html.js"></script> -->
-  <script src="src/data-cube.js"></script>
-  <script src="src/html.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@gjmcn/data-cube-print-html/dist/print-html.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/markdown-it@8.4.2/dist/markdown-it.min.js"></script>
-  <script src="https://bundle.run/markdown-it-attrs@2.3.2"></script>
-  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.6/build/highlight.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vega@5.3.5"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vega-lite@3.2.1"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vega-embed@4.0.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@gjmcn/vizsla@0"></script>
+  <script src="src/highlight.pack.js"></script>  <!-- load local file separately until fix bundling issue -->
 </head>
 
 <body>
@@ -70,7 +59,7 @@
     <div id="panel"></div>
   </div>
 
-  <script src="src/index.js"></script>
+  <script src="dist/bundle.js"></script>
 
 </body>
 
