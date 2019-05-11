@@ -61,18 +61,16 @@
           if (elm.classList.contains('custom-html')) {
             [wrapper].insert(Array.isArray(result) ? result[0] : result);
           }
-          else {
-            if (Array.isArray(result)) {
+          else if (Array.isArray(result)) {
               result.print({to: wrapper});
-            }
-            else {
-              let cls = 'other';
-              if (['number', 'boolean', 'string'].includes(typeof result)) cls = typeof result;
-              else if (result === null || result === undefined) cls = result;
-              else if (result instanceof Date) cls = 'date';
-              wrapper.classList.add('scalar', `scalar-${cls}`);
-              wrapper.textContent = '' + result;
-            }
+          }
+          else {
+            let cls = 'other';
+            if (['number', 'boolean', 'string'].includes(typeof result)) cls = typeof result;
+            else if (result === null || result === undefined) cls = result;
+            else if (result instanceof Date) cls = 'date';
+            wrapper.classList.add('scalar', `scalar-${cls}`);
+            wrapper.textContent = '' + result;
           }
         }
     });
