@@ -1,4 +1,4 @@
-<b>Data-Cube</b> adds array-oriented programming to JavaScript.{.big}
+__Data-Cube__ adds array-oriented programming to JavaScript.{.big}
 
 A native array:
 
