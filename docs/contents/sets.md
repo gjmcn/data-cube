@@ -12,13 +12,13 @@ These methods ignore shape, keys and labels and return a new array with no dupli
 
 ---
 
-<a name="method_unique" href="#method_unique">#</a> **unique:** `Array.prototype.unique()`
+<a id="method_unique" href="#method_unique">#</a> **unique:** `Array.prototype.unique()`
 
 Remove duplicates.
 
 ---
 
-<a name="method_basic_set_theory" href="#method_basic_set_theory">#</a><br>
+<a id="method_basic_set_theory" href="#method_basic_set_theory">#</a><br>
 **union:** `Array.prototype.union(arg0, arg1, arg2, ...)`<br>
 **inter:** `Array.prototype.inter(arg0, arg1, arg2, ...)`<br>
 **diff:** `Array.prototype.diff(arg0, arg1, arg2, ...)`<br>
@@ -35,13 +35,13 @@ Remove duplicates.
 
 ---
 
-<a name="method_is_unique" href="#method_is_unique">#</a> **isUnique:** `Array.prototype.isUnique()`
+<a id="method_is_unique" href="#method_is_unique">#</a> **isUnique:** `Array.prototype.isUnique()`
 
 Returns `true` if no two entries are equal to each other, otherwise returns `false`.
 
 ---
 
-<a name="method_is_in" href="#method_is_in">#</a> **isIn:** `Array.prototype.isIn(arg0, arg1, arg2, ...)`
+<a id="method_is_in" href="#method_is_in">#</a> **isIn:** `Array.prototype.isIn(arg0, arg1, arg2, ...)`
 
 Returns a new cube with boolean entries and the same shape, keys and labels as the calling array. An entry of the returned cube is `true` if the corresponding entry of the calling array appears _in any_ of the arguments.
 

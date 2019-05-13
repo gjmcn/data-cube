@@ -1,7 +1,7 @@
 
 ---
 
-<a name="method_concatenate" href="#method_concatenate">#</a><br>
+<a id="method_concatenate" href="#method_concatenate">#</a><br>
 **vert:** `Array.prototype.vert(arg0, arg1, arg2, ...)`<br>
 **horiz:** `Array.prototype.horiz(arg0, arg1, arg2, ...)`<br>
 **depth:** `Array.prototype.depth(arg0, arg1, arg2, ...)`
@@ -22,7 +22,7 @@ Notes:
 
 ---
 
-<a name="method_tile" href="#method_tile">#</a> **tile:** `Array.prototype.tile(dim = 0, n = 2, ret = 'full')`
+<a id="method_tile" href="#method_tile">#</a> **tile:** `Array.prototype.tile(dim = 0, n = 2, ret = 'full')`
 
 
 Repeat along dimension `dim` `n` times.
@@ -37,7 +37,7 @@ Returns a new cube.
 
 ---
 
-<a name="method_tile_to" href="#method_tile_to">#</a> **tileTo:** `Array.prototype.tileTo(y, ret = 'full')`
+<a id="method_tile_to" href="#method_tile_to">#</a> **tileTo:** `Array.prototype.tileTo(y, ret = 'full')`
 
 Repeat calling array as required so that the returned cube has the same shape as `y`.
 
@@ -53,7 +53,7 @@ Returns a new cube.
 
 ---
 
-<a name="method_unpack" href="#method_unpack">#</a> **unpack:** `Array.prototype.unpack()`
+<a id="method_unpack" href="#method_unpack">#</a> **unpack:** `Array.prototype.unpack()`
 
 The calling array must have at least two dimensions of length 1 (i.e. must be a 'column vector', 'row vector' or 'page vector') and have array/cube entries.
 
@@ -73,7 +73,7 @@ Notes:
 
 ---
 
-<a name="method_pack" href="#method_pack">#</a> **pack** `Array.prototype.pack(dim = 0, sc = 'full')`
+<a id="method_pack" href="#method_pack">#</a> **pack** `Array.prototype.pack(dim = 0, sc = 'full')`
 
 Pack rows, columns or pages.
 

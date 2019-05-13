@@ -1,7 +1,7 @@
 
 ## Using Data-Cube
 
-The Data-Cube module [exports a function](#) and adds methods to `Array.prototype`.
+The Data-Cube module [exports a function](?exported) and adds methods to `Array.prototype`.
 
 ### Node
 

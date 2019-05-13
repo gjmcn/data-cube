@@ -1,13 +1,13 @@
 
 ---
 
-<a name="method_shape" href="#method_shape">#</a> **shape:** `Array.prototype.shape()`
+<a id="method_shape" href="#method_shape">#</a> **shape:** `Array.prototype.shape()`
 
 Returns a 3-entry array: the number of rows, columns and pages.
 
 ---
 
-<a name="method_set_shape" href="#method_set_shape">#</a> **$shape:** `Array.prototype.$shape(shp)`
+<a id="method_set_shape" href="#method_set_shape">#</a> **$shape:** `Array.prototype.$shape(shp)`
 
 Set the shape (see `shape`). The number of entries must not change.
 
@@ -25,7 +25,7 @@ Set the shape (see `shape`). The number of entries must not change.
 
 ---
 
-<a name="method_set_set_shape" href="#method_set_set_shape">#</a> **$$shape:** `Array.prototype.$$shape(f)`
+<a id="method_set_set_shape" href="#method_set_set_shape">#</a> **$$shape:** `Array.prototype.$$shape(f)`
 
 Set the shape using the function `f`.
 
@@ -35,7 +35,7 @@ Set the shape using the function `f`.
 
 ---
 
-<a name="method_n" href="#method_n">#</a> **n:** `Array.prototype.n(dim = 0)`
+<a id="method_n" href="#method_n">#</a> **n:** `Array.prototype.n(dim = 0)`
 
 Length of dimension `dim`.
 
@@ -46,7 +46,7 @@ Returns a non-negative integer.
 ---
 
 
-<a name="method_set_squeeze" href="#method_set_squeeze">#</a> **$squeeze:** `Array.prototype.$squeeze()`
+<a id="method_set_squeeze" href="#method_set_squeeze">#</a> **$squeeze:** `Array.prototype.$squeeze()`
 
 Move dimensions of length greater than 1 'to the front'.
 

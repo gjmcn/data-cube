@@ -2,7 +2,7 @@ Note: see [[order|Query#method_order]] for sorting rows, columns or pages
 
 ---
 
-<a name="method_arrange" href="#method_arrange">#</a> **arrange:** `Array.prototype.arrange(how = null, ret = 'value')`
+<a id="method_arrange" href="#method_arrange">#</a> **arrange:** `Array.prototype.arrange(how = null, ret = 'value')`
 
 Sort entries &mdash; the shape, keys and labels of the calling array are ignored.
 
@@ -28,7 +28,7 @@ Returns a new array (unlike the native `sort` method which mutates the calling a
 
 ---
 
-<a name="method_order_key" href="#method_order_key">#</a> **orderKey:** `Array.prototype.orderKey(dim = 0, how = null)`
+<a id="method_order_key" href="#method_order_key">#</a> **orderKey:** `Array.prototype.orderKey(dim = 0, how = null)`
 
 Sort dimension `dim` by its keys.
 
@@ -38,7 +38,7 @@ Returns a new cube.
 
 ---
 
-<a name="method_bin" href="#method_bin">#</a> **bin:** `Array.prototype.bin(lim, how = null, name = lim)`
+<a id="method_bin" href="#method_bin">#</a> **bin:** `Array.prototype.bin(lim, how = null, name = lim)`
 
 Assign each entry to a bin.
 

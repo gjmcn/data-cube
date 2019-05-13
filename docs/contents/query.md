@@ -14,7 +14,7 @@ Query methods return a new cube.
 
 ---
 
-<a name="method_where" href="#method_where">#</a> **where:** `Array.prototype.where(dim = 0, val)`
+<a id="method_where" href="#method_where">#</a> **where:** `Array.prototype.where(dim = 0, val)`
 
 Get rows, columns or pages (depending on `dim`) where the corresponding values of `val` are truthy.
 
@@ -22,7 +22,7 @@ The order of rows/columns/pages is preserved.
 
 ---
 
-<a name="method_order" href="#method_order">#</a> **order:** `Array.prototype.order(dim = 0, val, how = null)`
+<a id="method_order" href="#method_order">#</a> **order:** `Array.prototype.order(dim = 0, val, how = null)`
 
 Order rows, columns or pages (depending on `dim`).
 
@@ -30,7 +30,7 @@ Order rows, columns or pages (depending on `dim`).
 
 ---
 
-<a name="method_group" href="#method_group">#</a> **group:** `Array.prototype.group(dim = 0, val, ent = 'subcube')`
+<a id="method_group" href="#method_group">#</a> **group:** `Array.prototype.group(dim = 0, val, ent = 'subcube')`
 
 Group rows, columns or pages (depending on `dim`). For simplicity, the description below focuses on grouping rows &mdash; i.e. `dim` equal to `0`.
 

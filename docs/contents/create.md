@@ -17,7 +17,7 @@ Notes:
 
 ---
 
-<a name="method_cube" href="#method_cube">#</a> **cube:** `Array.prototype.cube(val)`
+<a id="method_cube" href="#method_cube">#</a> **cube:** `Array.prototype.cube(val)`
 
 Returns a new cube with shape specified by the calling array: `[nRows, nColumns, nPages]`. If a dimension length is omitted or `undefined`, it defaults to 1.
 
@@ -27,7 +27,7 @@ The entries of the returned cube are set to `val`. If `val` is omitted or `undef
 
 ---
 
-<a name="method_rand" href="#method_rand">#</a> **rand:** `Array.prototype.rand(mx)`
+<a id="method_rand" href="#method_rand">#</a> **rand:** `Array.prototype.rand(mx)`
 
 Returns a new cube with shape specified by the calling array: `[nRows, nColumns, nPages]`. If a dimension length is omitted or `undefined`, it defaults to 1.
 
@@ -37,7 +37,7 @@ If passed, `mx` must be a positive integer. Each entry of the returned cube is a
 
 ---
 
-<a name="method_normal" href="#method_normal">#</a> **normal:** `Array.prototype.normal(mu = 0, sigma = 1)`
+<a id="method_normal" href="#method_normal">#</a> **normal:** `Array.prototype.normal(mu = 0, sigma = 1)`
 
 Returns a new cube with shape specified by the calling array: `[nRows, nColumns, nPages]`. If a dimension length is omitted or `undefined`, it defaults to 1.
 
@@ -45,7 +45,7 @@ Each entry of the returned cube is a sample from a normal distribution with mean
 
 ---
 
-<a name="method_seq" href="#method_seq">#</a> **seq:** `Array.prototype.seq(step = 1, unit)`
+<a id="method_seq" href="#method_seq">#</a> **seq:** `Array.prototype.seq(step = 1, unit)`
 
 The calling array is interpreted as `[start, limit]`. The `seq` method returns a new array with entries ranging from `start` to `limit` in steps of `step`. 
 
@@ -66,7 +66,7 @@ Note: when computing a numeric sequence, `limit + 1e-15` is used (or `limit - 1e
 
 ---
 
-<a name="method_lin" href="#method_lin">#</a> **lin:** `Array.prototype.lin(n = 10, ret = 'point')`
+<a id="method_lin" href="#method_lin">#</a> **lin:** `Array.prototype.lin(n = 10, ret = 'point')`
 
 The calling array is interpreted as `[start, end]`. The `lin` method creates an array of `n` &ge; 2 linearly spaced points from `start` to `end` inclusive.
 
@@ -88,7 +88,7 @@ Examples:
 
 ---
 
-<a name="method_grid" href="#method_grid">#</a> **grid:** `Array.prototype.grid(y, ret = 'value')`
+<a id="method_grid" href="#method_grid">#</a> **grid:** `Array.prototype.grid(y, ret = 'value')`
 
 All pairs from the calling array and `y`.
 
@@ -104,7 +104,7 @@ The order of the pairs is intuitive: `grid` iterates over the calling array for 
 
 ---
 
-<a name="method_matrix" href="#method_matrix">#</a> **matrix:** `Array.prototype.matrix(delim, name = true)`
+<a id="method_matrix" href="#method_matrix">#</a> **matrix:** `Array.prototype.matrix(delim, name = true)`
 
 Create a matrix (i.e. a 1-page cube) from a string or an array of arrays/objects.
 
@@ -126,7 +126,7 @@ Notes:
 
 ---
 
-<a name="method_dict" href="#method_dict">#</a> **dict:** `Array.prototype.dict(dim = 0)`
+<a id="method_dict" href="#method_dict">#</a> **dict:** `Array.prototype.dict(dim = 0)`
 
 Create a 'dictionary'.
 
@@ -134,13 +134,13 @@ The entries of the calling array are interpreted as _key_, _value_,  _key_, _val
 
 ---
 
-<a name="method_parse" href="#method_parse">#</a> **parse:** `Array.prototype.parse()`
+<a id="method_parse" href="#method_parse">#</a> **parse:** `Array.prototype.parse()`
 
 Create a cube or a standard array from a JSON string.
 
 The calling array should contain a single entry &mdash; the JSON string.
 
-Note: use the cube method [[stringify|Create-Copy-and-Convert#method_stringify]] to serialize a cube to a JSON string. `stringify` or the native method [JSON.stringify](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) can be used to serialize a standard array.
+Note: use the cube method [stringify](#method_stringify) to serialize a cube to a JSON string. `stringify` or the native method [JSON.stringify](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) can be used to serialize a standard array.
 
 ---
 
@@ -148,7 +148,7 @@ Note: use the cube method [[stringify|Create-Copy-and-Convert#method_stringify]]
 
 ---
 
-<a name="method_copy" href="#method_copy">#</a> **copy:** `Array.prototype.copy(ret = 'full')`
+<a id="method_copy" href="#method_copy">#</a> **copy:** `Array.prototype.copy(ret = 'full')`
 
 Shallow copy.
 
@@ -170,7 +170,7 @@ Both entries and keys are shallow copied.
 
 ---
 
-<a name="method_to_cube" href="#method_to_cube">#</a> **toCube:** `Array.prototype.toCube()`
+<a id="method_to_cube" href="#method_to_cube">#</a> **toCube:** `Array.prototype.toCube()`
 
 Convert a standard array to a cube (does nothing if already a cube).
 
@@ -180,7 +180,7 @@ The `dc` function exported by the Data-Cube package is equivalent to the `toCube
 
 ---
 
-<a name="method_to_array" href="#method_to_array">#</a> **toArray:** `Array.prototype.toArray()`
+<a id="method_to_array" href="#method_to_array">#</a> **toArray:** `Array.prototype.toArray()`
 
 Convert a cube to a standard array (does nothing if already a standard array).
 
@@ -192,7 +192,7 @@ Returns the array.
 
 ---
 
-<a name="method_ar_ar" href="#method_ar_ar">#</a> **arAr:** `Array.prototype.arAr()`
+<a id="method_ar_ar" href="#method_ar_ar">#</a> **arAr:** `Array.prototype.arAr()`
 
 'array of arrays'. Create an array of arrays from a 1-page cube or standard array.
 
@@ -202,7 +202,7 @@ Returns a new array with the same number of entries as the calling array has row
 
 ---
 
-<a name="method_ar_obj" href="#method_ar_obj">#</a> **arObj:** `Array.prototype.arObj()`
+<a id="method_ar_obj" href="#method_ar_obj">#</a> **arObj:** `Array.prototype.arObj()`
 
 'array of objects'. Create an array of objects from a 1-page cube.
 
@@ -214,7 +214,7 @@ Also see: [[vble|Other#method_vble]].
 
 ---
 
-<a name="method_dsv" href="#method_dsv">#</a> **dsv:** `Array.prototype.dsv(delim = ',')`
+<a id="method_dsv" href="#method_dsv">#</a> **dsv:** `Array.prototype.dsv(delim = ',')`
 
 'delimiter-separated values'. Create a string of delimiter-separated values (DSV) from a 1-page cube or standard array.
 
@@ -228,7 +228,7 @@ Returns a string.
 
 ---
 
-<a name="method_stringify" href="#method_stringify">#</a> **stringify:** `Array.prototype.stringify()`
+<a id="method_stringify" href="#method_stringify">#</a> **stringify:** `Array.prototype.stringify()`
 
 Returns a (JSON) string.
 
@@ -274,13 +274,13 @@ Notes:
 
 ---
 
-<a name="method_fetch" href="#method_fetch">#</a> **fetch:** `Array.prototype.fetch(method = 'text', init)`
+<a id="method_fetch" href="#method_fetch">#</a> **fetch:** `Array.prototype.fetch(method = 'text', init)`
 
 Fetch a resource and call the method with name `method` on the Response object.
 
 ---
 
-<a name="method_fetch_matrix" href="#method_fetch_matrix">#</a> **fetchMatrix:** `Array.prototype.fetchMatrix(name = true, init)`
+<a id="method_fetch_matrix" href="#method_fetch_matrix">#</a> **fetchMatrix:** `Array.prototype.fetchMatrix(name = true, init)`
 
 Fetch data and convert the result to a matrix (i.e. a 1-page cube).
 
@@ -288,7 +288,7 @@ If the file extension is _csv_/_tsv_, the file is assumed to contain comma/tab-s
 
 ---
 
-<a name="method_fetch_parse" href="#method_fetch_parse">#</a> **fetchParse:** `Array.prototype.fetchParse(init)`
+<a id="method_fetch_parse" href="#method_fetch_parse">#</a> **fetchParse:** `Array.prototype.fetchParse(init)`
 
 Fetch data and parse the result to a cube or a standard array.
 

@@ -4,15 +4,15 @@ Plugins add functionality to Data-Cube by adding new array methods. Some plugins
 
 The current plugins are:
 
-* [`data-cube-html`](#): DOM manipulation functions and methods
+* [`data-cube-html`](https://github.com/gjmcn/data-cube-html): DOM manipulation functions and methods
 
-* [`data-cube-print-html`](#): print cubes in HTML documents
+* [`data-cube-print-html`](https://github.com/gjmcn/data-cube-print-html): print cubes in HTML documents
 
-* [`data-cube-print-console`](#): print cubes in the terminal
+* [`data-cube-print-console`](https://github.com/gjmcn/data-cube-print-console): print cubes in the terminal
 
-* [`data-cube-polygon`](#): polygon methods
+* [`data-cube-polygon`](https://github.com/gjmcn/data-cube-polygon): polygon methods
 
-* [`data-cube-hull`](#): concave/convex hull
+* [`data-cube-hull`](https://github.com/gjmcn/data-cube-hull): concave/convex hull
 
 The following sections demonstrate how the `data-cube-html` plugin can be loaded. Use the same approach to load other plugins.
 

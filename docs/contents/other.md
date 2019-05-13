@@ -1,6 +1,6 @@
 ---
 
-<a name="method_tp" href="#method_tp">#</a> **tp:** `Array.prototype.tp(perm = [1,0,2])`
+<a id="method_tp" href="#method_tp">#</a> **tp:** `Array.prototype.tp(perm = [1,0,2])`
 
 Transpose.
 
@@ -10,7 +10,7 @@ Returns a new cube.
 
 ---
 
-<a name="method_flip" href="#method_flip">#</a> **flip:** `Array.prototype.flip(dim = 0)`
+<a id="method_flip" href="#method_flip">#</a> **flip:** `Array.prototype.flip(dim = 0)`
 
 
 Reverse the order of dimension `dim`.
@@ -19,7 +19,7 @@ Returns a new cube.
  
 ---
 
-<a name="method_roll" href="#method_roll">#</a> **roll:** `Array.prototype.roll(dim = 0, shift = 1)`
+<a id="method_roll" href="#method_roll">#</a> **roll:** `Array.prototype.roll(dim = 0, shift = 1)`
 
 Circular shift dimension `dim` by `shift`. Use a negative `shift` to shift backwards.
 
@@ -27,7 +27,7 @@ Returns a new cube.
 
 ---
 
-<a name="method_shuffle" href="#method_shuffle">#</a> **shuffle:** `Array.prototype.shuffle(dim = 0, n = null)`
+<a id="method_shuffle" href="#method_shuffle">#</a> **shuffle:** `Array.prototype.shuffle(dim = 0, n = null)`
 
 
 Shuffle dimension `dim`.
@@ -38,7 +38,7 @@ Returns a new cube.
 
 ---
 
-<a name="method_sample" href="#method_sample">#</a> **sample:** `Array.prototype.sample(dim = 0, n = 1, prob = null)`
+<a id="method_sample" href="#method_sample">#</a> **sample:** `Array.prototype.sample(dim = 0, n = 1, prob = null)`
 
 
 Sample `n` rows (or columns or pages depending on `dim`) with replacement.
@@ -51,7 +51,7 @@ Note: the returned cube does not have keys or a label on dimension `dim`.
 
 ---
 
-<a name="method_freq" href="#method_freq">#</a> **freq:** `Array.prototype.freq(ret = 'matrix')`
+<a id="method_freq" href="#method_freq">#</a> **freq:** `Array.prototype.freq(ret = 'matrix')`
 
 Count occurrences of each unique value &mdash; the shape, keys and labels of the calling array are ignored.
 
@@ -69,7 +69,7 @@ Note: `undefined` and `null` cannot be used as keys. If `ret` is `'vector'` and 
 
 ---
 
-<a name="method_has_key" href="#method_has_key">#</a> **hasKey:** `Array.prototype.hasKey(dim = 0, k)`
+<a id="method_has_key" href="#method_has_key">#</a> **hasKey:** `Array.prototype.hasKey(dim = 0, k)`
 
 If `k` is omitted, returns `true` if the calling array has keys on dimension `dim`, otherwise returns `false`.
 
@@ -79,7 +79,7 @@ If `k` is passed, `hasKey` returns `true` if the calling array has the key `k` o
 
 ---
 
-<a name="method_ind" href="#method_ind">#</a> **ind:** `Array.prototype.ind(dim = 0)`
+<a id="method_ind" href="#method_ind">#</a> **ind:** `Array.prototype.ind(dim = 0)`
 
 Indices on dimension `dim`.
 
@@ -89,7 +89,7 @@ Returns a new array with entries _0, 1, 2, ..., n-1_ where _n_ is the length of 
 
 ---
 
-<a name="method_ind_or_key" href="#method_ind_or_key">#</a> **indOrKey:** `Array.prototype.indOrKey(dim = 0)`
+<a id="method_ind_or_key" href="#method_ind_or_key">#</a> **indOrKey:** `Array.prototype.indOrKey(dim = 0)`
 
 Indices or keys on dimension `dim`.
 
@@ -99,7 +99,7 @@ Returns a new array.
 
 ---
 
-<a name="method_vec_ind" href="#method_vec_ind">#</a> **vecInd:** `Array.prototype.vecInd(r = null, c = null, p = null)`
+<a id="method_vec_ind" href="#method_vec_ind">#</a> **vecInd:** `Array.prototype.vecInd(r = null, c = null, p = null)`
 
 Vector indices that correspond to the given row (`r`), column (`c`) and page (`p`) indices/keys.
 
@@ -111,7 +111,7 @@ Returns a new array.
 
 ---
 
-<a name="method_posn" href="#method_posn">#</a> **posn:** `Array.prototype.posn(dim = 0, v)`
+<a id="method_posn" href="#method_posn">#</a> **posn:** `Array.prototype.posn(dim = 0, v)`
 
 Indices/keys on dimension `dim` that correspond to the vector indices `v`.
 
@@ -119,7 +119,7 @@ Returns a new array.
 
 ---
 
-<a name="method_which" href="#method_which">#</a> **which:** `Array.prototype.which(f)`
+<a id="method_which" href="#method_which">#</a> **which:** `Array.prototype.which(f)`
 
 Vector indices of entries that satisfy a given condition.
 
@@ -141,7 +141,7 @@ Returns a new array.
 
 ---
 
-<a name="method_compare" href="#method_compare">#</a> **compare:** `Array.prototype.compare(b, assert = true)`
+<a id="method_compare" href="#method_compare">#</a> **compare:** `Array.prototype.compare(b, assert = true)`
 
 Test if the calling array is 'the same as' `b`, i.e. has the same shape, keys, labels and entries (`===`).
 
@@ -153,7 +153,7 @@ If `assert` is falsy, `compare` returns the calling array (which is always truth
 
 ---
 
-<a name="method_vble" href="#method_vble">#</a> **vble:** `Array.prototype.vble(dim = 0)`
+<a id="method_vble" href="#method_vble">#</a> **vble:** `Array.prototype.vble(dim = 0)`
 
 Represent each 'observation' in the calling array by an object. `dim` indicates which dimension represents the 'variables'. For example, if `dim` is `1`, the columns are the variables and there is an object for each row-page pair. Each object indicates the row and page that it corresponds to and the value of each variable.
 

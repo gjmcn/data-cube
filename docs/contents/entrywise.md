@@ -2,7 +2,7 @@ Unless otherwise stated, entrywise methods return a new cube with the same shape
 
 ---
 
-<a name="method_ew_no_arg" href="#method_ew_no_arg">#</a> **Methods that take no arguments:**
+<a id="method_ew_no_arg" href="#method_ew_no_arg">#</a> **Methods that take no arguments:**
 
 Name | Function
 |:--|:--|
@@ -50,7 +50,7 @@ Name | Function
 
 ---
 
-<a name="method_op_like" href="#method_op_like">#</a> **Operator-like methods; take one argument:**
+<a id="method_op_like" href="#method_op_like">#</a> **Operator-like methods; take one argument:**
 
 Name | Operator/Function
 |:--|:--|
@@ -90,7 +90,7 @@ Note: unlike direct application of `&&` or `||`, `and` and `or` do not use short
 
 ---
 
-<a name="method_cond" href="#method_cond">#</a> **cond:** `Array.prototype.cond(a, b)`
+<a id="method_cond" href="#method_cond">#</a> **cond:** `Array.prototype.cond(a, b)`
 
 Apply the conditional operator `?:` entrywise.
 
@@ -102,13 +102,13 @@ Note: unlike direct application of `?:`, `cond` does not use short-circuit evalu
 
 ---
 
-<a name="method_prop" href="#method_prop">#</a> **prop:** `Array.prototype.prop(name)`
+<a id="method_prop" href="#method_prop">#</a> **prop:** `Array.prototype.prop(name)`
 
 Get property `name` of each entry.
 
 ---
 
-<a name="method_set_prop" href="#method_set_prop">#</a> **$prop:** `Array.prototype.$prop(name, val)`
+<a id="method_set_prop" href="#method_set_prop">#</a> **$prop:** `Array.prototype.$prop(name, val)`
 
 For each entry, set property `name` to `val`.
 
@@ -122,7 +122,7 @@ Note: if `$prop` throws an error when attempting to set a property of an entry (
 
 ---
 
-<a name="method_set_set_prop" href="#method_set_set_prop">#</a> **$$prop:** `Array.prototype.$$prop(name, f)`
+<a id="method_set_set_prop" href="#method_set_set_prop">#</a> **$$prop:** `Array.prototype.$$prop(name, f)`
 
 Set property `name` using the function `f`.
 
@@ -134,7 +134,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_method" href="#method_method">#</a> **method:** `Array.prototype.method(name, arg1, arg2, arg3, ...)`
+<a id="method_method" href="#method_method">#</a> **method:** `Array.prototype.method(name, arg1, arg2, arg3, ...)`
 
 Call method `name` of each entry of the calling array. The corresponding entries of `arg1`, `arg2`, `arg3`, ... are passed to the method.
 
@@ -142,7 +142,7 @@ All arguments except `name` are broadcast.
 
 ---
 
-<a name="method_call" href="#method_call">#</a> **call:** `Array.prototype.call(f, arg1, arg2, arg3, ...)`
+<a id="method_call" href="#method_call">#</a> **call:** `Array.prototype.call(f, arg1, arg2, arg3, ...)`
 
 Apply function `f` to each entry of the calling array. The corresponding entries of `arg1`, `arg2`, `arg3`, ... are passed as additional arguments.
 
@@ -160,7 +160,7 @@ All arguments except `f` are broadcast.
 
 ---
 
-<a name="method_set_set_call" href="#method_set_set_call">#</a> **$$call:** `Array.prototype.$$call(f, arg1, arg2, arg3, ...)`
+<a id="method_set_set_call" href="#method_set_set_call">#</a> **$$call:** `Array.prototype.$$call(f, arg1, arg2, arg3, ...)`
 
 Set entries using their current values and the function `f`.
 
@@ -170,7 +170,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_apply" href="#method_apply">#</a> **apply:** `Array.prototype.apply(arg0, arg1, arg2, ...)`
+<a id="method_apply" href="#method_apply">#</a> **apply:** `Array.prototype.apply(arg0, arg1, arg2, ...)`
 
 Each entry of the calling array must be a function. Each function is passed the corresponding entries of `arg0`, `arg1`, `arg2`, ...
 
@@ -178,7 +178,7 @@ All arguments are broadcast.
 
 ---
 
-<a name="method_loop" href="#method_loop">#</a> **loop:** `Array.prototype.loop(args0, args1, args2, ...)`
+<a id="method_loop" href="#method_loop">#</a> **loop:** `Array.prototype.loop(args0, args1, args2, ...)`
 
 Each of `args0`, `args1`, `args2`, ... contains a function or a property/method name followed by arguments/values associated with it. `loop` is mostly used to draw on the canvas with [data-cube-html](https://github.com/gjmcn/data-cube-html) and its behavior is demonstrated in this [sketch example](https://github.com/gjmcn/data-cube-html#method_sketch). 
 

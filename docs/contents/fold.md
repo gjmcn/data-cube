@@ -8,7 +8,7 @@ Fold methods act along a given dimension, reducing it to length 1.
 
 ---
 
-<a name="method_fold" href="#method_fold">#</a> **fold:** `Array.prototype.fold(dim = 0, f, init)`
+<a id="method_fold" href="#method_fold">#</a> **fold:** `Array.prototype.fold(dim = 0, f, init)`
 
 Fold along dimension `dim` using function `f` and initial 'accumulated value' `init`.
 
@@ -34,7 +34,7 @@ Notes:
 
 ---
 
-<a name="method_fold_one" href="#method_fold_one">#</a> **Convenience fold methods**
+<a id="method_fold_one" href="#method_fold_one">#</a> **Convenience fold methods**
 
 Name | Description | Initial value
 |:--|:--|--:|
@@ -62,7 +62,7 @@ Notes:
 
 ---
 
-<a name="method_sew" href="#method_sew">#</a> **sew:** `Array.prototype.sew(dim = 0, sep = ',')`
+<a id="method_sew" href="#method_sew">#</a> **sew:** `Array.prototype.sew(dim = 0, sep = ',')`
 
 Like the native array method [join](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/join), but works along a given dimension.
 
@@ -70,7 +70,7 @@ Returns a new cube.
 
 ---
 
-<a name="method_var" href="#method_var">#</a><br>
+<a id="method_var" href="#method_var">#</a><br>
 **var:** `Array.prototype.var(dim = 0, delta = 0)`<br>
 **sd:** `Array.prototype.sd(dim = 0, delta = 0)`<br>
 
@@ -82,7 +82,7 @@ Returns a new cube.
 
 ---
 
-<a name="method_wrap" href="#method_wrap">#</a> **wrap:** `Array.prototype.wrap(dim = 0, sc = 'full')`
+<a id="method_wrap" href="#method_wrap">#</a> **wrap:** `Array.prototype.wrap(dim = 0, sc = 'full')`
 
 Each entry of the returned cube is a subcube of the calling array. For example, the entries of `x.wrap(1)` are 'row vectors'.
 
@@ -98,7 +98,7 @@ Cumulative methods are like fold methods, but include all intermediate results &
 
 ---
 
-<a name="method_cumu" href="#method_cumu">#</a> **cumu:** `Array.prototype.cumu(dim = 0, f, init)`
+<a id="method_cumu" href="#method_cumu">#</a> **cumu:** `Array.prototype.cumu(dim = 0, f, init)`
 
 As [fold](#method_fold), but the returned cube includes all intermediate results.
 
@@ -106,7 +106,7 @@ Returns a new cube with the same shape, keys and labels as the calling array (un
 
 ---
 
-<a name="method_cumu_one" href="#method_cumu_one">#</a> **Convenience cumulative methods**
+<a id="method_cumu_one" href="#method_cumu_one">#</a> **Convenience cumulative methods**
 
 Name | Description
 |:--|:--|
@@ -128,7 +128,7 @@ These methods take the dimension to work along as an argument (default `0`) and 
 
 ---
 
-<a name="method_quantile" href="#method_quantile">#</a> **quantile:** `Array.prototype.quantile(dim = 0, prob = [0, 0.25, 0.5, 0.75, 1])`
+<a id="method_quantile" href="#method_quantile">#</a> **quantile:** `Array.prototype.quantile(dim = 0, prob = [0, 0.25, 0.5, 0.75, 1])`
 
 Quantiles corresponding to the probabilities `prob`.
 

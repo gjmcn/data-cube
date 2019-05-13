@@ -6,7 +6,7 @@ Notes:
 
 ---
 
-<a name="method_subcube" href="#method_subcube">#</a> **subcube:** `Array.prototype.subcube(r = null, c = null, p = null, ret = 'full')`
+<a id="method_subcube" href="#method_subcube">#</a> **subcube:** `Array.prototype.subcube(r = null, c = null, p = null, ret = 'full')`
 
 Get the specified rows (`r`), columns (`c`) and pages (`p`).
 
@@ -22,7 +22,7 @@ Pass `null` (or `undefined` or omit the argument) to indicate that all indices/k
 
 ---
 
-<a name="method_set_subcube" href="#method_set_subcube">#</a> **$subcube:** `Array.prototype.$subcube(r = null, c = null, p = null, val)`
+<a id="method_set_subcube" href="#method_set_subcube">#</a> **$subcube:** `Array.prototype.$subcube(r = null, c = null, p = null, val)`
 
 Set the corresponding subcube (see `subcube`) to `val`.
 
@@ -32,7 +32,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_set_set_subcube" href="#method_set_set_subcube">#</a> **$$subcube:** `Array.prototype.$$subcube(r = null, c = null, p = null, f)`
+<a id="method_set_set_subcube" href="#method_set_set_subcube">#</a> **$$subcube:** `Array.prototype.$$subcube(r = null, c = null, p = null, f)`
 
 Set the corresponding subcube (see `subcube`) using the function `f`.
 
@@ -42,7 +42,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_row" href="#method_row">#</a><br>
+<a id="method_row" href="#method_row">#</a><br>
 **row:** `Array.prototype.row(j, ret = 'full')`<br>
 **col:** `Array.prototype.col(j, ret = 'full')`<br>
 **page:** `Array.prototype.page(j, ret = 'full')`
@@ -55,7 +55,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_set_row" href="#method_set_row">#</a><br>
+<a id="method_set_row" href="#method_set_row">#</a><br>
 **$row:** `Array.prototype.$row(j, val)`<br>
 **$col:** `Array.prototype.$col(j, val)`<br>
 **$page:** `Array.prototype.$page(j, val)`
@@ -68,7 +68,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_set_set_row" href="#method_set_set_row">#</a><br>
+<a id="method_set_set_row" href="#method_set_set_row">#</a><br>
 **$$row:** `Array.prototype.$$row(j, f)`<br>
 **$$col:** `Array.prototype.$$col(j, f)`<br>
 **$$page:** `Array.prototype.$$page(j, f)`
@@ -83,7 +83,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_row_slice" href="#method_row_slice">#</a><br>
+<a id="method_row_slice" href="#method_row_slice">#</a><br>
 **rowSlice:** `Array.prototype.rowSlice(s = null, e = null, ret)`<br>
 **colSlice:** `Array.prototype.colSlice(s = null, e = null, ret)`<br>
 **pageSlice:** `Array.prototype.pageSlice(s = null, e = null, ret)`
@@ -98,7 +98,7 @@ Pass `null` or `undefined` as `e` or omit `e` to finish at the end of the releva
 
 ---
 
-<a name="method_set_row_slice" href="#method_set_row_slice">#</a><br>
+<a id="method_set_row_slice" href="#method_set_row_slice">#</a><br>
 **$rowSlice:** `Array.prototype.$rowSlice(s = null, e = null, val)`<br>
 **$colSlice:** `Array.prototype.$colSlice(s = null, e = null, val)`<br>
 **$pageSlice:** `Array.prototype.$pageSlice(s = null, e = null, val)`
@@ -111,7 +111,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_set_set_row_slice" href="#method_set_set_row_slice">#</a><br>
+<a id="method_set_set_row_slice" href="#method_set_set_row_slice">#</a><br>
 **$$rowSlice:** `Array.prototype.$$rowSlice(s = null, e = null, f)`<br>
 **$$colSlice:** `Array.prototype.$$colSlice(s = null, e = null, f)`<br>
 **$$pageSlice:** `Array.prototype.$$pageSlice(s = null, e = null, f)`
@@ -128,7 +128,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_head" href="#method_head">#</a> **head:** `Array.prototype.head(nr = null, nc = null, np = null, ret = 'full')`
+<a id="method_head" href="#method_head">#</a> **head:** `Array.prototype.head(nr = null, nc = null, np = null, ret = 'full')`
 
 Get the first `nr` rows, `nc` columns and `np` pages.
 

@@ -1,6 +1,6 @@
 ## Broadcasting
 
-Where appropriate, methods **broadcast** [singletons](#):
+Where appropriate, methods **broadcast** [singletons](?arguments):
 
 ```
 x = [2, 3].rand(100);
@@ -24,7 +24,7 @@ s.method('slice', 1, [3, 4]);
 s.method('slice', [1, 2], [3, 4]);
 ```
 
-[Operator-like](#) methods are special since they also broadcast the calling array:
+[Operator-like](?entrywise#method_op_like) methods are special since they also broadcast the calling array:
 
 ```js
 [5].add([10, 20]);
@@ -34,7 +34,7 @@ s.method('slice', [1, 2], [3, 4]);
 
 __Notes__
 
-* Only singletons are broadcast. Use [tile](#) or [tileTo](#) in other cases.
+* Only singletons are broadcast. Use [tile](?concatenate#method_tile) or [tileTo](?concatenate#method_tile_to) in other cases.
 
 * Singletons are _not_ copied during broadcasting; the same argument is used repeatedly. This is important when array entries are arrays, dates, objects etc.
 

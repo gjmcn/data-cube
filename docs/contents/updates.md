@@ -42,8 +42,8 @@ Notes:
 
 ---
 
-<a name="method_set_before" href="#method_set_before">#</a> **$before:** `Array.prototype.$before(f = null)`<br>
-<a name="method_set_after" href="#method_set_after">#</a> **$after:** `Array.prototype.$after(f = null)`
+<a id="method_set_before" href="#method_set_before">#</a> **$before:** `Array.prototype.$before(f = null)`<br>
+<a id="method_set_after" href="#method_set_after">#</a> **$after:** `Array.prototype.$after(f = null)`
 
 Set *before/after update* functions.
 
@@ -67,8 +67,8 @@ x.after().at('zUpdate')();   //y is undefined, z is 20
 
 ---
 
-<a name="method_before" href="#method_before">#</a> **before:** `Array.prototype.before()`<br>
-<a name="method_after" href="#method_after">#</a> **after:** `Array.prototype.after()`
+<a id="method_before" href="#method_before">#</a> **before:** `Array.prototype.before()`<br>
+<a id="method_after" href="#method_after">#</a> **after:** `Array.prototype.after()`
 
 Returns a cube containing the before/after-update functions of the calling array &mdash; or an empty cube if there are none.
 

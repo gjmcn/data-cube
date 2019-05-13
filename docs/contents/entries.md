@@ -4,7 +4,7 @@
 
 ---
 
-<a name="method_ent" href="#method_ent">#</a> **ent:** `Array.prototype.ent(i)`
+<a id="method_ent" href="#method_ent">#</a> **ent:** `Array.prototype.ent(i)`
 
 Returns the entry at vector index `i`.
 
@@ -12,7 +12,7 @@ A negative index counts back from the largest valid vector index.
 
 ---
 
-<a name="method_set_ent" href="#method_set_ent">#</a> **$ent:** `Array.prototype.$ent(i, val)`
+<a id="method_set_ent" href="#method_set_ent">#</a> **$ent:** `Array.prototype.$ent(i, val)`
 
 Set the corresponding entry (see `ent`) to `val`.
 
@@ -20,7 +20,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_set_set_ent" href="#method_set_set_ent">#</a> **$$ent:** `Array.prototype.$$ent(i, f)`
+<a id="method_set_set_ent" href="#method_set_set_ent">#</a> **$$ent:** `Array.prototype.$$ent(i, f)`
 
 Set the corresponding entry (see `ent`) using the function `f`.
 
@@ -30,7 +30,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_at" href="#method_at">#</a> **at:** `Array.prototype.at(r = null, c = null, p = null)`
+<a id="method_at" href="#method_at">#</a> **at:** `Array.prototype.at(r = null, c = null, p = null)`
 
 Returns the entry at row `r`, column `c` and page `p`.
 
@@ -38,7 +38,7 @@ Pass `null` (or `undefined` or omit the argument) to specify the first row/colum
 
 ---
 
-<a name="method_set_at" href="#method_set_at">#</a> **$at:** `Array.prototype.$at(r = null, c = null, p = null, val)`
+<a id="method_set_at" href="#method_set_at">#</a> **$at:** `Array.prototype.$at(r = null, c = null, p = null, val)`
 
 Set the corresponding entry (see `at`) to `val`.
 
@@ -46,7 +46,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_set_set_at" href="#method_set_set_at">#</a> **$$at:** `Array.prototype.$$at(r = null, c = null, p = null, f)`
+<a id="method_set_set_at" href="#method_set_set_at">#</a> **$$at:** `Array.prototype.$$at(r = null, c = null, p = null, f)`
 
 Set the corresponding entry (see `at`) using the function `f`.
 
@@ -60,7 +60,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_vec" href="#method_vec">#</a> **vec:** `Array.prototype.vec(i = null)`
+<a id="method_vec" href="#method_vec">#</a> **vec:** `Array.prototype.vec(i = null)`
 
 Get entries at vector indices `i`.
 
@@ -72,7 +72,7 @@ Returns a new array.
 
 ---
 
-<a name="method_set_vec" href="#method_set_vec">#</a> **$vec:** `Array.prototype.$vec(i = null, val)`
+<a id="method_set_vec" href="#method_set_vec">#</a> **$vec:** `Array.prototype.$vec(i = null, val)`
 
 Set selected entries (see `vec`) to `val`.
 
@@ -84,7 +84,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_set_set_vec" href="#method_set_set_vec">#</a> **$$vec:** `Array.prototype.$$vec(i = null, f)`
+<a id="method_set_set_vec" href="#method_set_set_vec">#</a> **$$vec:** `Array.prototype.$$vec(i = null, f)`
 
 Set selected entries (see `vec`) using the function `f`.
 
@@ -94,7 +94,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_rcp" href="#method_rcp">#</a> **rcp:** `Array.prototype.rcp(r = null, c = null, p = null)`
+<a id="method_rcp" href="#method_rcp">#</a> **rcp:** `Array.prototype.rcp(r = null, c = null, p = null)`
 
 Get entries that correspond to the given row (`r`), column (`c`) and page (`p`) indices/keys.
 
@@ -106,7 +106,7 @@ Returns a new array.
 
 ---
 
-<a name="method_set_rcp" href="#method_set_rcp">#</a> **$rcp:** `Array.prototype.$rcp(r = null, c = null, p = null, val)`
+<a id="method_set_rcp" href="#method_set_rcp">#</a> **$rcp:** `Array.prototype.$rcp(r = null, c = null, p = null, val)`
 
 Set selected entries (see `rcp`) to `val`.
 
@@ -116,7 +116,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_set_set_rcp" href="#method_set_set_rcp">#</a> **$$rcp:** `Array.prototype.$$rcp(r = null, c = null, p = null, f)`
+<a id="method_set_set_rcp" href="#method_set_set_rcp">#</a> **$$rcp:** `Array.prototype.$$rcp(r = null, c = null, p = null, f)`
 
 Set selected entries (see `rcp`) using the function `f`.
 
@@ -126,7 +126,7 @@ Returns the modified cube.
 
 ---
 
-<a name="method_set_autoType" href="#method_set_autoType">#</a> **$autoType:** `Array.prototype.$autoType(empty)`
+<a id="method_set_autoType" href="#method_set_autoType">#</a> **$autoType:** `Array.prototype.$autoType(empty)`
 
 Convert string entries to another type where appropriate:
 
