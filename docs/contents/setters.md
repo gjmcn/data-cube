@@ -1,5 +1,7 @@
 ## Setters
 
+---
+
 Data-Cube __setters__ (i.e. methods that change the calling array) are prefixed with `$`. Most setters correspond to **getters** of the same name:
 
 ```

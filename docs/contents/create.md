@@ -1,9 +1,13 @@
-Notes:
+## Create, Copy and Convert
 
-* These methods *do not* convert the calling array to a cube (except for [[toCube|Create-Copy-and-Convert#method_to_cube]]).
+---
 
-* These methods can be called as standard functions: the `dc` function exported by Data-Cube is equivalent to the [[toCube|Create-Copy-and-Convert#method_to_cube]] method; other methods can be called as properties of `dc`. For example:
-  ```js
+__Notes:__
+
+* These methods *do not* convert the calling array to a cube (except for [`toCube`](#method_to_cube)).
+
+* These methods can be called as standard functions. The [`dc`](?exported) function exported by Data-Cube is equivalent to the [`toCube`](#method_to_cube) method; other methods can be called as properties of `dc`. For example:
+  ``` {.no-exec}
   dc([2,3]);           //equivalent to [2,3].toCube()
   dc.cube([2,3], 7);   //equivalent to [2,3].cube(7)
   dc.rand([2,3], 7);   //equivalent to [2,3].rand(7)
@@ -25,6 +29,12 @@ The entries of the returned cube are set to `val`. If `val` is omitted or `undef
 
 `val` is broadcast.
 
+Example:
+
+```
+[2, 3].cube(5);
+```
+
 ---
 
 <a id="method_rand" href="#method_rand">#</a> **rand:** `Array.prototype.rand(mx)`
@@ -35,6 +45,12 @@ If `mx` is omitted, each entry of the returned cube is a sample from a uniform d
 
 If passed, `mx` must be a positive integer. Each entry of the returned cube is a sample from a _discrete_ uniform distribution: *x &isin; {0, 1, ..., mx}*.
 
+Example:
+
+```
+[2, 3].rand(5);
+```
+
 ---
 
 <a id="method_normal" href="#method_normal">#</a> **normal:** `Array.prototype.normal(mu = 0, sigma = 1)`
@@ -42,6 +58,12 @@ If passed, `mx` must be a positive integer. Each entry of the returned cube is a
 Returns a new cube with shape specified by the calling array: `[nRows, nColumns, nPages]`. If a dimension length is omitted or `undefined`, it defaults to 1.
 
 Each entry of the returned cube is a sample from a normal distribution with mean `mu` and standard deviation `sigma`.
+
+Example:
+
+```
+[2, 3].normal(5);
+```
 
 ---
 
@@ -53,16 +75,16 @@ If `unit` is omitted (or `undefined`), `start` and `limit` must be of the same t
 
 If `unit` is passed, the returned array contains dates.  In this case, `start` and `limit` must be dates (or strings/numbers that convert to valid dates) and `unit` must be `'year'`, `'month'`, `'week'`, `'day'`, `'hour'`, `'minute'`, `'second'` or `'milli'`. `step` is in units of `unit`.
 
+Note: when computing a numeric sequence, `limit + 1e-15` is used (or `limit - 1e-15` if `start > limit`) to avoid floating point issues. 
+
 Examples:
 
-```js
-[0,2].seq();         //-> [0, 1, 2]
-[0,6].seq(2);        //-> [0, 2, 4, 6]
-[0,5].seq(2);        //-> [0, 2, 4]
-[1,-3.5].seq(-1.5);  //-> [1, -0.5, -2, -3.5]
 ```
-
-Note: when computing a numeric sequence, `limit + 1e-15` is used (or `limit - 1e-15` if `start > limit`) to avoid floating point issues. 
+[0, 2].seq();
+```
+```
+[1, -4].seq(-1.5);
+```
 
 ---
 
@@ -80,10 +102,11 @@ Unlike [[seq|Create-Copy-and-Convert#method_step]], `lin` always computes a nume
 
 Examples:
 
-```js
-[0,2].lin(3);      //-> [0, 1, 2]
-[1.5,2.4].lin(4);  //-> [1.5, 1.8, 2.1, 2.4]
-[2,-4].lin(4);     //-> [2, 0, -2, -4]
+```
+[1.5, 2.4].lin(4);
+```
+```
+[2, -4].lin(4);
 ```
 
 ---
@@ -101,6 +124,12 @@ Each row of the returned cube represents a 'pair'; the number of columns and wha
 * `'both'`: 4 columns; vector indices of calling array, entries of calling array, vector indices of `y`, entries of `y`
 
 The order of the pairs is intuitive: `grid` iterates over the calling array for the first index/entry of `y`, then over the calling array for the second index/entry of `y` ...
+
+Example
+
+```
+[2, 3, 4].grid([8, 9]);
+```
 
 ---
 
@@ -124,6 +153,12 @@ Notes:
 
 * The values contained in a DSV string are assumed to be strings &mdash; so the entries (and keys) of the returned cube will be strings.
 
+Example:
+
+```
+[{a: 5, b: true}, {a: 6, b: false}].matrix();
+```
+
 ---
 
 <a id="method_dict" href="#method_dict">#</a> **dict:** `Array.prototype.dict(dim = 0)`
@@ -131,6 +166,12 @@ Notes:
 Create a 'dictionary'.
 
 The entries of the calling array are interpreted as _key_, _value_,  _key_, _value_, ... The returned cube has dimensions of length 1 except on `dim` and has keys on dimension `dim`.
+
+Example:
+
+```
+['a', 5, 'b', true].dict(1);
+```
 
 ---
 
@@ -141,6 +182,18 @@ Create a cube or a standard array from a JSON string.
 The calling array should contain a single entry &mdash; the JSON string.
 
 Note: use the cube method [stringify](#method_stringify) to serialize a cube to a JSON string. `stringify` or the native method [JSON.stringify](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) can be used to serialize a standard array.
+
+Example:
+
+```
+x = [2, 3].rand(5);
+```
+```
+s = x.stringify();
+```
+```
+[s].parse();
+```
 
 ---
 
@@ -164,6 +217,15 @@ Both entries and keys are shallow copied.
 
 * `'array'`: standard array; only the entries are copied
 
+Example:
+
+```
+x = [2, 3].rand(5);
+```
+```
+x.copy('array');
+```
+
 ---
 
 ### Convert
@@ -178,6 +240,21 @@ Returns the cube.
 
 The `dc` function exported by the Data-Cube package is equivalent to the `toCube` method. For example, `dc([2,3])` is equivalent to `[2,3].toCube()`. If a non-array is passed to `dc`, it returns a 1-entry cube with the passed value as the entry. 
 
+Example:
+
+```
+x = [3, 4]
+```
+```
+x.stringify();
+```
+```
+x.toCube();
+```
+```
+x.stringify();
+```
+
 ---
 
 <a id="method_to_array" href="#method_to_array">#</a> **toArray:** `Array.prototype.toArray()`
@@ -185,6 +262,15 @@ The `dc` function exported by the Data-Cube package is equivalent to the `toCube
 Convert a cube to a standard array (does nothing if already a standard array).
 
 Returns the array.
+
+Example:
+
+```
+x = [2, 3].rand(5);
+```
+```
+x.toArray();
+```
 
 ---
 
@@ -200,6 +286,18 @@ The keys and labels of the calling array are ignored.
 
 Returns a new array with the same number of entries as the calling array has rows.
 
+Example:
+
+```
+x = [2, 3].rand(5);
+```
+```
+y = x.arAr();
+```
+```
+y.stringify();
+```
+
 ---
 
 <a id="method_ar_obj" href="#method_ar_obj">#</a> **arObj:** `Array.prototype.arObj()`
@@ -209,6 +307,18 @@ Returns a new array with the same number of entries as the calling array has row
 The calling array must have column keys. These are converted to strings and used as property names. All other keys and labels of the calling array are ignored.
 
 Returns a new array with the same number of entries as the calling array has rows.
+
+Example:
+
+```
+x = [2, 3].rand(5).$key(1, ['a', 'b', 'c']);
+```
+```
+y = x.arObj();
+```
+```
+y.stringify();
+```
 
 Also see: [[vble|Other#method_vble]].
 
@@ -236,6 +346,15 @@ Returns a (JSON) string.
 
 Note: use the cube method [[parse|Create-Copy-and-Convert#method_parse]] to reconstruct a cube from a JSON string. ` parse` or the native method [JSON.parse](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse) can be used to reconstruct a standard array.
 
+Example:
+
+```
+x = [2, 3].rand(5);
+```
+```
+s = x.stringify();
+```
+
 ---
 
 ### Fetch
@@ -250,7 +369,7 @@ Notes:
 
 * Fetch methods return a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Example usage with `fetchMatrix`:
 
-  ```js
+  ``` {.no-exec}
   //pass matrix to the function f
   [url].fetchMatrix()
     .then(f);
@@ -295,3 +414,7 @@ Fetch data and parse the result to a cube or a standard array.
 `fetchParse` should only be used to load JSON created by Data-Cube's [[stringify|#method_stringify]] method or JSON that represents a standard array. 
 
 ---
+
+```{.no-input .no-output}
+deleteVariables('s', 'x');
+```

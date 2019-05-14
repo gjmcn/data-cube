@@ -1,5 +1,7 @@
 ## Cubes
 
+---
+
 A cube has 3 __dimensions__:
 
 0: rows,&ensp; 1: columns,&ensp; 2: pages {.indent}

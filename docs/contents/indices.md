@@ -1,5 +1,7 @@
 ## Indices and Keys
 
+---
+
 Rows, columns and pages have **indices** by default. Negative indices count back from the end of the relevant dimension:
 
 ```

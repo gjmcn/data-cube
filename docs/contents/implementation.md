@@ -1,5 +1,7 @@
 ## Implementation
 
+---
+
 Data-Cube adds new methods to `Array.prototype`. When one of these methods is called, the calling array is converted to a 'cube' by adding properties to the array instance:
 
 ```{.no-exec}

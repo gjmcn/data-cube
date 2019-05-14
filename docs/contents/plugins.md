@@ -1,5 +1,7 @@
 ## Plugins
 
+---
+
 Plugins add functionality to Data-Cube by adding new array methods. Some plugins export a function.
 
 The current plugins are:

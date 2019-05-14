@@ -1,5 +1,7 @@
 ## Arguments
 
+---
+
 Passing a 1-entry array to a Data-Cube method is equivalent to passing the entry itself:
 
 ```

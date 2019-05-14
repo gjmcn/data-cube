@@ -1,5 +1,7 @@
 ## Labels
 
+---
+
 Each dimension can have a (non-empty) string label:
 
 ```
