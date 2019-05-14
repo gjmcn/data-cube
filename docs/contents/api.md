@@ -1,5 +1,7 @@
 ## API
 
+---
+
 Data-Cube methods and functions:
 
 * [Create, Copy, Convert](?create)

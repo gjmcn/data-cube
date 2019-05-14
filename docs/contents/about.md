@@ -1,4 +1,8 @@
-__Data-Cube__ adds array-oriented programming to JavaScript.{.big}
+## Data-Cube
+
+A library that adds array-oriented programming to JavaScript. {.big}
+
+---
 
 A native array:
 
