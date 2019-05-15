@@ -416,5 +416,5 @@ Fetch data and parse the result to a cube or a standard array.
 ---
 
 ```{.no-input .no-output}
-deleteVariables('s', 'x');
+deleteVariables('s', 'x', 'y');
 ```

@@ -20,6 +20,16 @@ Pass `null` (or `undefined` or omit the argument) to indicate that all indices/k
 
 * `'array'`: standard array; entries of the selected rows, columns and pages
 
+
+Example:
+
+```
+x = [3, 4].rand(100);
+```
+```
+x.subcube([0, -1], [1, 2]);
+```
+
 ---
 
 <a id="method_set_subcube" href="#method_set_subcube">#</a> **$subcube:** `Array.prototype.$subcube(r = null, c = null, p = null, val)`
@@ -30,6 +40,15 @@ Set the corresponding subcube (see `subcube`) to `val`.
 
 Returns the modified cube.
 
+Example:
+
+```
+x = [3, 4].rand(100);
+```
+```
+x.$subcube([0, -1], [1, 2], null, [200, 300, 400, 500]);
+```
+
 ---
 
 <a id="method_set_set_subcube" href="#method_set_set_subcube">#</a> **$$subcube:** `Array.prototype.$$subcube(r = null, c = null, p = null, f)`
@@ -39,6 +58,15 @@ Set the corresponding subcube (see `subcube`) using the function `f`.
 `x.$$subcube(r, c, p, f)` is equivalent to `x.$subcube(r, c, p, f(x.subcube(r, c, p, 'full'), x))`.
 
 Returns the modified cube.
+
+Example:
+
+```
+x = [3, 4].rand(100);
+```
+```
+x.$$subcube([0, -1], [1, 2], null, sc => sc.add(100));
+```
 
 ---
 

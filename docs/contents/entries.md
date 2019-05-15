@@ -10,6 +10,15 @@ Returns the entry at vector index `i`.
 
 A negative index counts back from the largest valid vector index.
 
+Example:
+
+```
+x = [2,3].rand(100);
+```
+```
+x.ent(2);
+```
+
 ---
 
 <a id="method_set_ent" href="#method_set_ent">#</a> **$ent:** `Array.prototype.$ent(i, val)`
@@ -17,6 +26,15 @@ A negative index counts back from the largest valid vector index.
 Set the corresponding entry (see `ent`) to `val`.
 
 Returns the modified cube.
+
+Example:
+
+```
+x = [2,3].rand(100);
+```
+```
+x.$ent(2, 200);
+```
 
 ---
 
@@ -28,6 +46,15 @@ Set the corresponding entry (see `ent`) using the function `f`.
 
 Returns the modified cube.
 
+Example:
+
+```
+x = [2,3].rand(100);
+```
+```
+x.$$ent(2, val => val + 100);
+```
+
 ---
 
 <a id="method_at" href="#method_at">#</a> **at:** `Array.prototype.at(r = null, c = null, p = null)`
@@ -36,6 +63,15 @@ Returns the entry at row `r`, column `c` and page `p`.
 
 Pass `null` (or `undefined` or omit the argument) to specify the first row/column/page, regardless of whether the corresponding dimension has indices or keys.
 
+Example:
+
+```
+x = [2,3].rand(100);
+```
+```
+x.at(0, 1);
+```
+
 ---
 
 <a id="method_set_at" href="#method_set_at">#</a> **$at:** `Array.prototype.$at(r = null, c = null, p = null, val)`
@@ -43,6 +79,15 @@ Pass `null` (or `undefined` or omit the argument) to specify the first row/colum
 Set the corresponding entry (see `at`) to `val`.
 
 Returns the modified cube.
+
+Example:
+
+```
+x = [2,3].rand(100);
+```
+```
+x.$at(0, 1, null, 200);
+```
 
 ---
 
@@ -53,6 +98,15 @@ Set the corresponding entry (see `at`) using the function `f`.
 `x.$$at(r, c, p, f)` is equivalent to `x.$at(r, c, p, f(x.at(r, c, p), x))`.
 
 Returns the modified cube.
+
+Example:
+
+```
+x = [2,3].rand(100);
+```
+```
+x.$$at(0, 1, null, val => val + 100);
+```
 
 ---
 
@@ -70,6 +124,15 @@ Pass `null` (or `undefined` or omit the argument) to get all entries in the same
 
 Returns a new array.
 
+Example:
+
+```
+x = [2,3].rand(100);
+```
+```
+x.vec([0, -2]);
+```
+
 ---
 
 <a id="method_set_vec" href="#method_set_vec">#</a> **$vec:** `Array.prototype.$vec(i = null, val)`
@@ -82,6 +145,15 @@ Note that `$vec` can be used to set every entry of a cube without affecting its 
 
 Returns the modified cube.
 
+Example:
+
+```
+x = [2,3].rand(100);
+```
+```
+x.$vec([0, -2], [200, 300]);
+```
+
 ---
 
 <a id="method_set_set_vec" href="#method_set_set_vec">#</a> **$$vec:** `Array.prototype.$$vec(i = null, f)`
@@ -91,6 +163,15 @@ Set selected entries (see `vec`) using the function `f`.
 `x.$$vec(i, f)` is equivalent to `x.$vec(i, f(x.vec(i), x))`.
 
 Returns the modified cube.
+
+Example:
+
+```
+x = [2,3].rand(100);
+```
+```
+x.$$vec([0, -2], vals => vals.add(100));
+```
 
 ---
 
@@ -104,6 +185,15 @@ All arguments are broadcast.
 
 Returns a new array.
 
+Example:
+
+```
+x = [2,3].rand(100);
+```
+```
+x.rcp(0, [0, 2]);
+```
+
 ---
 
 <a id="method_set_rcp" href="#method_set_rcp">#</a> **$rcp:** `Array.prototype.$rcp(r = null, c = null, p = null, val)`
@@ -114,6 +204,15 @@ All arguments are broadcast &mdash; though if `r`, `c` and `p` are all singleton
 
 Returns the modified cube.
 
+Example:
+
+```
+x = [2,3].rand(100);
+```
+```
+x.$rcp(0, [0, 2], null, [200, 300]);
+```
+
 ---
 
 <a id="method_set_set_rcp" href="#method_set_set_rcp">#</a> **$$rcp:** `Array.prototype.$$rcp(r = null, c = null, p = null, f)`
@@ -123,6 +222,15 @@ Set selected entries (see `rcp`) using the function `f`.
 `x.$$rcp(r, c, p, f)` is equivalent to `x.$rcp(r, c, p, f(x.rcp(r, c, p), x))`.
 
 Returns the modified cube.
+
+Example:
+
+```
+x = [2,3].rand(100);
+```
+```
+x.$$rcp(0, [0, 2], null, vals => vals.add(100));
+```
 
 ---
 
@@ -142,4 +250,17 @@ Note: the conversion rules are similar to [d3.autoType](https://github.com/d3/d3
 
 Returns the modified cube.
 
+Example:
+
+```
+x = ['', 'undefined', 'null', 'true', 'false', 'NaN', '123', 'abc'].tp();
+```
+```
+x.$autoType();
+```
+
 ---
+
+```{.no-input .no-output}
+deleteVariables('x');
+```
