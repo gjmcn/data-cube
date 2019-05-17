@@ -48,6 +48,15 @@ Name | Function
 `box` | `x => Array.isArray(x) ? x : [x]`
 `unbox` | `x => Array.isArray(x) ? x[0] : x`
 
+Example:
+
+```
+x = [5, '6'];
+```
+```
+x.typeof();
+```
+
 ---
 
 <a id="method_op_like" href="#method_op_like">#</a> **Operator-like methods; take one argument:**
@@ -88,6 +97,15 @@ Multiple arguments can be passed to operator-like methods as a shorthand way of 
 
 Note: unlike direct application of `&&` or `||`, `and` and `or` do not use short-circuit evaluation.
 
+Example:
+
+```
+x = [5, 6];
+```
+```
+x.add(10);
+```
+
 ---
 
 <a id="method_cond" href="#method_cond">#</a> **cond:** `Array.prototype.cond(a, b)`
@@ -99,6 +117,15 @@ If an entry of the calling array is truthy, the returned cube contains the corre
 `a` and `b` are broadcast.
 
 Note: unlike direct application of `?:`, `cond` does not use short-circuit evaluation.
+
+Example:
+
+```
+x = [false, true, false];
+```
+```
+x.cond('!', ['a', 'b', 'c']);
+```
 
 ---
 
@@ -189,25 +216,6 @@ Returns the calling array (converted to a cube).
 
 ---
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```{.no-input .no-output}
+deleteVariables('x');
+```

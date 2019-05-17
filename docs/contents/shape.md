@@ -5,6 +5,15 @@
 
 Returns a 3-entry array: the number of rows, columns and pages.
 
+Example:
+
+```
+x = [2, 3].rand(100);
+```
+```
+x.shape();
+```
+
 ---
 
 <a id="method_set_shape" href="#method_set_shape">#</a> **$shape:** `Array.prototype.$shape(shp)`
@@ -23,6 +32,15 @@ Set the shape (see `shape`). The number of entries must not change.
 
 `$shape` removes all keys and labels and returns the modified cube.
 
+Example:
+
+```
+x = [2, 3].rand(100);
+```
+```
+x.$shape(3);
+```
+
 ---
 
 <a id="method_set_set_shape" href="#method_set_set_shape">#</a> **$$shape:** `Array.prototype.$$shape(f)`
@@ -32,6 +50,15 @@ Set the shape using the function `f`.
 `x.$$shape(f)` is equivalent to `x.$shape(f(x.shape(), x))`.
 
 `$$shape` removes all keys and labels and returns the modified cube.
+
+Example:
+
+```
+x = [2, 3].rand(100);
+```
+```
+x.$$shape(shp => shp[0] === 2 ? 3 : 2);
+```
 
 ---
 
@@ -43,8 +70,16 @@ Returns a non-negative integer.
 
 (Note: use the `length` property as normal to get the total number of entries.)
 
----
+Example:
 
+```
+x = [2, 3].rand(100);
+```
+```
+x.n();
+```
+
+---
 
 <a id="method_set_squeeze" href="#method_set_squeeze">#</a> **$squeeze:** `Array.prototype.$squeeze()`
 
@@ -54,5 +89,17 @@ Dimensions that are moved take their keys and labels with them (unlike `$shape` 
 
 Returns the modified cube.
 
+Example:
+
+```
+x = [3, 1, 2].rand(100);
+```
+```
+x.$squeeze();
+```
+
 ---
 
+```{.no-input .no-output}
+deleteVariables('x');
+```

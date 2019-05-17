@@ -81,6 +81,15 @@ x.$$subcube([0, -1], [1, 2], null, sc => sc.add(100));
 
 * `x.page(j, ret)` is equivalent to `x.subcube(null, null, j, ret)`
 
+Example:
+
+```
+x = [3, 4].rand(100);
+```
+```
+x.col([0, -1]);
+```
+
 ---
 
 <a id="method_set_row" href="#method_set_row">#</a><br>
@@ -93,6 +102,15 @@ x.$$subcube([0, -1], [1, 2], null, sc => sc.add(100));
 * `x.$col(j, val)` is equivalent to `x.$subcube(null, j, null, val)`
 
 * `x.$page(j, val)` is equivalent to `x.$subcube(null, null, j, val)`
+
+Example:
+
+```
+x = [3, 4].rand(100);
+```
+```
+x.$col([0, -1], x.col([1, 2]));
+```
 
 ---
 
@@ -109,6 +127,15 @@ x.$$subcube([0, -1], [1, 2], null, sc => sc.add(100));
 
 * `x.$$page(j, f)` is equivalent to `x.$page(j, f(x.page(j), x))`
 
+Example:
+
+```
+x = [3, 4].rand(100);
+```
+```
+x.$$col([0, -1], sc => sc.add(100));
+```
+
 ---
 
 <a id="method_row_slice" href="#method_row_slice">#</a><br>
@@ -124,6 +151,15 @@ Pass `null` or `undefined` as `e` or omit `e` to finish at the end of the releva
 
 `ret` behaves as in `subcube`.
 
+Example:
+
+```
+x = [3, 4].rand(100);
+```
+```
+x.colSlice(2);
+```
+
 ---
 
 <a id="method_set_row_slice" href="#method_set_row_slice">#</a><br>
@@ -136,6 +172,15 @@ Set the selected rows, columns or pages (see `rowSlice`, `colSlice` and `pageSli
 `val` is broadcast.
 
 Returns the modified cube.
+
+Example:
+
+```
+x = [3, 4].rand(100);
+```
+```
+x.$colSlice(2, null, 200);
+```
 
 ---
 
@@ -154,6 +199,15 @@ Set the corresponding subcube (see `rowSlice`, `colSlice` and `pageSlice`) using
 
 Returns the modified cube.
 
+Example:
+
+```
+x = [3, 4].rand(100);
+```
+```
+x.$$colSlice(2, null, sc => sc.add(100));
+```
+
 ---
 
 <a id="method_head" href="#method_head">#</a> **head:** `Array.prototype.head(nr = null, nc = null, np = null, ret = 'full')`
@@ -166,4 +220,17 @@ If a dimension length is less than the corresponding argument, `head` gets all r
 
 `ret` behaves as in `subcube`.
 
+Example:
+
+```
+x = [3, 4].rand(100);
+```
+```
+x.head(2, 3);
+```
+
 ---
+
+```{.no-input .no-output}
+deleteVariables('x');
+```
