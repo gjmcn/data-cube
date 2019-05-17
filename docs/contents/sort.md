@@ -26,6 +26,15 @@ Sort entries &mdash; the shape, keys and labels of the calling array are ignored
 
 Returns a new array (unlike the native `sort` method which mutates the calling array).
 
+Example:
+
+```
+x = [2, 3].rand(100);
+```
+```
+x.arrange('asc');
+```
+
 ---
 
 <a id="method_order_key" href="#method_order_key">#</a> **orderKey:** `Array.prototype.orderKey(dim = 0, how = null)`
@@ -35,6 +44,15 @@ Sort dimension `dim` by its keys.
 `how` specifies how the keys are sorted &mdash; see [[arrange|Sort#method_arrange]].
 
 Returns a new cube.
+
+Example:
+
+```
+x = [2, 3].rand(100).$key(1, ['c', 'a', 'b']);
+```
+```
+x.orderKey(1);
+```
 
 ---
 
@@ -54,17 +72,23 @@ Assign each entry to a bin.
 
 Returns a new cube with the same shape, keys and labels as the calling array. Each entry of the returned cube is a bin name.
 
-Examples:
+Example:
 
-```js
-let lim = [4,8,10];
-let x = [8,1,9,5];
-
-//default behavior is not suitable for numbers, sorted limits are [10, 4, 8]
-x.bin(lim);         //-> [10, 10, 10, 10]
-
-//use 'asc' with numbers (and dates)
-x.bin(lim, 'asc');  //-> [8, 4, 10, 8]
+``` {.no-output}
+limits = [40, 60, 80, 100];
+```
+``` {.no-output}
+names = ['fail', 'pass', 'merit', 'distinction'];
+```
+```
+x = [2, 4].rand(100);
+```
+```
+x.bin(limits, 'asc', names);
 ```
 
 ---
+
+```{.no-input .no-output}
+deleteVariables('limits', 'names', 'x');
+```

@@ -32,6 +32,15 @@ Notes:
 
 * Unlike the native array method [reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce), `fold` does not skip 'holes'. This is significant since Data-Cube uses sparse arrays (i.e. holes) for uninitialized cubes (e.g. `x = [5].cube()`).
 
+Example:
+
+```
+x = [2, 4].rand(10);
+```
+```
+x.fold(1, (a, b) => a + b, 0);
+```
+
 ---
 
 <a id="method_fold_one" href="#method_fold_one">#</a> **Convenience fold methods**
@@ -60,6 +69,15 @@ Notes:
 
 * `sameType` uses `typeof`. If entries have the same type, the result is a string indicating the type (e.g. `'number'`). Otherwise, the result is `false`.
 
+Example:
+
+```
+x = [2, 4].rand(10);
+```
+```
+x.sum(1);
+```
+
 ---
 
 <a id="method_sew" href="#method_sew">#</a> **sew:** `Array.prototype.sew(dim = 0, sep = ',')`
@@ -67,6 +85,15 @@ Notes:
 Like the native array method [join](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/join), but works along a given dimension.
 
 Returns a new cube.
+
+Example:
+
+```
+x = ['a', 'h'].seq().$shape(2);
+```
+```
+x.sew(1);
+```
 
 ---
 
@@ -80,6 +107,15 @@ The denominator in the variance calculation for an array/cube `x` is: `x.n(dim) 
 
 Returns a new cube.
 
+Example:
+
+```
+x = [1, 8].seq().$shape(2);
+```
+```
+x.var(1);
+```
+
 ---
 
 <a id="method_wrap" href="#method_wrap">#</a> **wrap:** `Array.prototype.wrap(dim = 0, sc = 'full')`
@@ -89,6 +125,18 @@ Each entry of the returned cube is a subcube of the calling array. For example, 
 `sc` specifies whether each subcube should be a `'full'` subcube, `'core'` subcube or `'array'` (see the `ret` argument of [[subcube|Get-and-Set-Subcubes#method_subcube]] for details).
 
 Returns a new cube.
+
+Example:
+
+```
+x = [2, 3].rand(10);
+```
+```
+w = x.wrap(1);
+```
+```
+w.map(a => JSON.stringify(a));
+```
 
 ---
 
@@ -103,6 +151,15 @@ Cumulative methods are like fold methods, but include all intermediate results &
 As [fold](#method_fold), but the returned cube includes all intermediate results.
 
 Returns a new cube with the same shape, keys and labels as the calling array (unless `dim` is `-1`).
+
+Example:
+
+```
+x = [2, 4].rand(10);
+```
+```
+x.cumu(1, (a, b) => a + b, 0);
+```
 
 ---
 
@@ -121,6 +178,15 @@ Name | Description
 `cumuMaxPosn` | cumulative index/key of maximum
 
 These methods take the dimension to work along as an argument (default `0`) and return a new cube.
+
+Example:
+
+```
+x = [2, 4].rand(10);
+```
+```
+x.cumuSum(1);
+```
 
 ---
 
@@ -142,4 +208,17 @@ Where required, linear interpolation is used to estimate quantiles.
 
 Returns a new cube.
 
+Example:
+
+```
+x = [1, 20].seq().$shape(10, 2).tp();
+```
+```
+x.quantile(1);
+```
+
 ---
+
+```{.no-input .no-output}
+deleteVariables('w', 'x');
+```

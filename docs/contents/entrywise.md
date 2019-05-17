@@ -133,6 +133,12 @@ x.cond('!', ['a', 'b', 'c']);
 
 Get property `name` of each entry.
 
+Example:
+
+```
+x = [{a: 5, b: 6}, {a: 10, b: 20}].prop('a');
+```
+
 ---
 
 <a id="method_set_prop" href="#method_set_prop">#</a> **$prop:** `Array.prototype.$prop(name, val)`
@@ -147,6 +153,14 @@ Returns the modified cube.
 
 Note: if `$prop` throws an error when attempting to set a property of an entry (e.g. because the entry is `undefined`), any already-made changes will persist.
 
+Example:
+
+```
+x = [{a: 5, b: 6}, {a: 10, b: 20}]
+  .$prop('a', [88, 99])
+  .prop('a');
+```
+
 ---
 
 <a id="method_set_set_prop" href="#method_set_set_prop">#</a> **$$prop:** `Array.prototype.$$prop(name, f)`
@@ -159,6 +173,14 @@ Note: the new values (the `f(xi, x)`) are computed first, then the `name` proper
 
 Returns the modified cube.
 
+Example:
+
+```
+x = [{a: 5, b: 6}, {a: 10, b: 20}]
+  .$$prop('a', obj => obj.a + obj.b)
+  .prop('a');
+```
+
 ---
 
 <a id="method_method" href="#method_method">#</a> **method:** `Array.prototype.method(name, arg1, arg2, arg3, ...)`
@@ -166,6 +188,15 @@ Returns the modified cube.
 Call method `name` of each entry of the calling array. The corresponding entries of `arg1`, `arg2`, `arg3`, ... are passed to the method.
 
 All arguments except `name` are broadcast.
+
+Example:
+
+```
+x = [2, 3].rand();
+```
+```
+x.method('toFixed', 2);
+```
 
 ---
 
@@ -185,6 +216,15 @@ All arguments except `f` are broadcast.
 
 * returns a cube with the same shape, keys and labels as the calling array
 
+Example:
+
+```
+x = [2, 3].rand(10);
+```
+```
+x.call(val => val + 100);
+```
+
 ---
 
 <a id="method_set_set_call" href="#method_set_set_call">#</a> **$$call:** `Array.prototype.$$call(f, arg1, arg2, arg3, ...)`
@@ -195,6 +235,15 @@ Set entries using their current values and the function `f`.
 
 Returns the modified cube.
 
+Example:
+
+```
+x = [2, 3].rand(10);
+```
+```
+x.$$call(val => val + 100);
+```
+
 ---
 
 <a id="method_apply" href="#method_apply">#</a> **apply:** `Array.prototype.apply(arg0, arg1, arg2, ...)`
@@ -202,6 +251,15 @@ Returns the modified cube.
 Each entry of the calling array must be a function. Each function is passed the corresponding entries of `arg0`, `arg1`, `arg2`, ...
 
 All arguments are broadcast.
+
+Example:
+
+```
+f = [(a, b) => a + b, (a, b) => a * b];
+```
+```
+f.apply(10, [20, 30]);
+```
 
 ---
 
@@ -217,5 +275,5 @@ Returns the calling array (converted to a cube).
 ---
 
 ```{.no-input .no-output}
-deleteVariables('x');
+deleteVariables('f', 'x');
 ```

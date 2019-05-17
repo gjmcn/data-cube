@@ -16,6 +16,12 @@ These methods ignore shape, keys and labels and return a new array with no dupli
 
 Remove duplicates.
 
+Example:
+
+``` 
+[1, 4, 4, 2, 1].unique();
+```
+
 ---
 
 <a id="method_basic_set_theory" href="#method_basic_set_theory">#</a><br>
@@ -29,6 +35,12 @@ Remove duplicates.
 
 `diff`  (difference): entries that appear in the calling array _and none_ of the arguments.
 
+Example:
+
+``` 
+x = [1, 7, 3].union([6, 3], 4);
+```
+
 ---
 
 ### Other
@@ -39,11 +51,29 @@ Remove duplicates.
 
 Returns `true` if no two entries are equal to each other, otherwise returns `false`.
 
+Example:
+
+``` 
+[1, 4, 1, 2].isUnique();
+```
+
 ---
 
 <a id="method_is_in" href="#method_is_in">#</a> **isIn:** `Array.prototype.isIn(arg0, arg1, arg2, ...)`
 
 Returns a new cube with boolean entries and the same shape, keys and labels as the calling array. An entry of the returned cube is `true` if the corresponding entry of the calling array appears _in any_ of the arguments.
 
+Example:
+
+``` 
+x = [1, 6].seq().$shape(2);
+```
+```
+x.isIn(3, [5, 7]);
+```
+
 ---
 
+```{.no-input .no-output}
+deleteVariables('x');
+```
