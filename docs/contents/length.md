@@ -29,7 +29,7 @@ x.$shape(1);
 
 ---
 
-__Notes:__ 
+__Notes:__{#notes}
 
 * _The `length` property of a cube should not be changed directly, nor by setting a nonexistent entry using square brackets._ Use [`toArray`](?create#method_to_array) to convert a cube to an array before changing its length directly, and use [`$ent`](?entries#method_set_ent) or [`$at`](?entries#method_set_at) to catch length changes when setting individual entries. (Unfortunately, making `length` non-writable for cubes is prohibitively expensive.)
 

@@ -69,5 +69,5 @@ Note: modifying the returned cube (e.g. changing an entry to a different functio
 ---
 
 ```{.no-input .no-output}
-deleteVariables('x');
+deleteVariables('celsius', 'fahrenheit');
 ```

@@ -14,7 +14,7 @@ x.row([0]);
 x.row(0);
 ```
 
-We refer to 1-entry array arguments and non-array arguments as **singletons**.
+We refer to 1-entry array arguments and non-array arguments as **singletons**.{#singletons}
 
 Most methods ignore the shape, keys and labels of array arguments:
 

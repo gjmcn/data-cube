@@ -2,7 +2,7 @@ To iterate over entries, use standard approaches such as `for` and `for...of` lo
 
 There are currently no generators or methods for iterating over a dimension directly. For now, call [[indOrKey|Other#method_ind_or_key]], [[ind|Other#method_ind]] or [[key|Get-and-Set-Keys-and-Labels#method_key]] and loop over the result. For example:
 
-```js
+```js {.no-exec}
 //loop over row indices or keys
 for (let j of x.indOrKey()) {};
 

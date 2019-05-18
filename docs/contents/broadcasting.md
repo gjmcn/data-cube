@@ -2,7 +2,7 @@
 
 ---
 
-Where appropriate, methods **broadcast** [singletons](?arguments):
+Where appropriate, methods **broadcast** [singletons](?arguments#singletons):
 
 ```
 x = [2, 3].rand(100);
