@@ -9,15 +9,51 @@
 
   //load markdown-it - individual local files until fix bundling issue
   const md = require('./markdown-it-8.4.2.min.js')({ html: true })
-    .use(require('./markdown-it-attrs-2.3.2.min.js'));
+          .use(require('./markdown-it-attrs-2.3.2.min.js'));
 
   const panel = document.getElementById('panel');
 
+  //current content file
+  let filename;
+
   window.deleteVariables = (...names) => names.forEach(nm => delete window[nm]);
 
-  async function loadPanel(span) {
+  //local storage for scroll position
+  let saveScrollPosn, loadScrollPosn;
+  {
+    //from: https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+    function storageAvailable(type) {
+      var storage;
+      try {
+          storage = window[type];
+          var x = '__storage_test__';
+          storage.setItem(x, x);
+          storage.removeItem(x);
+          return true;
+      }
+      catch(e) {
+        return e instanceof DOMException && (
+          e.code === 22 || e.code === 1014 || e.name === 'QuotaExceededError' ||
+          e.name === 'NS_ERROR_DOM_QUOTA_REACHED') && (storage && storage.length !== 0);
+      }
+    }
+    if (storageAvailable('localStorage')) {
+      saveScrollPosn = () => localStorage[`page_${filename}`] = panel.scrollTop;
+      loadScrollPosn = () => localStorage[`page_${filename}`];
+    }
+    else {
+      saveScrollPosn = () => {};
+      loadScrollPosn = () => {};
+    }
+  }
 
-    const filename = location.search.slice(1) || 'about';
+  //load content into main panel
+  async function loadPanel(span, returning) {
+
+    //save scroll position before change contents
+    if (filename) saveScrollPosn();
+
+    filename = location.search.slice(1) || 'about';
  
     //clear panel and highlight sidebar link
     panel.innerHTML = '';
@@ -75,16 +111,19 @@
         }
     });
 
-    //scroll to section
-    if (location.hash) qa(location.hash)[0].scrollIntoView();
-
+    //scroll
+    if (location.hash) {  //to section
+      qa(location.hash)[0].scrollIntoView();
+    }
+    else if (returning) {  //to previous scroll posn if arrive via back/forward button
+      panel.scrollTop = loadScrollPosn(); 
+    }
   };
 
   //navigation
   {
-
     //backward and forward buttons
-    window.onpopstate = () => loadPanel();
+    window.onpopstate = () => loadPanel(null, true);
 
     //side bar links
     qa('#sidebar span').on('click', evt => {
@@ -95,9 +134,11 @@
     //data-cube link in navbar
     qa('#data-cube-link').on('click', evt => qa('#sidebar span')[0].click());
 
-    //on window load
-    window.onload = () => loadPanel();
+    //pageshow
+    window.addEventListener('pageshow', evt => loadPanel(null, evt.persisted));
 
+    //pagehide
+    window.addEventListener('pagehide', () => saveScrollPosn());
   }
 
 })();
