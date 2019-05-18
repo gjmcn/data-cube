@@ -1,3 +1,4 @@
+
 ---
 
 <a id="method_tp" href="#method_tp">#</a> **tp:** `Array.prototype.tp(perm = [1,0,2])`
@@ -8,6 +9,15 @@ Transpose.
 
 Returns a new cube.
 
+Example:
+
+```
+x = [2, 3].rand(100);
+```
+```
+x.tp();
+```
+
 ---
 
 <a id="method_flip" href="#method_flip">#</a> **flip:** `Array.prototype.flip(dim = 0)`
@@ -16,6 +26,15 @@ Returns a new cube.
 Reverse the order of dimension `dim`.
 
 Returns a new cube.
+
+Example:
+
+```
+x = [2, 4].rand(100);
+```
+```
+x.flip(1);
+```
  
 ---
 
@@ -24,6 +43,15 @@ Returns a new cube.
 Circular shift dimension `dim` by `shift`. Use a negative `shift` to shift backwards.
 
 Returns a new cube.
+
+Example:
+
+```
+x = [2, 4].rand(100);
+```
+```
+x.roll(1);
+```
 
 ---
 
@@ -35,6 +63,15 @@ Shuffle dimension `dim`.
 `n` is the number of rows (or columns or pages depending on `dim`) in the returned cube. Omit `n` (or pass `undefined` or `null`) to get all rows; pass a number to 'sample without replacement'.
 
 Returns a new cube.
+
+Example:
+
+```
+x = [1, 16].seq().$shape(2);
+```
+```
+x.shuffle(1);
+```
 
 ---
 
@@ -48,6 +85,15 @@ If `prob` is omitted (or `undefined` or `null`), each row is chosen with equal p
 Returns a new cube.
 
 Note: the returned cube does not have keys or a label on dimension `dim`.
+
+Example:
+
+```
+x = [2, 3].rand(100);
+```
+```
+x.sample(1, 6);
+```
 
 ---
 
@@ -67,6 +113,15 @@ The order of the unique values in the returned cube is the same as the order in 
 
 Note: `undefined` and `null` cannot be used as keys. If `ret` is `'vector'` and the calling array contains `undefined`, the corresponding row key of the returned cube is the string `'_undefined_'`. Similarly, `'_null_'` is used for `null`.
 
+Example:
+
+```
+x = [2, 5].rand(4);
+```
+```
+x.freq();
+```
+
 ---
 
 <a id="method_has_key" href="#method_has_key">#</a> **hasKey:** `Array.prototype.hasKey(dim = 0, k)`
@@ -76,6 +131,18 @@ If `k` is omitted, returns `true` if the calling array has keys on dimension `di
 If `k` is passed, `hasKey` returns `true` if the calling array has the key `k` on dimension `dim`, otherwise `hasKey` returns `false` &mdash; including when the dimension `dim` does not have keys.
 
 `k` must be a singleton. `hasKey` cannot be used to test multiple keys; use e.g. `['a','b'].map(k => x.hasKey(0,k))` or `['a','b'].isIn(x.key())`.
+
+Example:
+
+```
+x = [2, 3].cube(0).$key(0, ['a', 'b']);
+```
+```
+x.hasKey();
+```
+```
+x.hasKey(0, 'c');
+```
 
 ---
 
@@ -87,6 +154,15 @@ Returns a new array with entries _0, 1, 2, ..., n-1_ where _n_ is the length of 
 
 `ind` returns the 'indices' even when the calling array has keys rather than indices on dimension `dim`.
 
+Example:
+
+```
+x = [2, 3].cube(0).$key(0, ['a', 'b']);
+```
+```
+x.ind(1);
+```
+
 ---
 
 <a id="method_ind_or_key" href="#method_ind_or_key">#</a> **indOrKey:** `Array.prototype.indOrKey(dim = 0)`
@@ -96,6 +172,18 @@ Indices or keys on dimension `dim`.
 `indOrKey` is equivalent to `ind` when dimension `dim` of the calling array has indices and is equivalent to `key` otherwise.
 
 Returns a new array.
+
+Example:
+
+```
+x = [2, 3].cube(0).$key(0, ['a', 'b']);
+```
+```
+x.indOrKey();
+```
+```
+x.indOrKey(1);
+```
 
 ---
 
@@ -109,6 +197,15 @@ All arguments are broadcast.
 
 Returns a new array.
 
+Example:
+
+```
+x = [2, 3].cube(0).$key(0, ['a', 'b']);
+```
+```
+x.vecInd('b', [0, 2, 0]);
+```
+
 ---
 
 <a id="method_posn" href="#method_posn">#</a> **posn:** `Array.prototype.posn(dim = 0, v)`
@@ -116,6 +213,18 @@ Returns a new array.
 Indices/keys on dimension `dim` that correspond to the vector indices `v`.
 
 Returns a new array.
+
+Example:
+
+```
+x = [2, 3].cube(0).$key(0, ['a', 'b']);
+```
+```
+x.posn(0, [1, 5, 1]);
+```
+```
+x.posn(1, [1, 5, 1]);
+```
 
 ---
 
@@ -139,6 +248,15 @@ Notes:
 
 Returns a new array.
 
+Example:
+
+```
+x = [0, 1, true, false].$shape(2);
+```
+```
+x.which();
+```
+
 ---
 
 <a id="method_compare" href="#method_compare">#</a> **compare:** `Array.prototype.compare(b, assert = true)`
@@ -150,6 +268,18 @@ A cube *can* be the same as a standard array. Specifically, a vector with no key
 If `assert` is truthy, `compare` returns the calling array if it is the same as `b` and throws an error if it is not the same (the error message indicates the difference).
 
 If `assert` is falsy, `compare` returns the calling array (which is always truthy) if it is the same as `b` and returns `false` if it is not the same.
+
+Example:
+
+```
+x = [4, 5, 6, 7].$shape(2);
+```
+```
+y = [4, 5, 6, 7].$shape(2);
+```
+```
+x.compare(y);
+```
 
 ---
 
@@ -171,4 +301,19 @@ Notes:
 
 Also see: [[arObj|Create-Copy-and-Convert#method_ar_obj]].
 
----
+Example:
+
+```
+x = [2, 3].rand(10);
+```
+```
+y = x.vble(1);
+```
+```
+y.map(obj => JSON.stringify(obj));
+```
+
+
+```{.no-input .no-output}
+deleteVariables('x', 'y');
+```

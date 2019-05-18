@@ -20,6 +20,18 @@ Notes:
 
 * Use the native array method [concat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat) to ignore the shape, keys and labels of the calling array and all arguments.
 
+Example:
+
+```
+x = [2, 3].rand(10);
+```
+```
+y = [2, 2].rand(10);
+```
+```
+x.horiz(y);
+```
+
 ---
 
 <a id="method_tile" href="#method_tile">#</a> **tile:** `Array.prototype.tile(dim = 0, n = 2, ret = 'full')`
@@ -34,6 +46,15 @@ Repeat along dimension `dim` `n` times.
 * `'core'`: cube with no keys or labels
 
 Returns a new cube.
+
+Example:
+
+```
+x = [2, 2].rand(10);
+```
+```
+x.tile(1, 3);
+```
 
 ---
 
@@ -51,6 +72,18 @@ On each dimension, the required number of 'tiles' must be a non-negative integer
 
 Returns a new cube.
 
+Example:
+
+```
+x = [2, 2].rand(10);
+```
+```
+y = [4, 6].cube(0);
+```
+```
+x.tileTo(y);
+```
+
 ---
 
 <a id="method_unpack" href="#method_unpack">#</a> **unpack:** `Array.prototype.unpack()`
@@ -66,6 +99,21 @@ Notes:
 * currently, the calling array (i.e. the outer array) cannot have more than 65536 entries &mdash; `unpack` will throw an error if this limit is exceeded
 
 * [[unbox|Entrywise#method_ew_no_arg]] is typically used to unpack 1-entry arrays
+
+Example:
+
+```
+x = [2, 3].rand(10);
+```
+```
+y = x.pack(0);
+```
+```
+y[0];
+```
+```
+y.unpack();
+```
 
 ---
 
@@ -83,4 +131,20 @@ Internally, `pack` uses [[subcube|Get-and-Set-Subcubes#method_subcube]]. `sc` is
  
 Returns a new cube.
 
+Example:
+
+```
+x = [2, 3].rand(10);
+```
+```
+y = x.pack(0);
+```
+```
+y[0];
+```
+
 ---
+
+```{.no-input .no-output}
+deleteVariables('x', 'y');
+```

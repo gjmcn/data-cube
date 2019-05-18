@@ -1,12 +1,21 @@
-Update functions are called immediately before or after an array/cube is changed. For example:
+Update functions are called immediately before or after an array/cube is changed.
 
-```js
-let results = [3,2].rand(99)
-  .$key(0, ['Ali', 'Bob', 'Cath'])
-  .$key(1, ['Maths', 'Physics'])
-  .$after(r => console.log(`Well done ${r.sum(1).maxPosn()}!`));
+Example:
 
-results.$row('Bob', 100);  //prints 'Well done Bob!'
+```
+celsius = [3].cube()
+  .$key(0, ['London', 'Madrid', 'Paris'])
+  .$after(() => fahrenheit = celsius.mul(9/5).add(32).round())
+  .$vec(null, [15, 21, 17]);
+```
+```
+fahrenheit;
+```
+```
+celsius.$at('Paris', 20);
+```
+```
+fahrenheit;
 ```
 
 Notes:
@@ -24,16 +33,11 @@ Notes:
 * Update functions are invisible when _creating_, _copying_, _comparing_ and _converting_ cubes:
 
   * Methods that produce a new cube do not copy the update functions of the calling array:
-
-    ```js
-    let x = [5,6].$after(() => {});   //x has 1 after-update function
-    let y = x.add(10);                //y has no update functions
-    ```
   
   * [[copy|Create-Copy-and-Convert#method_copy]] does not copy update functions. If required, copy update functions explicitly:
 
-    ````js
-    let v = u.copy().$after(u.after());
+    ```` {.no-exec}
+    y = x.copy().$after(x.after());
     ````
 
   * [[compare|Other#method_compare]] ignores update functions.
@@ -51,19 +55,7 @@ When a `$`-setter is called, the cube's *before-update* functions are called bef
 
 If `f` is `null` (or `undefined` or omitted or an empty array), all *before/after-update* functions are removed. Otherwise, each entry of `f` must be a function. The update functions are called in the order that they appear in `f` and are passed the calling array, the name of the setter called and an array containing the arguments passed to the setter.
 
-`f` can be a cube, so it can have keys:
-
-```js
-let x = [10,20];
-let y, z;
-
-x.$after([
-  'yUpdate', () => y = x[0],
-  'zUpdate', () => z = x[1]
-].dict());
-
-x.after().at('zUpdate')();   //y is undefined, z is 20
-```
+`f` can be a cube. The shape, keys and labels of `f` do not affect the behavior of updates, but keys can be useful for keeping track of what each function does &mdash; when constructing `f` or when retrieving it with [`before`](#method_before)/[`after`](#method_after). `$before` and `$after` copy `f` so do not see its update functions.
 
 ---
 
@@ -75,3 +67,7 @@ Returns a cube containing the before/after-update functions of the calling array
 Note: modifying the returned cube (e.g. changing an entry to a different function) _does not_ affect the update functions of the calling array.
 
 ---
+
+```{.no-input .no-output}
+deleteVariables('x');
+```

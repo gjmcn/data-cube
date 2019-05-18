@@ -20,6 +20,15 @@ Get rows, columns or pages (depending on `dim`) where the corresponding values o
 
 The order of rows/columns/pages is preserved.
 
+Example:
+
+```
+x = [1, 8].seq().$shape(4);
+```
+```
+x.where(0, x.col(1).gt(6));
+```
+
 ---
 
 <a id="method_order" href="#method_order">#</a> **order:** `Array.prototype.order(dim = 0, val, how = null)`
@@ -27,6 +36,15 @@ The order of rows/columns/pages is preserved.
 Order rows, columns or pages (depending on `dim`).
 
 `how` specifies how `val` is sorted &mdash; see [[arrange|Sort#method_arrange]].
+
+Example:
+
+```
+x = [2, 5].rand(10);
+```
+```
+x.order(1, x.row(1), 'asc');
+```
 
 ---
 
@@ -62,4 +80,20 @@ Notes:
 
 * `group` uses the vector indices of `val`. For example, to group the columns of a matrix `x` on rows `2` and `4` use: `x.group(1, x.row([2,4]).tp())` (note the use of the transpose method [[tp|Other#method_tp]]).
 
+Example:
+
+```
+x = ['a', 'b', 'c'].grid([10, 20]);
+```
+```
+g = x.group(0, x.col(0));
+```
+```
+g.at('b');
+```
+
 --- 
+
+```{.no-input .no-output}
+deleteVariables('g', 'x');
+```
