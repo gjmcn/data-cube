@@ -77,6 +77,14 @@
       hljs.highlightBlock(elm);
     }
 
+    //internal links: call load panel directly
+    [panel].qa('a.cake-internal').on('click', evt => {
+      history.pushState(null, '', evt.target.href);
+      loadPanel();
+      evt.preventDefault();
+      return false;
+    });
+
     //run examples
     preCodes.filter(elm => !elm.classList.contains('no-exec'))
       .forEach(elm => {
