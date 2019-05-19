@@ -18,7 +18,7 @@ x.$at(0, 1, null, 200);
 
 ### Singletons {#singletons}
 
-In general, JavaScript does not handle [singletons](?arguments#singletons){.cake-internal} like Data-Cube methods do. This is most likely to cause a problem where a Data-Cube method is incorrectly assumed to return a non-array. For example:
+In general, JavaScript does not handle [singletons](?arguments#singletons){.internal} like Data-Cube methods do. This is most likely to cause a problem where a Data-Cube method is incorrectly assumed to return a non-array. For example:
 
 ```
 x = 5;
@@ -28,7 +28,7 @@ if ([0, null, ''].any()) {  //any truthy entries?
 x;
 ```
 
-Here, `any` returns a 1-entry which is always truthy so `x` is set to `10`. (Note: [fold methods](?fold){.cake-internal} always return an array &mdash; they only reduce one dimension so do not always produce a single value.)
+Here, `any` returns a 1-entry which is always truthy so `x` is set to `10`. (Note: [fold methods](?fold){.internal} always return an array &mdash; they only reduce one dimension so do not always produce a single value.)
 
 A similar issue can arise when array entries are arrays:
 

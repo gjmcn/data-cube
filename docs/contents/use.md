@@ -3,7 +3,7 @@
 
 ---
 
-The Data-Cube module [exports a function](?exported){.cake-internal} and adds methods to `Array.prototype`.
+The Data-Cube module [exports a function](?exported){.internal} and adds methods to `Array.prototype`.
 
 ### Node
 

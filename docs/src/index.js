@@ -53,76 +53,81 @@
     //save scroll position before change contents
     if (filename && !anchor) saveScrollPosn();
 
+    const oldFilename = filename;
     filename = location.search.slice(1) || 'about';
     anchor = location.hash;
  
-    //clear panel and highlight sidebar link
-    panel.innerHTML = '';
-    qa('#sidebar span').removeClass('selected');
-    (span || qa(`#sidebar span[data-file="${filename}"]`)).addClass('selected');
+    if (filename !== oldFilename) {
 
-    //load content and highlight code
-    const content = await fetch(`contents/${filename}.md`)
-      .then(response => response.text())
-      .then(text => md.render(text + '\n\n<br><br><br>'));
-    panel.innerHTML = content;
-    const preCodes = qa('pre > code');
-    for (let elm of preCodes) {
-      if (elm.classList.contains('no-input')) {
-        elm.parentNode.classList.add('d-none');
-        continue;
+      //clear panel and highlight sidebar link
+      panel.innerHTML = '';
+      qa('#sidebar span').removeClass('selected');
+      (span || qa(`#sidebar span[data-file="${filename}"]`)).addClass('selected');
+
+      //load content and highlight code
+      const content = await fetch(`contents/${filename}.md`)
+        .then(response => response.text())
+        .then(text => md.render(text + '\n\n<br><br><br>'));
+      panel.innerHTML = content;
+      const preCodes = qa('pre > code');
+      for (let elm of preCodes) {
+        if (elm.classList.contains('no-input')) {
+          elm.parentNode.classList.add('d-none');
+          continue;
+        }
+        else if (!elm.classList.contains('html')) {
+          elm.classList.add('javascript');
+        }
+        hljs.highlightBlock(elm);
       }
-      else if (!elm.classList.contains('html')) {
-        elm.classList.add('javascript');
-      }
-      hljs.highlightBlock(elm);
+
+      //internal links: call load panel directly
+      [panel].qa('a.internal').on('click', evt => {
+        history.pushState(null, '', evt.target.href);
+        loadPanel();
+        evt.preventDefault();
+        return false;
+      });
+
+      //run examples
+      preCodes.filter(elm => !elm.classList.contains('no-exec'))
+        .forEach(elm => {
+          const wrapper = document.createElement('div');
+          wrapper.classList.add('output');
+          let result;
+          try {
+            result = (1, eval)(elm.textContent);
+          }
+          catch (err) {
+            wrapper.classList.add('scalar', `scalar-error`);
+            wrapper.textContent = err;
+            elm.parentNode.parentNode.insertBefore(wrapper, elm.parentNode.nextSibling);
+            return;
+          }
+          if (!elm.classList.contains('no-output')) {
+            elm.parentNode.parentNode.insertBefore(wrapper, elm.parentNode.nextSibling);
+            if (elm.classList.contains('custom-html')) {
+              [wrapper].insert(Array.isArray(result) ? result[0] : result);
+            }
+            else if (Array.isArray(result)) {
+                result.print({to: wrapper});
+            }
+            else {
+              let cls = 'other';
+              if (['number', 'boolean', 'string'].includes(typeof result)) cls = typeof result;
+              else if (result === null || result === undefined) cls = result;
+              else if (result instanceof Date) cls = 'date';
+              wrapper.classList.add('scalar', `scalar-${cls}`);
+              wrapper.textContent = '' + result;
+            }
+          }
+      });
+    
     }
 
-    //internal links: call load panel directly
-    [panel].qa('a.cake-internal').on('click', evt => {
-      history.pushState(null, '', evt.target.href);
-      loadPanel();
-      evt.preventDefault();
-      return false;
-    });
-
-    //run examples
-    preCodes.filter(elm => !elm.classList.contains('no-exec'))
-      .forEach(elm => {
-        const wrapper = document.createElement('div');
-        wrapper.classList.add('output');
-        let result;
-        try {
-          result = (1, eval)(elm.textContent);
-        }
-        catch (err) {
-          wrapper.classList.add('scalar', `scalar-error`);
-          wrapper.textContent = err;
-          elm.parentNode.parentNode.insertBefore(wrapper, elm.parentNode.nextSibling);
-          return;
-        }
-        if (!elm.classList.contains('no-output')) {
-          elm.parentNode.parentNode.insertBefore(wrapper, elm.parentNode.nextSibling);
-          if (elm.classList.contains('custom-html')) {
-            [wrapper].insert(Array.isArray(result) ? result[0] : result);
-          }
-          else if (Array.isArray(result)) {
-              result.print({to: wrapper});
-          }
-          else {
-            let cls = 'other';
-            if (['number', 'boolean', 'string'].includes(typeof result)) cls = typeof result;
-            else if (result === null || result === undefined) cls = result;
-            else if (result instanceof Date) cls = 'date';
-            wrapper.classList.add('scalar', `scalar-${cls}`);
-            wrapper.textContent = '' + result;
-          }
-        }
-    });
-
     //scroll
-    if (location.hash) {  //to section
-      qa(location.hash)[0].scrollIntoView();
+    if (anchor) {  //to section
+      qa(anchor)[0].scrollIntoView();
     }
     else if (returning) {  //to previous scroll posn if arrive via back/forward button
       panel.scrollTop = loadScrollPosn(); 
@@ -137,12 +142,11 @@
     //side bar links
     qa('#sidebar span').on('click', evt => {
       history.pushState(null, '', `?${evt.target.getAttribute('data-file')}`);
-      // history.pushState(null, '', `index.html?${evt.target.getAttribute('data-file')}`);
       loadPanel(evt.me);
     });
 
     //data-cube link in navbar
-    qa('#data-cube-link').on('click', evt => qa('#sidebar span')[0].click());
+    qa('#data-cube-link').on('click', () => qa('#sidebar span')[0].click());
 
     //pageshow
     window.addEventListener('pageshow', evt => loadPanel(null, evt.persisted));

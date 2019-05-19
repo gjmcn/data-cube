@@ -31,7 +31,7 @@ x.$shape(1);
 
 __Notes:__{#notes}
 
-* _The `length` property of a cube should not be changed directly, nor by setting a nonexistent entry using square brackets._ Use [`toArray`](?create#method_to_array){.cake-internal} to convert a cube to an array before changing its length directly, and use [`$ent`](?entries#method_set_ent){.cake-internal} or [`$at`](?entries#method_set_at){.cake-internal} to catch length changes when setting individual entries. (Unfortunately, making `length` non-writable for cubes is prohibitively expensive.)
+* _The `length` property of a cube should not be changed directly, nor by setting a nonexistent entry using square brackets._ Use [`toArray`](?create#method_to_array){.internal} to convert a cube to an array before changing its length directly, and use [`$ent`](?entries#method_set_ent){.internal} or [`$at`](?entries#method_set_at){.internal} to catch length changes when setting individual entries. (Unfortunately, making `length` non-writable for cubes is prohibitively expensive.)
 
 * Native array methods such as [`push`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push) that mutate the calling array are modified so that a cube is converted back to a standard array before the method is applied. 
 
