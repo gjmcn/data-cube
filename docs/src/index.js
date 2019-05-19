@@ -135,7 +135,8 @@
 
     //side bar links
     qa('#sidebar span').on('click', evt => {
-      history.pushState(null, '', `index.html?${evt.target.getAttribute('data-file')}`);
+      history.pushState(null, '', `?${evt.target.getAttribute('data-file')}`);
+      // history.pushState(null, '', `index.html?${evt.target.getAttribute('data-file')}`);
       loadPanel(evt.me);
     });
 

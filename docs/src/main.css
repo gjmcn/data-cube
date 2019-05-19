@@ -104,6 +104,10 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, dl {
   color: #105fb8;
 }
 
+#panel a code {
+  pointer-events: none;
+}
+
 .output {
   overflow: auto;
   margin: 20px 0 20px 32px;
