@@ -13,8 +13,8 @@
 
   const panel = document.getElementById('panel');
 
-  //current content file
-  let filename;
+  //current content file and anchor
+  let filename, anchor;
 
   window.deleteVariables = (...names) => names.forEach(nm => delete window[nm]);
 
@@ -51,9 +51,10 @@
   async function loadPanel(span, returning) {
 
     //save scroll position before change contents
-    if (filename) saveScrollPosn();
+    if (filename && !anchor) saveScrollPosn();
 
     filename = location.search.slice(1) || 'about';
+    anchor = location.hash;
  
     //clear panel and highlight sidebar link
     panel.innerHTML = '';

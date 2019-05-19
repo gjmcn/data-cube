@@ -4,9 +4,9 @@
 
 __Notes:__
 
-* These methods *do not* convert the calling array to a cube (except for [`toCube`](#method_to_cube)).
+* These methods *do not* convert the calling array to a cube (except for [`toCube`](#method_to_cube){.cake-internal}).
 
-* These methods can be called as standard functions. The [`dc`](?exported) function exported by Data-Cube is equivalent to the [`toCube`](#method_to_cube) method; other methods can be called as properties of `dc`. For example:
+* These methods can be called as standard functions. The [`dc`](?exported){.cake-internal} function exported by Data-Cube is equivalent to the [`toCube`](#method_to_cube){.cake-internal} method; other methods can be called as properties of `dc`. For example:
   ``` {.no-exec}
   dc([2,3]);           //equivalent to [2,3].toCube()
   dc.cube([2,3], 7);   //equivalent to [2,3].cube(7)
