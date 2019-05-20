@@ -81,13 +81,15 @@
         hljs.highlightBlock(elm);
       }
 
-      //internal links: call load panel directly
-      [panel].qa('a.internal').on('click', evt => {
-        history.pushState(null, '', evt.target.href);
-        loadPanel();
-        evt.preventDefault();
-        return false;
-      });
+      //internal links to different 'page'
+      [panel].qa('a')
+        .filter(elm => elm.getAttribute('href')[0] === '?')
+        .on('click', evt => {
+          history.pushState(null, '', evt.target.getAttribute('href'));
+          loadPanel();
+          evt.preventDefault();
+          return false;
+        });
 
       //run examples
       preCodes.filter(elm => !elm.classList.contains('no-exec'))

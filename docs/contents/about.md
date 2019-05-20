@@ -62,7 +62,7 @@ dc.fetchMatrix('data/iris.json')
   .then(m => m.head(3).print({to: div}));
 ```
 
-[Plugins](?plugins){.internal} add extra functionality to Data-Cube. For example, this page uses the [print-html plugin](https://github.com/gjmcn/data-cube-print-html) to print arrays and we use the [html plugin](https://github.com/gjmcn/data-cube-html) above to create a `<div>`.
+[Plugins](?plugins) add extra functionality to Data-Cube. For example, this page uses the [print-html plugin](https://github.com/gjmcn/data-cube-print-html) to print arrays and we use the [html plugin](https://github.com/gjmcn/data-cube-html) above to create a `<div>`.
 
 ```{.no-input .no-output}
 deleteVariables('a');
