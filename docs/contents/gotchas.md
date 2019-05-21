@@ -61,16 +61,16 @@ x.$ent(1, [[7, 8]]);  //set entry 1 to the array [7, 8]
 
 ### Sparse Arrays {#sparse-arrays}
 
-A cube is a sparse array by default. This does not cause any strange behavior from Data-Cube methods, but be careful with native methods:
+[`cube`](?create#method_cube) returns a sparse array by default &mdash; each entry is a 'hole'. Data-Cube methods behave as if holes have the value `undefined`, but some native methods ignore holes completely:
 
 ```
 x = [2].cube();  //sparse
 ```
 ```
-x.filter(val => val === undefined);  //filter ignores holes
+x.some(val => val === undefined);  //some ignores holes
 ```
 
-[This page](http://2ality.com/2015/09/holes-arrays-es6.html) summarizes how native methods handle holes. To avoid this issue altogether, initialize cube entries (to something other than `undefined`), e.g. `[2].cube(0)`.
+[This page](http://2ality.com/2015/09/holes-arrays-es6.html) summarizes how native methods handle holes. To avoid this issue altogether, simply initialize cube entries, e.g. `[2].cube(0)`. (Note: initializing entries to `undefined` leaves them as holes.)
 
 ### Duplicate key errors {#duplicate-key-errors}
 

@@ -8,9 +8,9 @@ __Notes:__
 
 * These methods can be called as standard functions. The [`dc`](?exported) function exported by Data-Cube is equivalent to the [`toCube`](#method_to_cube) method; other methods can be called as properties of `dc`. For example:
   ``` {.no-exec}
-  dc([2,3]);           //equivalent to [2,3].toCube()
-  dc.cube([2,3], 7);   //equivalent to [2,3].cube(7)
-  dc.rand([2,3], 7);   //equivalent to [2,3].rand(7)
+  dc([2, 3]);          //equivalent to [2, 3].toCube()
+  dc.cube([2, 3], 7);  //equivalent to [2, 3].cube(7)
+  dc.rand([2, 3], 7);  //equivalent to [2, 3].rand(7)
   dc.copy(x);          //equivalent to x.copy()
   ```
   When the function approach is used, a non-array first argument and a 1-entry array first argument are equivalent. For example, `dc.cube(5)` is equivalent to `dc.cube([5])`.
@@ -48,7 +48,7 @@ If passed, `mx` must be a positive integer. Each entry of the returned cube is a
 Example:
 
 ```
-[2, 3].rand(5);
+[2, 3].rand(10);
 ```
 
 ---
@@ -98,7 +98,7 @@ The calling array is interpreted as `[start, end]`. The `lin` method creates an 
 
 * `'step'`: a 2-entry array; the first entry is the array of linearly spaced points, the second entry is the step (the distance between points, but negative when `start > end`)
 
-Unlike [[seq|Create-Copy-and-Convert#method_step]], `lin` always computes a numeric sequence. `start` and `end` are automatically converted to numbers so a date sequence can be created using e.g. `[date1,date2].lin().date()`.
+Unlike [seq](#method_seq), `lin` always computes a numeric sequence. `start` and `end` are automatically converted to numbers, so a date sequence can be created using e.g. `[date1, date2].lin().date()`.
 
 Examples:
 
@@ -151,7 +151,7 @@ Notes:
 
 * A byte order mark (BOM) at the start of a DSV string is ignored.
 
-* The values contained in a DSV string are assumed to be strings &mdash; so the entries (and keys) of the returned cube will be strings.
+* The values contained in a DSV string are assumed to be strings &mdash; so the entries (and keys) of the returned cube will be strings. [`$autoType`](?entries#method_set_autoType) can be used to convert strings to other basic types.
 
 Example:
 
@@ -181,12 +181,12 @@ Create a cube or a standard array from a JSON string.
 
 The calling array should contain a single entry &mdash; the JSON string.
 
-Note: use the cube method [stringify](#method_stringify) to serialize a cube to a JSON string. `stringify` or the native method [JSON.stringify](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) can be used to serialize a standard array.
+Note: use the cube method [`stringify`](#method_stringify) to serialize a cube to a JSON string. `stringify` or the native method [JSON.stringify](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) can be used to serialize a standard array.
 
 Example:
 
 ```
-x = [2, 3].rand(5);
+x = [2, 3].rand(10);
 ```
 ```
 s = x.stringify();
@@ -213,14 +213,14 @@ Both entries and keys are shallow copied.
 
 * `'core'`: cube with the same entries and shape as the calling array, but no keys or labels
 
-* `'shell'`: cube with the same shape, keys and labels as the calling array, but `undefined` entries
+* `'shell'`: cube with the same shape, keys and labels as the calling array; the cube is a [sparse array](?gotchas#sparse-arrays)
 
 * `'array'`: standard array; only the entries are copied
 
 Example:
 
 ```
-x = [2, 3].rand(5);
+x = [2, 3].rand(10);
 ```
 ```
 x.copy('array');
@@ -238,7 +238,7 @@ Convert a standard array to a cube (does nothing if already a cube).
 
 Returns the cube.
 
-The `dc` function exported by the Data-Cube package is equivalent to the `toCube` method. For example, `dc([2,3])` is equivalent to `[2,3].toCube()`. If a non-array is passed to `dc`, it returns a 1-entry cube with the passed value as the entry. 
+The [`dc`](?exported) function exported by the Data-Cube module is equivalent to the `toCube` method. For example, `dc([2, 3])` is equivalent to `[2, 3].toCube()`. If a non-array is passed to `dc`, it returns a 1-entry cube with the passed value as the entry. 
 
 Example:
 
@@ -266,7 +266,7 @@ Returns the array.
 Example:
 
 ```
-x = [2, 3].rand(5);
+x = [2, 3].rand(10);
 ```
 ```
 x.toArray();
@@ -280,7 +280,7 @@ x.toArray();
 
 <a id="method_ar_ar" href="#method_ar_ar">#</a> **arAr:** `Array.prototype.arAr()`
 
-'array of arrays'. Create an array of arrays from a 1-page cube or standard array.
+'array of arrays'. Create an array of arrays from a 1-page cube or a standard array.
 
 The keys and labels of the calling array are ignored.
 
@@ -289,7 +289,7 @@ Returns a new array with the same number of entries as the calling array has row
 Example:
 
 ```
-x = [2, 3].rand(5);
+x = [2, 3].rand(10);
 ```
 ```
 y = x.arAr();
@@ -311,7 +311,7 @@ Returns a new array with the same number of entries as the calling array has row
 Example:
 
 ```
-x = [2, 3].rand(5).$key(1, ['a', 'b', 'c']);
+x = [2, 3].rand(10).$key(1, ['a', 'b', 'c']);
 ```
 ```
 y = x.arObj();
@@ -320,13 +320,13 @@ y = x.arObj();
 y.stringify();
 ```
 
-Also see: [[vble|Other#method_vble]].
+Also see: [vble](?other#method_vble).
 
 ---
 
 <a id="method_dsv" href="#method_dsv">#</a> **dsv:** `Array.prototype.dsv(delim = ',')`
 
-'delimiter-separated values'. Create a string of delimiter-separated values (DSV) from a 1-page cube or standard array.
+'delimiter-separated values'. Create a string of delimiter-separated values (DSV) from a 1-page cube or a standard array.
 
 `delim` is the delimiter.
 
@@ -344,15 +344,15 @@ Returns a (JSON) string.
 
 `stringify` uses the same rules as the native method [JSON.stringify](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) to represent array entries. In particular: functions, symbols, `Infinity`, `NaN`, `undefined` and `null` all become `null`; dates are converted to strings. The same rules are applied to keys.
 
-Note: use the cube method [[parse|Create-Copy-and-Convert#method_parse]] to reconstruct a cube from a JSON string. ` parse` or the native method [JSON.parse](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse) can be used to reconstruct a standard array.
+Note: use the cube method [`parse`](#method_parse) to reconstruct a cube from a JSON string. ` parse` or the native method [JSON.parse](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse) can be used to reconstruct a standard array.
 
 Example:
 
 ```
-x = [2, 3].rand(5);
+x = [2, 3].rand(10);
 ```
 ```
-s = x.stringify();
+x.stringify();
 ```
 
 ---
@@ -361,13 +361,15 @@ s = x.stringify();
 
 Notes:
 
-* Fetch methods call the `fetch` function. In the browser, this will be `window.fetch`. In Node.js, load [node-fetch](https://www.npmjs.com/package/node-fetch) before using the fetch methods.
+* Fetch methods call the `fetch` function. In the browser, this will be [`window.fetch`](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch). In Node.js, load [`node-fetch`](https://www.npmjs.com/package/node-fetch) before using the fetch methods.
 
 * The calling array should contain a single entry that is a url (a string).
 
 * The `init` argument of fetch methods is an options object that is passed to the `fetch` function.
 
-* Fetch methods return a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Example usage with `fetchMatrix`:
+* Fetch methods return a [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
+
+Example usage with [`fetchMatrix`](#method_fetch_matrix):
 
   ``` {.no-exec}
   //pass matrix to the function f
@@ -395,7 +397,7 @@ Notes:
 
 <a id="method_fetch" href="#method_fetch">#</a> **fetch:** `Array.prototype.fetch(method = 'text', init)`
 
-Fetch a resource and call the method with name `method` on the Response object.
+Fetch a resource and call the method with name `method` on the response object.
 
 ---
 
@@ -403,7 +405,7 @@ Fetch a resource and call the method with name `method` on the Response object.
 
 Fetch data and convert the result to a matrix (i.e. a 1-page cube).
 
-If the file extension is _csv_/_tsv_, the file is assumed to contain comma/tab-separated values and `name` indicates if the first row contains column keys. Otherwise, the data is assumed to be JSON and `name` is ignored (see [[matrix|#method_matrix]]).
+If the file extension is _csv_/_tsv_, the file is assumed to contain comma/tab-separated values and `name` indicates if the first row contains column keys. Otherwise, the data is assumed to be JSON and `name` is ignored (see [`matrix`](#method_matrix)).
 
 ---
 
@@ -411,7 +413,7 @@ If the file extension is _csv_/_tsv_, the file is assumed to contain comma/tab-s
 
 Fetch data and parse the result to a cube or a standard array.
 
-`fetchParse` should only be used to load JSON created by Data-Cube's [[stringify|#method_stringify]] method or JSON that represents a standard array. 
+`fetchParse` should only be used to load JSON created by Data-Cube's [`stringify`](#method_stringify) method or JSON that represents a standard array. 
 
 ---
 
