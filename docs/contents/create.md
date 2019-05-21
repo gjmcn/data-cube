@@ -359,7 +359,9 @@ x.stringify();
 
 ### Fetch
 
-Notes:
+---
+
+__Notes:__
 
 * Fetch methods call the `fetch` function. In the browser, this will be [`window.fetch`](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch). In Node.js, load [`node-fetch`](https://www.npmjs.com/package/node-fetch) before using the fetch methods.
 

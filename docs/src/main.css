@@ -129,6 +129,14 @@ pre {
   padding-left: 28px;
 }
 
+.table-sm.list {
+  max-width: 500px;
+}
+
+.table-sm.list th {
+  font-size: 15px;
+}
+
 /*code not in pre - highlight.js seems to overwrite these
 styles when they are in pre, but be careful if add more styles*/
 code {  

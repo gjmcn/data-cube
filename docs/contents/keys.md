@@ -1,4 +1,6 @@
 
+## Get-Set Keys and Labels
+
 ---
 
 <a id="method_key" href="#method_key">#</a> **key:** `Array.prototype.key(dim = 0)`
@@ -45,7 +47,7 @@ Returns the modified cube.
 Example:
 
 ```
-x = [5, 6].$key(0, ['a', 'b']);
+x = ['a', 5, 'b', 6].dict();
 ```
 ```
 x.$$key(0, ks => ks.toUpperCase());

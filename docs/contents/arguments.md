@@ -2,19 +2,24 @@
 
 ---
 
+### Singletons {#singletons}
+
 Passing a 1-entry array to a Data-Cube method is equivalent to passing the entry itself:
+
 
 ```
 x = [2, 8].rand(100);
 ```
 ```
-x.row([0]);
+x.row([1]);
 ```
 ```
-x.row(0);
+x.row(1);
 ```
 
-We refer to 1-entry array arguments and non-array arguments as **singletons**.{#singletons}
+1-entry array arguments and non-array arguments are referred to as __singletons__.
+
+### Shape, Keys and Labels
 
 Most methods ignore the shape, keys and labels of array arguments:
 
@@ -42,6 +47,8 @@ z.$shape(2);
 ```
 y.horiz(z);
 ```
+
+### Default Values
 
 Many arguments have a __default__ value that is used when the argument is omitted or `undefined`. In many cases, the default value `null` is used to to indicate a default behavior rather than a fixed default value:
 

@@ -1,8 +1,13 @@
-Notes:
+
+## Get-Set Subcube
+
+---
+
+__Notes:__
 
 * subcube setters do not change the keys or labels of the calling array
 
-* [[where|Query#method_where]] can also be used to get a subcube
+* [`where`](?query#method_where) can also be used to get a subcube
 
 ---
 
@@ -34,7 +39,7 @@ x.subcube([0, -1], [1, 2]);
 
 <a id="method_set_subcube" href="#method_set_subcube">#</a> **$subcube:** `Array.prototype.$subcube(r = null, c = null, p = null, val)`
 
-Set the corresponding subcube (see `subcube`) to `val`.
+Set the corresponding subcube (see [`subcube`](#method_subcube)) to `val`.
 
 `val` is broadcast.
 
@@ -53,7 +58,7 @@ x.$subcube([0, -1], [1, 2], null, [200, 300, 400, 500]);
 
 <a id="method_set_set_subcube" href="#method_set_set_subcube">#</a> **$$subcube:** `Array.prototype.$$subcube(r = null, c = null, p = null, f)`
 
-Set the corresponding subcube (see `subcube`) using the function `f`.
+Set the corresponding subcube (see [`subcube`](#method_subcube)) using the function `f`.
 
 `x.$$subcube(r, c, p, f)` is equivalent to `x.$subcube(r, c, p, f(x.subcube(r, c, p, 'full'), x))`.
 
@@ -149,7 +154,7 @@ Pass `null` or `undefined` as `s` or omit `s` to begin from the start of the rel
 
 Pass `null` or `undefined` as `e` or omit `e` to finish at the end of the relevant dimension.
 
-`ret` behaves as in `subcube`.
+`ret` behaves as in [`subcube`](#method_subcube).
 
 Example:
 
@@ -167,7 +172,7 @@ x.colSlice(2);
 **$colSlice:** `Array.prototype.$colSlice(s = null, e = null, val)`<br>
 **$pageSlice:** `Array.prototype.$pageSlice(s = null, e = null, val)`
 
-Set the selected rows, columns or pages (see `rowSlice`, `colSlice` and `pageSlice`) to `val`.
+Set the selected rows, columns or pages (see [`rowSlice`](#method_row_slice), [`colSlice`](#method_row_slice) and [`pageSlice`](#method_row_slice)) to `val`.
 
 `val` is broadcast.
 
@@ -189,7 +194,7 @@ x.$colSlice(2, null, 200);
 **$$colSlice:** `Array.prototype.$$colSlice(s = null, e = null, f)`<br>
 **$$pageSlice:** `Array.prototype.$$pageSlice(s = null, e = null, f)`
 
-Set the corresponding subcube (see `rowSlice`, `colSlice` and `pageSlice`) using the function `f`.
+Set the corresponding subcube (see [`rowSlice`](#method_row_slice), [`colSlice`](#method_row_slice) and [`pageSlice`](#method_row_slice)) using the function `f`.
 
 * `x.$$rowSlice(s, e, f)` is equivalent to `x.$rowSlice(s, e, f(x.rowSlice(s, e), x))`
 
@@ -218,7 +223,7 @@ Each argument should be a non-negative integer. Pass `null`, `undefined` or omit
 
 If a dimension length is less than the corresponding argument, `head` gets all rows/columns/pages (in contrast to methods that are passed indices/keys and throw an error if an index/key does not exist).
 
-`ret` behaves as in `subcube`.
+`ret` behaves as in [`subcube`](#method_subcube).
 
 Example:
 

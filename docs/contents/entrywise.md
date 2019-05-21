@@ -1,3 +1,8 @@
+
+## Entrywise
+
+---
+
 Unless otherwise stated, entrywise methods return a new cube with the same shape, keys and labels as the calling array.
 
 ---
@@ -46,7 +51,7 @@ Name | Function
 `not` | `x => !x`
 `typeof` | `typeof`
 `box` | `x => Array.isArray(x) ? x : [x]`
-`unbox` | `x => Array.isArray(x) ? x[0] : x`
+`unbox` | `x => Array.isArray(x) ? x[0] : x` {.table .table-sm .list}
 
 Example:
 
@@ -87,7 +92,7 @@ Name | Operator/Function
 `search` | `String.prototype.search`
 `test` | `RegExp.prototype.test`
 `and` | `&&`
-`or` | `\|\|` 
+`or` | `\|\|` {.table .table-sm .list}
 
 The argument is broadcast. However, operator-like methods are special in that the calling array is also broadcast &mdash; i.e. the calling array can be a singleton when the argument is not. In this case, the returned cube has the same shape, keys and labels as the argument.
 

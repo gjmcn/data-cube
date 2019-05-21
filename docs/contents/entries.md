@@ -1,3 +1,6 @@
+
+## Get-Set Entries
+
 ---
 
 ### Individual Entry
@@ -13,7 +16,7 @@ A negative index counts back from the largest valid vector index.
 Example:
 
 ```
-x = [2,3].rand(100);
+x = ['a', 'f'].seq().$shape(2);
 ```
 ```
 x.ent(2);
@@ -23,24 +26,24 @@ x.ent(2);
 
 <a id="method_set_ent" href="#method_set_ent">#</a> **$ent:** `Array.prototype.$ent(i, val)`
 
-Set the corresponding entry (see `ent`) to `val`.
+Set the corresponding entry (see [`ent`](#method_ent)) to `val`.
 
 Returns the modified cube.
 
 Example:
 
 ```
-x = [2,3].rand(100);
+x = ['a', 'f'].seq().$shape(2);
 ```
 ```
-x.$ent(2, 200);
+x.$ent(2, 'Z');
 ```
 
 ---
 
 <a id="method_set_set_ent" href="#method_set_set_ent">#</a> **$$ent:** `Array.prototype.$$ent(i, f)`
 
-Set the corresponding entry (see `ent`) using the function `f`.
+Set the corresponding entry (see [`ent`](#method_ent)) using the function `f`.
 
 `x.$$ent(i, f)` is equivalent to `x.$ent(i, f(x.ent(i), x))`.
 
@@ -49,10 +52,10 @@ Returns the modified cube.
 Example:
 
 ```
-x = [2,3].rand(100);
+x = ['a', 'f'].seq().$shape(2);
 ```
 ```
-x.$$ent(2, val => val + 100);
+x.$$ent(2, val => val + '!');
 ```
 
 ---
@@ -66,7 +69,7 @@ Pass `null` (or `undefined` or omit the argument) to specify the first row/colum
 Example:
 
 ```
-x = [2,3].rand(100);
+x = ['a', 'f'].seq().$shape(2);
 ```
 ```
 x.at(0, 1);
@@ -76,24 +79,24 @@ x.at(0, 1);
 
 <a id="method_set_at" href="#method_set_at">#</a> **$at:** `Array.prototype.$at(r = null, c = null, p = null, val)`
 
-Set the corresponding entry (see `at`) to `val`.
+Set the corresponding entry (see [`at`](#method_at)) to `val`.
 
 Returns the modified cube.
 
 Example:
 
 ```
-x = [2,3].rand(100);
+x = ['a', 'f'].seq().$shape(2);
 ```
 ```
-x.$at(0, 1, null, 200);
+x.$at(0, 1, null, 'Z');
 ```
 
 ---
 
 <a id="method_set_set_at" href="#method_set_set_at">#</a> **$$at:** `Array.prototype.$$at(r = null, c = null, p = null, f)`
 
-Set the corresponding entry (see `at`) using the function `f`.
+Set the corresponding entry (see [`at`](#method_at)) using the function `f`.
 
 `x.$$at(r, c, p, f)` is equivalent to `x.$at(r, c, p, f(x.at(r, c, p), x))`.
 
@@ -102,10 +105,10 @@ Returns the modified cube.
 Example:
 
 ```
-x = [2,3].rand(100);
+x = ['a', 'f'].seq().$shape(2);
 ```
 ```
-x.$$at(0, 1, null, val => val + 100);
+x.$$at(0, 1, null, val => val + '!');
 ```
 
 ---
@@ -127,7 +130,7 @@ Returns a new array.
 Example:
 
 ```
-x = [2,3].rand(100);
+x = ['a', 'f'].seq().$shape(2);
 ```
 ```
 x.vec([0, -2]);
@@ -137,7 +140,7 @@ x.vec([0, -2]);
 
 <a id="method_set_vec" href="#method_set_vec">#</a> **$vec:** `Array.prototype.$vec(i = null, val)`
 
-Set selected entries (see `vec`) to `val`.
+Set selected entries (see [`vec`](#method_vec)) to `val`.
 
 `val` is broadcast.
 
@@ -148,17 +151,17 @@ Returns the modified cube.
 Example:
 
 ```
-x = [2,3].rand(100);
+x = ['a', 'f'].seq().$shape(2);
 ```
 ```
-x.$vec([0, -2], [200, 300]);
+x.$vec([0, -2], ['Y', 'Z']);
 ```
 
 ---
 
 <a id="method_set_set_vec" href="#method_set_set_vec">#</a> **$$vec:** `Array.prototype.$$vec(i = null, f)`
 
-Set selected entries (see `vec`) using the function `f`.
+Set selected entries (see [`vec`](#method_vec)) using the function `f`.
 
 `x.$$vec(i, f)` is equivalent to `x.$vec(i, f(x.vec(i), x))`.
 
@@ -167,10 +170,10 @@ Returns the modified cube.
 Example:
 
 ```
-x = [2,3].rand(100);
+x = ['a', 'f'].seq().$shape(2);
 ```
 ```
-x.$$vec([0, -2], vals => vals.add(100));
+x.$$vec([0, -2], vals => vals.add('!'));
 ```
 
 ---
@@ -188,17 +191,17 @@ Returns a new array.
 Example:
 
 ```
-x = [2,3].rand(100);
+x = ['a', 'f'].seq().$shape(2);
 ```
 ```
-x.rcp(0, [0, 2]);
+x.rcp([1, 0], [0, 2]);
 ```
 
 ---
 
 <a id="method_set_rcp" href="#method_set_rcp">#</a> **$rcp:** `Array.prototype.$rcp(r = null, c = null, p = null, val)`
 
-Set selected entries (see `rcp`) to `val`.
+Set selected entries (see [`rcp`](#method_rcp)) to `val`.
 
 All arguments are broadcast &mdash; though if `r`, `c` and `p` are all singletons, `val` must also be a singleton.
 
@@ -207,17 +210,17 @@ Returns the modified cube.
 Example:
 
 ```
-x = [2,3].rand(100);
+x = ['a', 'f'].seq().$shape(2);
 ```
 ```
-x.$rcp(0, [0, 2], null, [200, 300]);
+x.$rcp([1, 0], [0, 2], null, ['Y', 'Z']);
 ```
 
 ---
 
 <a id="method_set_set_rcp" href="#method_set_set_rcp">#</a> **$$rcp:** `Array.prototype.$$rcp(r = null, c = null, p = null, f)`
 
-Set selected entries (see `rcp`) using the function `f`.
+Set selected entries (see [`rcp`](#method_rcp)) using the function `f`.
 
 `x.$$rcp(r, c, p, f)` is equivalent to `x.$rcp(r, c, p, f(x.rcp(r, c, p), x))`.
 
@@ -226,10 +229,10 @@ Returns the modified cube.
 Example:
 
 ```
-x = [2,3].rand(100);
+x = ['a', 'f'].seq().$shape(2);
 ```
 ```
-x.$$rcp(0, [0, 2], null, vals => vals.add(100));
+x.$$rcp([1, 0], [0, 2], null, vals => vals.add('!'));
 ```
 
 ---
@@ -256,7 +259,7 @@ Example:
 x = ['', 'undefined', 'null', 'true', 'false', 'NaN', '123', 'abc'].tp();
 ```
 ```
-x.$autoType();
+x.$autoType(null);
 ```
 
 ---

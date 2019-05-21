@@ -1,4 +1,6 @@
 
+## Get-Set Shape
+
 ---
 
 <a id="method_shape" href="#method_shape">#</a> **shape:** `Array.prototype.shape()`
@@ -8,7 +10,7 @@ Returns a 3-entry array: the number of rows, columns and pages.
 Example:
 
 ```
-x = [2, 3].rand(100);
+x = [2, 3].cube(5);
 ```
 ```
 x.shape();
@@ -18,7 +20,7 @@ x.shape();
 
 <a id="method_set_shape" href="#method_set_shape">#</a> **$shape:** `Array.prototype.$shape(shp)`
 
-Set the shape (see `shape`). The number of entries must not change.
+Set the shape (see [`shape`](#method_shape)). The number of entries must not change.
 
 `shp` can be:
 
@@ -45,7 +47,7 @@ x.$shape(3);
 
 <a id="method_set_set_shape" href="#method_set_set_shape">#</a> **$$shape:** `Array.prototype.$$shape(f)`
 
-Set the shape using the function `f`.
+Set the shape (see [`shape`](#method_shape)) using the function `f`.
 
 `x.$$shape(f)` is equivalent to `x.$shape(f(x.shape(), x))`.
 
