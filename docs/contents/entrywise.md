@@ -92,13 +92,13 @@ Name | Operator/Function
 `search` | `String.prototype.search`
 `test` | `RegExp.prototype.test`
 `and` | `&&`
-`or` | `\|\|` {.table .table-sm .list}
+`or` | `||` {.table .table-sm .list}
 
 The argument is broadcast. However, operator-like methods are special in that the calling array is also broadcast &mdash; i.e. the calling array can be a singleton when the argument is not. In this case, the returned cube has the same shape, keys and labels as the argument.
 
 Despite the special behavior of broadcasting, the normal cube conversion rules apply. Specifically, the calling array is converted to a cube (if it is not one already) and the argument is left unchanged.
 
-Multiple arguments can be passed to operator-like methods as a shorthand way of chaining the same method. For example, `x.add(y,z)` is equivalent to `x.add(y).add(z)`.
+Multiple arguments can be passed to operator-like methods as a shorthand way of chaining the same method. For example, `x.add(y, z)` is equivalent to `x.add(y).add(z)`.
 
 Note: unlike direct application of `&&` or `||`, `and` and `or` do not use short-circuit evaluation.
 
@@ -141,7 +141,7 @@ Get property `name` of each entry.
 Example:
 
 ```
-x = [{a: 5, b: 6}, {a: 10, b: 20}].prop('a');
+[{a: 5, b: 6}, {a: 10, b: 20}].prop('a');
 ```
 
 ---
@@ -161,7 +161,7 @@ Note: if `$prop` throws an error when attempting to set a property of an entry (
 Example:
 
 ```
-x = [{a: 5, b: 6}, {a: 10, b: 20}]
+[{a: 5, b: 6}, {a: 10, b: 20}]
   .$prop('a', [88, 99])
   .prop('a');
 ```
@@ -181,7 +181,7 @@ Returns the modified cube.
 Example:
 
 ```
-x = [{a: 5, b: 6}, {a: 10, b: 20}]
+[{a: 5, b: 6}, {a: 10, b: 20}]
   .$$prop('a', obj => obj.a + obj.b)
   .prop('a');
 ```
@@ -192,7 +192,7 @@ x = [{a: 5, b: 6}, {a: 10, b: 20}]
 
 Call method `name` of each entry of the calling array. The corresponding entries of `arg1`, `arg2`, `arg3`, ... are passed to the method.
 
-All arguments except `name` are broadcast.
+`name` must be a singleton; all other arguments are broadcast.
 
 Example:
 
@@ -209,13 +209,13 @@ x.method('toFixed', 2);
 
 Apply function `f` to each entry of the calling array. The corresponding entries of `arg1`, `arg2`, `arg3`, ... are passed as additional arguments.
 
-All arguments except `f` are broadcast.
+`f` must be a singleton; all other arguments are broadcast.
 
-`call` is similar to the native array method [map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map), but `call`:
+`call` is similar to the native array method [`map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map), but `call`:
 
 * does not skip holes in the calling array
 
-* accepts additional arguments for `f` (whereas `map` passes `f` the entry index and the calling array)
+* accepts additional arguments for `f` (whereas `map` passes `f` the entry's index and the calling array)
 
 * cannot be passed an alternative `this` value
 
@@ -224,7 +224,7 @@ All arguments except `f` are broadcast.
 Example:
 
 ```
-x = [2, 3].rand(10);
+x = [2, 3].rand(100);
 ```
 ```
 x.call(val => val + 100);
@@ -236,14 +236,14 @@ x.call(val => val + 100);
 
 Set entries using their current values and the function `f`.
 
-`x.$$call(f, a, b)` calls `x.call(f, a, b)` and uses the result as the new entry values of `x`.
+`x.$$call(f, arg1, arg2, arg3, ...)` calls `x.call(f, arg1, arg2, arg3, ...)` and uses the result as the new entry values of `x`.
 
 Returns the modified cube.
 
 Example:
 
 ```
-x = [2, 3].rand(10);
+x = [2, 3].rand(100);
 ```
 ```
 x.$$call(val => val + 100);

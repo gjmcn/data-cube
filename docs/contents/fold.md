@@ -1,3 +1,8 @@
+
+## Fold and Cumulative
+
+---
+
 The first argument of these methods indicates the dimension to act along. If the dimension argument is `-1`, the shape, keys and labels of the calling array are ignored.
 
 ---
@@ -14,7 +19,7 @@ Fold along dimension `dim` using function `f` and initial 'accumulated value' `i
 
 `f` is passed the accumulated value, the 'current entry', the 'current index' (even if dimension `dim` has keys) and the calling array. 
 
-`init` must be a singleton so wrap it in an additional array if necessary, e.g. `[[5,6]]`.
+`init` must be a singleton so wrap it in an additional array if necessary, e.g. `[[5, 6]]`.
 
 If `init` is omitted, the first entry is used and each fold has one less step.
 
@@ -30,7 +35,7 @@ Notes:
 
 * When `init` is an object (rather than a primitive value such as a number or a string), the same object is used for each fold &mdash; i.e. `init` is *not* copied.  Avoid (or be very careful when) using an `f` that mutates `init`.
 
-* Unlike the native array method [reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce), `fold` does not skip 'holes'. This is significant since Data-Cube uses sparse arrays (i.e. holes) for uninitialized cubes (e.g. `x = [5].cube()`).
+* Unlike the native array method [`reduce`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce), `fold` does not skip 'holes'. This is significant since Data-Cube uses sparse arrays (i.e. holes) for uninitialized cubes (e.g. `x = [5].cube()`).
 
 Example:
 
@@ -59,15 +64,15 @@ Name | Description | Initial value
 `mean` | mean | `NaN`
 `geoMean` | geometric mean | `NaN`
 `range` | range | `-Infinity`
-`sameType` | same type? | `null`
+`sameType` | same type? | `null` {.table .table-sm .list}
 
 These methods take the dimension to fold as an argument (default `0`) and return a new cube.
 
 Notes:
 
-* Do not use `sum` to concatenate strings; use [[sew|Fold-and-Cumulative#method_sew]] or the native array method [join](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/join).
+* Do not use `sum` to concatenate strings; use [`sew`](#method_sew) or the native array method [`join`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/join).
 
-* `sameType` uses `typeof`. If entries have the same type, the result is a string indicating the type (e.g. `'number'`). Otherwise, the result is `false`.
+* `sameType` uses [`typeof`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof). If entries have the same type, the result is a string indicating the type (e.g. `'number'`). Otherwise, the result is `false`.
 
 Example:
 
@@ -82,7 +87,7 @@ x.sum(1);
 
 <a id="method_sew" href="#method_sew">#</a> **sew:** `Array.prototype.sew(dim = 0, sep = ',')`
 
-Like the native array method [join](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/join), but works along a given dimension.
+Like the native array method [`join`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/join), but works along a given dimension.
 
 Returns a new cube.
 
@@ -122,14 +127,14 @@ x.var(1);
 
 Each entry of the returned cube is a subcube of the calling array. For example, the entries of `x.wrap(1)` are 'row vectors'.
 
-`sc` specifies whether each subcube should be a `'full'` subcube, `'core'` subcube or `'array'` (see the `ret` argument of [[subcube|Get-and-Set-Subcubes#method_subcube]] for details).
+`sc` specifies whether each subcube should be a `'full'` subcube, `'core'` subcube or `'array'` (see the `ret` argument of [`subcube`](?subcubes#method_subcube) for details).
 
 Returns a new cube.
 
 Example:
 
 ```
-x = [2, 3].rand(10);
+x = [2, 3].rand(100);
 ```
 ```
 w = x.wrap(1);
@@ -148,7 +153,7 @@ Cumulative methods are like fold methods, but include all intermediate results &
 
 <a id="method_cumu" href="#method_cumu">#</a> **cumu:** `Array.prototype.cumu(dim = 0, f, init)`
 
-As [fold](#method_fold), but the returned cube includes all intermediate results.
+As [`fold`](#method_fold), but the returned cube includes all intermediate results.
 
 Returns a new cube with the same shape, keys and labels as the calling array (unless `dim` is `-1`).
 
@@ -175,7 +180,7 @@ Name | Description
 `cumuMin` | cumulative min
 `cumuMax` | cumulative max
 `cumuMinPosn` | cumulative index/key of minimum
-`cumuMaxPosn` | cumulative index/key of maximum
+`cumuMaxPosn` | cumulative index/key of maximum {.table .table-sm .list}
 
 These methods take the dimension to work along as an argument (default `0`) and return a new cube.
 
@@ -211,7 +216,7 @@ Returns a new cube.
 Example:
 
 ```
-x = [1, 20].seq().$shape(10, 2).tp();
+x = [1, 20].seq().$shape(10).tp();
 ```
 ```
 x.quantile(1);
