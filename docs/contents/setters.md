@@ -23,7 +23,7 @@ x.$$row(1, rw => rw.add(100));
 In the above example, the callback function is passed the result of the corresponding getter (`x.row(1)`). Most `$$`-setters behave in this way, but a few apply the callback entrywise:
 
 ```
-[ {a: 5}, {a: 6} ]
+[{a: 5}, {a: 6}]
   .$$prop('b', obj => obj.a + 10)
   .map(obj => JSON.stringify(obj));  //print as strings
 ```

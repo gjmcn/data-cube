@@ -1,14 +1,13 @@
+
+## Query
+
+---
+
 These methods filter, sort or group a dimension of the calling array based on their `val` argument:
 
 * If `val` is a (singleton) function, it is passed the calling array and the entries of the result are filtered/sorted/grouped.
 
 * Otherwise, the entries of `val` are filtered/sorted/grouped.
-
-Notes:
-
-* Each entry of `val` (or the result of `val` if it is a function) corresponds to an index of dimension `dim` of the calling array &mdash; `val` must have the same number of entries as the length of `dim` (though see [[group|Query#method_group]]).
-
-* Use a function for `val` to refer to the calling array when it is not assigned to a variable. For example, if `x` is a matrix, `x.rowSlice(0, 99).where(0, me => me.col(2).gt(50))` gets the first 100 rows of `x`, and from these, gets the rows where column `2` is greater than `50`.
 
 Query methods return a new cube.
 
@@ -35,12 +34,12 @@ x.where(0, x.col(1).gt(6));
 
 Order rows, columns or pages (depending on `dim`).
 
-`how` specifies how `val` is sorted &mdash; see [[arrange|Sort#method_arrange]].
+`how` specifies how `val` is sorted &mdash; see [`arrange`](?sort#method_arrange).
 
 Example:
 
 ```
-x = [2, 5].rand(10);
+x = [2, 5].rand(100);
 ```
 ```
 x.order(1, x.row(1), 'asc');
@@ -78,7 +77,7 @@ Notes:
 
 * `undefined` and `null` cannot be used as keys. If `val` contains `undefined`, the corresponding key of the returned cube is the string `'_undefined_'`. Similarly, `'_null_'` is used for `null`.
 
-* `group` uses the vector indices of `val`. For example, to group the columns of a matrix `x` on rows `2` and `4` use: `x.group(1, x.row([2,4]).tp())` (note the use of the transpose method [[tp|Other#method_tp]]).
+* The shape of `val` is ignored. For example, to group the columns of a matrix `x` on rows `2` and `4` use: `x.group(1, x.row([2, 4]).tp())` (note the use of the transpose method [`tp`](?other#method_tp)).
 
 Example:
 

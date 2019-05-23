@@ -1,4 +1,6 @@
 
+## Concatenate and Repeat
+
 ---
 
 <a id="method_concatenate" href="#method_concatenate">#</a><br>
@@ -16,17 +18,17 @@ Returns a new cube.
 
 Notes:
 
-* It is more efficient to call `vert`, `horiz` or `depth` once with multiple arguments rather than multiple times with a single argument. For example, `a.horiz(b,c,d)` is more efficient than `a.horiz(b).horiz(c).horiz(d)`.
+* It is more efficient to call `vert`, `horiz` or `depth` once with multiple arguments rather than multiple times with a single argument. For example, `a.horiz(b, c)` is more efficient than `a.horiz(b).horiz(c)`.
 
-* Use the native array method [concat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat) to ignore the shape, keys and labels of the calling array and all arguments.
+* Use the native array method [`concat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat) to ignore the shape, keys and labels of the calling array and all arguments.
 
 Example:
 
 ```
-x = [2, 3].rand(10);
+x = [2, 3].cube(5);
 ```
 ```
-y = [2, 2].rand(10);
+y = [2, 2].cube(6);
 ```
 ```
 x.horiz(y);
@@ -50,7 +52,7 @@ Returns a new cube.
 Example:
 
 ```
-x = [2, 2].rand(10);
+x = [1, 2, 3, 4].$shape(2);
 ```
 ```
 x.tile(1, 3);
@@ -75,7 +77,7 @@ Returns a new cube.
 Example:
 
 ```
-x = [2, 2].rand(10);
+x = [1, 2, 3, 4].$shape(2);
 ```
 ```
 y = [4, 6].cube(0);
@@ -98,12 +100,12 @@ Notes:
 
 * currently, the calling array (i.e. the outer array) cannot have more than 65536 entries &mdash; `unpack` will throw an error if this limit is exceeded
 
-* [[unbox|Entrywise#method_ew_no_arg]] is typically used to unpack 1-entry arrays
+* [`unbox`](?entrywise#method_ew_no_arg) is typically used to unpack 1-entry arrays
 
 Example:
 
 ```
-x = [2, 3].rand(10);
+x = [2, 3].rand(100);
 ```
 ```
 y = x.pack(0);
@@ -123,18 +125,16 @@ y.unpack();
 
 <a id="method_pack" href="#method_pack">#</a> **pack** `Array.prototype.pack(dim = 0, sc = 'full')`
 
-Pack rows, columns or pages.
+Pack rows, columns or pages. For example, `y = x.pack(1)` packs the columns, returning a cube with 1 row, 1 page and the same number of columns as `x`. Each entry of `y` is the corresponding column (subcube) of `x`.
 
-Example: `y = x.pack(1)` packs the columns, returning a cube with 1 row, 1 page and the same number of columns as `x`. Each entry of `y` is the corresponding column (subcube) of `x`.
-
-Internally, `pack` uses [[subcube|Get-and-Set-Subcubes#method_subcube]]. `sc` is used as the `ret` argument for `subcube`.
+Internally, `pack` uses [`subcube`](?subcubes#method_subcube). `sc` is used as the `ret` argument for `subcube`.
  
 Returns a new cube.
 
 Example:
 
 ```
-x = [2, 3].rand(10);
+x = [2, 3].rand(100);
 ```
 ```
 y = x.pack(0);
