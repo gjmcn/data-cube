@@ -1,4 +1,9 @@
-Notes on set theory methods:
+
+## Sets
+
+---
+
+__Notes:__
 
 * The "SameValueZero" algorithm is used to test for equality; this is the same as `===` except that any two `NaN` values are equal.
 

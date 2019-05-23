@@ -1,4 +1,9 @@
-Note: see [[order|Query#method_order]] for sorting rows, columns or pages
+
+## Sort
+
+---
+
+__Note:__ see [`order`](?query#method_order) for sorting rows, columns or pages.
 
 ---
 
@@ -8,13 +13,13 @@ Sort entries &mdash; the shape, keys and labels of the calling array are ignored
 
 `how` specifies how entries should be sorted:
 
-*  omitted (or `null` or `undefined`): default unicode-based behavior of native [sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort) method
+*  omitted (or `null` or `undefined`): default unicode-based behavior of native [`sort`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort) method
 
-* function: a 'comparison function' &mdash; see [sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
+* function: a 'comparison function' &mdash; see [`sort`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
 
-* `'asc'`: ascending (comparison function: `(a,b) => a - b`), suitable for numbers and dates
+* `'asc'`: ascending (comparison function: `(a, b) => a - b`), suitable for numbers and dates
 
-* `'desc'`: descending (comparison function: `(a,b) => b - a`), suitable for numbers and dates
+* `'desc'`: descending (comparison function: `(a, b) => b - a`), suitable for numbers and dates
 
 `ret` specifies what the returned array should contain:
 
@@ -41,7 +46,7 @@ x.arrange('asc');
 
 Sort dimension `dim` by its keys.
 
-`how` specifies how the keys are sorted &mdash; see [[arrange|Sort#method_arrange]].
+`how` specifies how the keys are sorted &mdash; see [`arrange`](#method_arrange).
 
 Returns a new cube.
 
@@ -62,7 +67,7 @@ Assign each entry to a bin.
 
 `lim` contains the bin limits.
 
-`how` specifies how the limits are sorted (see [[arrange|Sort#method_arrange]]) and how entries are compared to limits. If `f` is the comparison function associated with `how`, entry `e` of the calling array is assigned to the first bin whose limit `u` satisfies `f(e,u) <= 0`. If `how` is omitted (or `null` or `undefined`), unicode-based sorting is used for the limits and `e` is assigned to the first bin whose limit `u` satisfies `e <= u`.
+`how` specifies how the limits are sorted (see [`arrange`](#method_arrange)) and how entries are compared to limits. If `f` is the comparison function associated with `how`, entry `e` of the calling array is assigned to the first bin whose limit `u` satisfies `f(e,u) <= 0`. If `how` is omitted (or `null` or `undefined`), unicode-based sorting is used for the limits and `e` is assigned to the first bin whose limit `u` satisfies `e <= u`.
 
 `name` contains bin names. The entries of `name` correspond to the entries of `lim`:
 
@@ -75,7 +80,7 @@ Returns a new cube with the same shape, keys and labels as the calling array. Ea
 Example:
 
 ``` {.no-output}
-limits = [40, 60, 80, 100];
+limits = [39, 59, 79, 100];
 ```
 ``` {.no-output}
 names = ['fail', 'pass', 'merit', 'distinction'];
