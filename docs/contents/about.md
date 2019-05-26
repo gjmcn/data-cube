@@ -62,7 +62,12 @@ dc.fetchMatrix('data/iris.json')
   .then(m => m.head(3).print({to: div}));
 ```
 
-[Plugins](?plugins) add extra functionality to Data-Cube. For example, this page uses the [print-html plugin](https://github.com/gjmcn/data-cube-print-html) to print arrays and we use the [html plugin](https://github.com/gjmcn/data-cube-html) above to create a `<div>`.
+[Plugins](?plugins) add extra functionality to Data-Cube. For example, this page uses the [print-html plugin](https://github.com/gjmcn/data-cube-print-html) to print arrays and we use the [html plugin](https://github.com/gjmcn/data-cube-html) above to create a `<div>`. The following Observable notebooks contain more examples that use plugins:
+
+* [Array-oriented JavaScript](https://observablehq.com/@gjmcn/data-cube-array-oriented-javascript)
+* [Visualization](https://observablehq.com/@gjmcn/data-cube-visualization)
+* [Polygons and Hulls](https://observablehq.com/@gjmcn/data-cube-polygon-and-hull-plugins)
+* [Scratchpad](https://observablehq.com/@gjmcn/data-cube-scratchpad)
 
 ```{.no-input .no-output}
 deleteVariables('a');
