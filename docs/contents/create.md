@@ -98,7 +98,7 @@ The calling array is interpreted as `[start, end]`. The `lin` method creates an 
 
 * `'step'`: a 2-entry array; the first entry is the array of linearly spaced points, the second entry is the step (the distance between points, but negative when `start > end`)
 
-Unlike [seq](#method_seq), `lin` always computes a numeric sequence. `start` and `end` are automatically converted to numbers, so a date sequence can be created using e.g. `[date1, date2].lin().date()`.
+Unlike [`seq`](#method_seq), `lin` always computes a numeric sequence. `start` and `end` are automatically converted to numbers, so a date sequence can be created using e.g. `[date1, date2].lin().date()`.
 
 Examples:
 
@@ -320,7 +320,7 @@ y = x.arObj();
 y.stringify();
 ```
 
-Also see: [vble](?other#method_vble).
+Also see: [`vble`](?other#method_vble).
 
 ---
 

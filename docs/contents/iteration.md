@@ -1,17 +1,26 @@
-To iterate over entries, use standard approaches such as `for` and `for...of` loops and the native array methods `forEach` and `map`. Also see the cube method [[cmap|Entrywise#method_cmap]].
 
-There are currently no generators or methods for iterating over a dimension directly. For now, call [[indOrKey|Other#method_ind_or_key]], [[ind|Other#method_ind]] or [[key|Get-and-Set-Keys-and-Labels#method_key]] and loop over the result. For example:
+## Iteration
+
+---
+
+Use native approaches to loop over entries: [`while`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/while), [`for`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for) and [`for...of`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of) loops, and the [`forEach`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach) method.
+
+There are currently no Data-Cube methods for iterating over a dimension. For now, use a `for` loop:
 
 ```js {.no-exec}
-//loop over row indices or keys
-for (let j of x.indOrKey()) {};
+//loop over column indices
+for (let j = 0, n = x.n(1); j < n; j++) {};
+```
 
-//loop over row keys
-for (let j of x.key()) {};
+Or call [`ind`](?other#method_ind), [`key`](?keys#method_key) or [`indOrKey`](?other#method_ind_or_key), and loop over the result using `for...of`:
 
-//loop over row indices
-for (let j of x.ind()) {};
+```js {.no-exec}
+//loop over column indices
+for (let j of x.ind(1)) {};
 
-//loop over row indices, for loop
-for (let j = 0; j < x.n(); j++) {};
-``` 
+//loop over column keys
+for (let j of x.key(1)) {};
+
+//loop over column indices or keys
+for (let j of x.indOrKey(1)) {};
+```

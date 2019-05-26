@@ -272,8 +272,9 @@ f.apply(10, [20, 30]);
 
 Each of `args0`, `args1`, `args2`, ... contains a function or a property/method name followed by arguments/values associated with it. `loop` is mostly used to draw on the canvas with [data-cube-html](https://github.com/gjmcn/data-cube-html) and its behavior is demonstrated in this [sketch example](https://github.com/gjmcn/data-cube-html#method_sketch). 
 
-
 Each function or property/method name must be a singleton. The other entries of `args0`, `args1`, `args2` ... as well as the calling array are broadcast.
+
+Note: setting properties with `loop` does not trigger [updates](?updates).
 
 Returns the calling array (converted to a cube).
 

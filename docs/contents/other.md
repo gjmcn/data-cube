@@ -1,11 +1,13 @@
 
+## Other
+
 ---
 
-<a id="method_tp" href="#method_tp">#</a> **tp:** `Array.prototype.tp(perm = [1,0,2])`
+<a id="method_tp" href="#method_tp">#</a> **tp:** `Array.prototype.tp(perm = [1, 0, 2])`
 
 Transpose.
 
-`perm` is a permutation of `0`, `1` and `2` that specifies how the dimensions are rearranged. The default `[1,0,2]` corresponds to swapping rows and columns.
+`perm` is a permutation of `0`, `1` and `2` that specifies how the dimensions are rearranged. The default `[1, 0, 2]` corresponds to swapping rows and columns.
 
 Returns a new cube.
 
@@ -116,7 +118,7 @@ Note: `undefined` and `null` cannot be used as keys. If `ret` is `'vector'` and 
 Example:
 
 ```
-x = [2, 5].rand(4);
+x = [2, 4].rand(5);
 ```
 ```
 x.freq();
@@ -130,7 +132,7 @@ If `k` is omitted, returns `true` if the calling array has keys on dimension `di
 
 If `k` is passed, `hasKey` returns `true` if the calling array has the key `k` on dimension `dim`, otherwise `hasKey` returns `false` &mdash; including when the dimension `dim` does not have keys.
 
-`k` must be a singleton. `hasKey` cannot be used to test multiple keys; use e.g. `['a','b'].map(k => x.hasKey(0,k))` or `['a','b'].isIn(x.key())`.
+`k` must be a singleton, so `hasKey` cannot be used to test multiple keys (use e.g. `['a', 'b'].map(k => x.hasKey(0, k))` or `['a', 'b'].isIn(x.key())`).
 
 Example:
 
@@ -157,7 +159,7 @@ Returns a new array with entries _0, 1, 2, ..., n-1_ where _n_ is the length of 
 Example:
 
 ```
-x = [2, 3].cube(0).$key(0, ['a', 'b']);
+x = [2, 3].cube(0);
 ```
 ```
 x.ind(1);
@@ -244,7 +246,7 @@ Notes:
 
 * `x.gt(5).which()` is equivalent to `x.which(a => a > 5)`.
 
-* [[where|Query#method_where]] is typically more useful than `which` for getting subtables. For example, to get the rows of a matrix `x` that have a truthy value in column `3`, `x.where(0, x.col(3))` will always work whereas `x.row(x.col(3).which())` will only work if `x` does not have row keys.
+* [`where`](?query#method_where) is typically more useful than `which` for getting subtables. For example, to get the rows of a matrix `x` that have a truthy value in column `3`, `x.where(0, x.col(3))` will always work whereas `x.row(x.col(3).which())` will only work if `x` does not have row keys.
 
 Returns a new array.
 
@@ -263,7 +265,7 @@ x.which();
 
 Test if the calling array is 'the same as' `b`, i.e. has the same shape, keys, labels and entries (`===`).
 
-A cube *can* be the same as a standard array. Specifically, a vector with no keys or labels is the same as a standard array with matching length and entries. Note that `compare` (like almost all cube methods) converts the calling array to a cube.
+A cube *can* be the same as a standard array. Specifically, a vector with no keys or labels is the same as a standard array with matching length and entries. (Note that `compare`  converts the calling array to a cube as normal.)
 
 If `assert` is truthy, `compare` returns the calling array if it is the same as `b` and throws an error if it is not the same (the error message indicates the difference).
 
@@ -275,7 +277,7 @@ Example:
 x = [4, 5, 6, 7].$shape(2);
 ```
 ```
-y = [4, 5, 6, 7].$shape(2);
+y = [4, 5, 66, 7].$shape(2);
 ```
 ```
 x.compare(y);
@@ -299,12 +301,12 @@ Notes:
 
 `vble` returns a new array containing the objects in the intuitive order.
 
-Also see: [[arObj|Create-Copy-and-Convert#method_ar_obj]].
+Also see: [`arObj`](?create#method_ar_obj).
 
 Example:
 
 ```
-x = [2, 3].rand(10);
+x = [2, 3].rand(100);
 ```
 ```
 y = x.vble(1);
