@@ -10,8 +10,8 @@
   "author": "Graham McNeill",
   "license": "MIT",
   "dependencies": {
-    "@gjmcn/data-cube": "^0.1.9",
-    "@gjmcn/data-cube-html": "^0.1.2",
-    "@gjmcn/data-cube-print-html": "^0.1.2"
+    "@gjmcn/data-cube": "^0.2.0",
+    "@gjmcn/data-cube-html": "^0.2.0",
+    "@gjmcn/data-cube-print-html": "^0.2.0"
   }
 }
