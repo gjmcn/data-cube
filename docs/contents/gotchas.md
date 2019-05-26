@@ -86,7 +86,7 @@ results = ['Alice', 'pass', 'Bob', 'pass', 'Cath', 'fail'].dict();
 colors.row(results);  //duplicate key error
 ```
 ```
-color.row(results, 'array');  //works
+colors.row(results, 'array');  //works
 ```
 
 ```{.no-input .no-output}
