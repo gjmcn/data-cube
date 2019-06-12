@@ -8,7 +8,7 @@ Where appropriate, methods **broadcast** [singletons](?arguments#singletons):
 x = [2, 3].rand(100);
 ```
 ```
-x.$col([0,2], 200);  //broadcast 200 to all selected entries
+x.$col([0, 2], 200);  //broadcast 200 to all selected entries
 ```
 
 Here is another example; [`method`](?entrywise#method_method) broadcasts all of its arguments except the first:
