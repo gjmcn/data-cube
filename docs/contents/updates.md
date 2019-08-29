@@ -9,14 +9,14 @@ Example:
 
 ```
 celsius = ['London', 0, 'Madrid', 0, 'Paris', 0].dict()
-  .$after(() => fahrenheit = celsius.mul(9/5).add(32).round())
-  .$vec(null, [15, 21, 17]);
+  .$after(c => fahrenheit = c.mul(9/5).add(32).round())
+  .$row(null, [15, 21, 17]);
 ```
 ```
 fahrenheit;
 ```
 ```
-celsius.$at('Paris', 20);
+celsius.$row('Paris', 20);
 ```
 ```
 fahrenheit;
