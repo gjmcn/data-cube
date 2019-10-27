@@ -180,9 +180,6 @@
     
     //str, * -> undef, add property/method to Array.prototype
     addArrayMethod: (name,f) => {
-      if (name in Array.prototype) {
-        throw Error(name + ' is already a property of Array.prototype');      
-      }
       Object.defineProperty( Array.prototype, name, {
         value: f,
         configurable: true,
@@ -193,9 +190,6 @@
     
     //str, func -> undef, add accessor property to Array.prototype
     addArrayGetter: (name,f) => {
-      if (name in Array.prototype) {
-        throw Error(name + ' is already a property of Array.prototype');      
-      }
       Object.defineProperty( Array.prototype, name, {
         configurable: true,
         enumerable: false,
